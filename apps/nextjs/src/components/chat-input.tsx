@@ -72,7 +72,7 @@ export const ChatInput = ({
                       }
                     }}
                     placeholder={placeholder}
-                    className="w-full !text-lg pr-16"
+                    className="w-full !text-lg pr-16 resize-none"
                     {...field}
                     disabled={disabled || isLoading}
                   />
