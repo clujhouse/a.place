@@ -12,10 +12,12 @@ import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
+import { MainChatProvider } from "~/context/main-chat-context";
 
 interface MainChatProps {
   messages: AMessage[];
   chatId: string | (() => Promise<string> | string);
+  messageReplacement?: React.ReactNode;
 }
 
 function ScrollToBottom() {
@@ -31,7 +33,7 @@ function ScrollToBottom() {
   );
 }
 
-const MainChat = ({ messages, chatId }: MainChatProps) => {
+const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const trpc = useTRPC();
@@ -90,37 +92,43 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
     }),
   );
 
+  const onSubmit = async (message: string) => {
+    const stringChatId =
+      typeof chatId === "string" ? chatId : await chatId();
+
+    mutate({ chatId: stringChatId, input: message });
+  }
+
   console.log(messages);
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel>
-        <StickToBottom
-          className="flex h-screen flex-col"
-          resize="smooth"
-          initial="smooth"
-        >
-          <StickToBottom.Content className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-12">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
-          </StickToBottom.Content>
+    <MainChatProvider sendMessage={onSubmit}>
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel>
+          <StickToBottom
+            className="flex h-screen flex-col"
+            resize="smooth"
+            initial="smooth"
+          >
+            <StickToBottom.Content className="mx-auto h-full flex max-w-[655px] flex-col gap-6 p-4 pb-12">
+              {messageReplacement 
+              ? messageReplacement 
+              : messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+            </StickToBottom.Content>
 
-          <ScrollToBottom />
-          <ChatInput
-            className="mx-auto mt-auto max-w-xl p-4"
-            onSubmit={async (message) => {
-              const stringChatId =
-                typeof chatId === "string" ? chatId : await chatId();
-
-              mutate({ chatId: stringChatId, input: message });
-            }}
-            isLoading={isLoading}
-          />
-        </StickToBottom>
-      </ResizablePanel>
-      {/* <ResizableHandle /> */}
-      {/* <ResizablePanel defaultSize={30}></ResizablePanel> */}
-    </ResizablePanelGroup>
+            <ScrollToBottom />
+            <ChatInput
+              className="mx-auto mt-auto max-w-[655px] p-4"
+              onSubmit={onSubmit}
+              isLoading={isLoading}
+            />
+          </StickToBottom>
+        </ResizablePanel>
+        {/* <ResizableHandle /> */}
+        {/* <ResizablePanel defaultSize={30}></ResizablePanel> */}
+      </ResizablePanelGroup>
+    </MainChatProvider>
   );
 };
 

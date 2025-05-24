@@ -7,6 +7,7 @@ import { User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Card, CardContent, CardHeader } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
+import { cn } from "@acme/ui";
 
 import { useTRPC } from "~/trpc/react";
 import { ProfileSidebar } from "./profile-sidebar";
@@ -16,9 +17,15 @@ interface ProfileCardProps {
     id: string;
     name: string;
   };
+  profileImageDisplay?: "full" | "icon";
+  containerClassName?: string;
 }
 
-export function ProfileCard({ profile }: ProfileCardProps) {
+export function ProfileCard({ 
+  profile, 
+  containerClassName, 
+  profileImageDisplay = "icon" 
+}: ProfileCardProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
@@ -27,7 +34,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="flex w-full min-w-0 flex-col gap-2 p-3">
+      <Card className={cn("flex w-full min-w-0 flex-col gap-2 p-3", containerClassName)}>
         <CardHeader className="flex flex-row items-center gap-4 p-0">
           <Skeleton className="h-12 w-12" />
         </CardHeader>
@@ -46,11 +53,11 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   return (
     <>
       <Card
-        className="flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent"
+        className={cn("flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent", containerClassName)}
         onClick={() => setIsSidebarOpen(true)}
       >
         <CardHeader className="flex flex-row items-center gap-4 p-0">
-          <Avatar className="h-12 w-12 border border-secondary">
+          <Avatar className={cn("border border-secondary", profileImageDisplay === "full" ? "w-full h-auto max-h-24" : "h-12 w-12")}>
             {displayImage ? (
               <AvatarImage
                 src={displayImage}

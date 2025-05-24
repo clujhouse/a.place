@@ -37,6 +37,7 @@
     "./switch": "./src/switch.tsx",
     "./select": "./src/select.tsx",
     "./sheet": "./src/sheet.tsx",
+    "./marquee": "./src/marquee.tsx",
     "./markdown-content": "./src/markdown-content.tsx"
   },
   "scripts": {

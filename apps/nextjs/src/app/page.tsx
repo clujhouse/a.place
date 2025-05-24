@@ -10,6 +10,7 @@ import { messageSchema } from "@acme/validators/message";
 import { useCreateChat } from "~/hooks/use-create-chat";
 import { useTRPC } from "~/trpc/react";
 import MainChat from "./_components/main-chat";
+import MainPresentation from "./_components/main-presentation";
 
 const Homepage = () => {
   const [chatId, setChatId] = useState<string | null>(null);
@@ -41,6 +42,7 @@ const Homepage = () => {
         setChatId(id);
         return createChat(id);
       }}
+      messageReplacement={<MainPresentation />}
     />
   );
 };
