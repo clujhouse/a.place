@@ -85,7 +85,7 @@ export const mainRouter = {
       // Get recent chat history
       const chatHistory = (await ctx.db.query.message.findMany({
         where: (message, { eq }) => eq(message.chatId, chatId),
-        orderBy: (message, { desc }) => desc(message.createdAt),
+        orderBy: (message, { asc }) => asc(message.createdAt),
         limit: 10,
       })) as AMessage[];
 
