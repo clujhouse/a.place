@@ -41,6 +41,7 @@ export const profile = mysqlTable("profile", {
   completionPercentage: int("completion_percentage").notNull().default(0),
 
   text: text("text"),
+  shortBio: text("short_bio"),
   embedding: vector("embedding", { length: 1024 }),
   profileImage: json("profile_image").$type<string>(),
   images: json("images").$type<string[]>().default([]),

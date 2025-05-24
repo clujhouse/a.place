@@ -14,7 +14,7 @@ import {
   createLearnAboutYouPromptWithSuggestions,
   learnAboutYouPrompt,
 } from "../prompts/learn-about-you";
-import { profilePrompt } from "../prompts/profile";
+import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
@@ -263,6 +263,21 @@ export const llmRouter = {
 
       const profileText = await profielStream.text;
 
+      // Generate short bio
+      const shortBioStream = await streamText({
+        model: google("gemini-2.5-flash-preview-04-17"),
+        experimental_telemetry: { isEnabled: true },
+        prompt: `${shortBioPrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
+          allMessages,
+        )
+          .map((msg) => `${msg.role}: ${msg.content}`)
+          .join("\n")}`,
+      });
+
+      const shortBioText = await shortBioStream.text;
+
+      console.log("Generated short bio:", shortBioText);
+
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
       const embedding = await client.embed({
         input: [profileText],
@@ -287,22 +302,23 @@ export const llmRouter = {
           .update(profile)
           .set({
             text: profileText,
+            shortBio: shortBioText,
             embedding: buffered,
-            // Don't overwrite completion percentage here since it was set by validation
           })
           .where(eq(profile.userId, ctx.session.user.id));
 
-        console.log("Updated existing profile with text:", profileText);
+        console.log("Updated existing profile with text and short bio");
       } else {
         // Create new profile
         await ctx.db.insert(profile).values({
           text: profileText,
+          shortBio: shortBioText,
           userId: ctx.session.user.id,
           embedding: buffered,
           completionPercentage: 0, // Will be updated by validation
         });
 
-        console.log("Created new profile with text:", profileText);
+        console.log("Created new profile with text and short bio");
       }
 
       // Verify the update
