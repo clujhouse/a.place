@@ -1,14 +1,10 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
 
-import { Icon } from "@acme/ui/icon";
 import {
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
 } from "@acme/ui/sidebar";
@@ -26,7 +22,6 @@ interface Chat {
 
 export const AppSidebarChats = () => {
   const trpc = useTRPC();
-  const router = useRouter();
 
   const { data: chats, isLoading } = useQuery(trpc.chat.getAll.queryOptions());
 
@@ -44,18 +39,6 @@ export const AppSidebarChats = () => {
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
-        <SidebarMenuButton
-          onClick={() => {
-            router.push("/");
-          }}
-          className="text-sidebar-foreground/70"
-        >
-          <Icon as={Plus} size="sm" />
-          <span>New Chat</span>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-
       {chats?.map((chat: Chat) => (
         <AppSidebarChatItem key={chat.id} chat={chat} />
       ))}

@@ -20,8 +20,8 @@ import "@vidstack/react/player/styles/default/layouts/video.css";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
-import { AppSidebar } from "./_components/app-sidebar";
 import { AppProvider } from "../context/app-context";
+import { AppSidebar } from "./_components/app-sidebar";
 
 export const metadata: Metadata = {
   metadataBase: new URL(

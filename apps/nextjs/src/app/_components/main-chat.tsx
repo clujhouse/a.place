@@ -94,11 +94,11 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel>
         <StickToBottom
-          className="flex h-full flex-col"
+          className="flex h-screen flex-col"
           resize="smooth"
           initial="smooth"
         >
-          <StickToBottom.Content className="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
+          <StickToBottom.Content className="mx-auto flex max-w-3xl flex-col gap-6 p-4 pb-12">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
@@ -106,7 +106,7 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
 
           <ScrollToBottom />
           <ChatInput
-            className="mx-auto mt-auto max-w-4xl p-4"
+            className="mx-auto mt-auto max-w-3xl p-4"
             onSubmit={async (message) => {
               const stringChatId =
                 typeof chatId === "string" ? chatId : await chatId();
