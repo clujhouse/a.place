@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
-import { generateObject, smoothStream, streamText } from "ai";
+import { generateObject, generateText, smoothStream, streamText } from "ai";
 import { nanoid } from "nanoid";
 import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
@@ -74,6 +74,10 @@ export const llmRouter = {
         schema: validationResponseSchema,
         prompt: `${judgePrompt}\n\n## Conversation to Analyze:\n${conversationForValidation}`,
       });
+      yield {
+        type: "completionPercentage" as const,
+        validation: validation.object.completionPercentage,
+      };
 
       const aiMessageId = nanoid();
       const result = streamText({
@@ -137,7 +141,7 @@ export const llmRouter = {
 
       const profileText = await profileStream.text;
       // Generate short bio
-      const shortBioStream = streamText({
+      const { text: shortBioText } = await generateText({
         model: google("gemini-2.0-flash"),
         experimental_telemetry: { isEnabled: true },
         prompt: `${shortBioPrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
@@ -146,8 +150,6 @@ export const llmRouter = {
           .map((msg) => `${msg.role}: ${msg.content}`)
           .join("\n")}`,
       });
-
-      const shortBioText = await shortBioStream.text;
 
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
       const embedding = await client.embed({

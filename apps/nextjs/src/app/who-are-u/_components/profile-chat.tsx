@@ -5,7 +5,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
-import { useAppContext } from "~/context/app-context";
 
 import type { AMessage } from "@acme/validators/message";
 import {
@@ -16,6 +15,7 @@ import {
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
+import { useAppContext } from "~/context/app-context";
 import { useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
 import { ProfileBio } from "./profile-bio";
@@ -48,7 +48,18 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
 
   const updateProfileBio = (newProfile: string) => {
     queryClient.setQueryData(trpc.profile.get.queryKey(), (old) => {
-      if (!old) return null;
+      if (!old)
+        return {
+          completionPercentage: 0,
+          text: newProfile,
+          shortBio: "",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          userId: "",
+          embedding: null,
+          profileImage: null,
+          images: [],
+        };
 
       return { ...old, text: newProfile };
     });
@@ -98,9 +109,8 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
 
               updateProfileBio(newProfileText);
             })
-            .with({ type: "validation" }, ({ validation }) => {
-              console.log("Received validation result:", validation);
-              updateProfileCompletion(validation.completionPercentage);
+            .with({ type: "completionPercentage" }, (completionPercentage) => {
+              updateProfileCompletion(completionPercentage.validation);
             });
       },
 
@@ -109,10 +119,14 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
       },
     }),
   );
-  
+
   useEffect(() => {
     if (messages.length === 0) {
-      mutate({ chatId, input: "Hello! Tell me more about this profile creation page and let's get started." });
+      mutate({
+        chatId,
+        input:
+          "Hello! Tell me more about this profile creation page and let's get started.",
+      });
     }
   }, [messages, mutate, chatId]);
 
