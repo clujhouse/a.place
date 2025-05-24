@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
+import { nanoid } from "nanoid";
 
 import { messageSchema } from "@acme/validators/message";
 
@@ -11,21 +12,24 @@ import MainChat from "./_components/main-chat";
 const Homepage = () => {
   const trpc = useTRPC();
 
-  const { data: chat } = useQuery(trpc.chat.create.queryOptions("cool-chat"));
-
-  const { data } = useQuery(
-    trpc.chat.get.queryOptions("cool-chat", {
-      enabled: !!chat,
-    }),
+  const { data: chat, mutateAsync } = useMutation(
+    trpc.chat.create.mutationOptions(),
   );
+
+  const { data } = useQuery(trpc.chat.get.queryOptions(chat ?? skipToken));
 
   const message = useMemo(() => {
     return data?.map((message) => messageSchema.parse(message));
   }, [data]);
 
-  if (!chat || !message) return <div>Loading...</div>;
-
-  return <MainChat messages={message} chatId={chat} />;
+  return (
+    <MainChat
+      messages={message ?? []}
+      chatId={() => {
+        return mutateAsync(nanoid());
+      }}
+    />
+  );
 };
 
 export default Homepage;

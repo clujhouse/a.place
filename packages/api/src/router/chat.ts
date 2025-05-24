@@ -25,20 +25,22 @@ export const chatRouter = {
     return (chat?.messages ?? []) as AMessage[];
   }),
 
-  create: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    const newChat = await ctx.db.query.chat.findFirst({
-      where: (chat, { eq }) => eq(chat.id, input),
-    });
-
-    if (!newChat) {
-      await ctx.db.insert(chat).values({
-        id: input,
-        title: "Profile Chat",
-        userId: ctx.session.user.id,
+  create: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      const newChat = await ctx.db.query.chat.findFirst({
+        where: (chat, { eq }) => eq(chat.id, input),
       });
 
+      if (!newChat) {
+        await ctx.db.insert(chat).values({
+          id: input,
+          title: "Profile Chat",
+          userId: ctx.session.user.id,
+        });
+
+        return input;
+      }
       return input;
-    }
-    return input;
-  }),
+    }),
 } satisfies TRPCRouterRecord;

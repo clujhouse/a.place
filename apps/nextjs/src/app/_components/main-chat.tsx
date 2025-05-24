@@ -15,7 +15,7 @@ import { useTRPC } from "~/trpc/react";
 
 interface MainChatProps {
   messages: AMessage[];
-  chatId: string;
+  chatId: string | (() => Promise<string>);
 }
 
 function ScrollToBottom() {
@@ -47,7 +47,7 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const updateMainChat = (messageId: string, chunk: string) => {
+  const updateMainChat = (messageId: string, chunk: string, chatId: string) => {
     queryClient.setQueryData(trpc.chat.get.queryKey(chatId), (old) => {
       if (!old) return [];
 
@@ -87,7 +87,7 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
           return [...old, message];
         });
       },
-      onSuccess: async (data) => {
+      onSuccess: async (data, vars) => {
         let messageId: string | null = null;
         for await (const part of data)
           match(part)
@@ -95,7 +95,7 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
               messageId = data.messageId;
             })
             .with({ type: "text-delta" }, ({ textDelta }) => {
-              if (messageId) updateMainChat(messageId, textDelta);
+              if (messageId) updateMainChat(messageId, textDelta, vars.chatId);
             });
 
         setIsLoading(false);
@@ -124,7 +124,12 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
           <ScrollToBottom />
           <ChatInput
             className="mx-auto mt-auto max-w-4xl p-4"
-            onSubmit={(message) => mutate({ chatId, input: message })}
+            onSubmit={async (message) => {
+              const stringChatId =
+                typeof chatId === "string" ? chatId : await chatId();
+
+              mutate({ chatId: stringChatId, input: message });
+            }}
             isLoading={isLoading}
           />
         </StickToBottom>
