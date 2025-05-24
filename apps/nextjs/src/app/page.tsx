@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
-import { useRouter } from "next/navigation";
 
 import { messageSchema } from "@acme/validators/message";
 

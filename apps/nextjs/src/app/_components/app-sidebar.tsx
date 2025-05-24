@@ -55,7 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
-      <SidebarHeader>
+      <SidebarHeader className="pt-4">
         <SidebarMenu>
           <Link href="/">
             <Button variant="ghost" size="icon" className="mb-4">
