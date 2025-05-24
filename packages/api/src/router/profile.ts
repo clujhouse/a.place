@@ -1,9 +1,8 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import type { InferSelectModel } from "drizzle-orm";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import type { AMessage } from "@acme/validators/message";
 import { chat, profile } from "@acme/db/schema";
 
 import { protectedProcedure } from "../trpc";
@@ -81,13 +80,6 @@ export const profileRouter = {
 
       return { success: true };
     }),
-
-  chat: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return (await ctx.db.query.message.findMany({
-      where: (message, { eq }) => eq(message.chatId, input),
-      orderBy: (message, { asc }) => asc(message.createdAt),
-    })) as AMessage[];
-  }),
 
   getProfileChat: protectedProcedure.query(async ({ ctx }) => {
     const profileChat = await ctx.db.query.chat.findFirst({

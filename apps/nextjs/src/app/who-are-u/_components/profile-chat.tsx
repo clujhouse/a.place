@@ -65,7 +65,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           createdAt: new Date(),
         };
 
-        queryClient.setQueryData(trpc.profile.chat.queryKey(chatId), (old) => {
+        queryClient.setQueryData(trpc.chat.get.queryKey(chatId), (old) => {
           if (!old) return [];
 
           return [...old, message];

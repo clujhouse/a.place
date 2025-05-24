@@ -16,7 +16,7 @@ const WhoAreYouPage = () => {
   );
 
   const { data } = useQuery(
-    trpc.profile.chat.queryOptions(profileChat?.id ?? "", {
+    trpc.chat.get.queryOptions(profileChat?.id ?? "", {
       enabled: !!profileChat,
     }),
   );
