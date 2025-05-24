@@ -69,10 +69,9 @@ export const llmRouter = {
       });
 
       const profielStream = streamText({
-        model: google("gemini-2.0-flash"),
+        model: google("gemini-2.5-flash-preview-04-17"),
         experimental_telemetry: { isEnabled: true },
-        system: profilePrompt,
-        messages: convertMessageToCoreMessage(allMessages),
+        prompt: `${profilePrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(allMessages).map(msg => `${msg.role}: ${msg.content}`).join('\n')}`,
         experimental_transform: smoothStream({
           delayInMs: 20, // optional: defaults to 10ms
           chunking: "word", // optional: defaults to 'word'
