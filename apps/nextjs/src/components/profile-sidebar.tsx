@@ -47,7 +47,7 @@ export function ProfileSidebar({
                   <AvatarImage src={profile.profileImage} alt={profileName} />
                 ) : (
                   <AvatarFallback>
-                    <User className="h-10 w-10" />
+                    <User className="h-10 w-10 object-cover" />
                   </AvatarFallback>
                 )}
               </Avatar>

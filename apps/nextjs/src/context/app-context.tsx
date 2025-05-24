@@ -5,6 +5,8 @@ import { createContext, useState, useContext, ReactNode } from "react";
 interface AppContextType {
   isProfileCreating: boolean;
   setIsProfileCreating: (value: boolean) => void;
+  isChatLoading: boolean;
+  setIsChatLoading: (value: boolean) => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -19,9 +21,15 @@ export function useAppContext() {
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [isProfileCreating, setIsProfileCreating] = useState(false);
+  const [isChatLoading, setIsChatLoading] = useState(false);
 
   return (
-    <AppContext.Provider value={{ isProfileCreating, setIsProfileCreating }}>
+    <AppContext.Provider value={{ 
+      isProfileCreating, 
+      setIsProfileCreating, 
+      isChatLoading, 
+      setIsChatLoading 
+    }}>
       {children}
     </AppContext.Provider>
   );

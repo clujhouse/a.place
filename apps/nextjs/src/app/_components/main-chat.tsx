@@ -13,6 +13,8 @@ import { ChatMessage } from "~/components/chat-message";
 import { MainChatProvider } from "~/context/main-chat-context";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
+import { useAppContext } from "~/context/app-context";
+import { Loader2 } from "lucide-react";
 
 interface MainChatProps {
   messages: AMessage[];
@@ -34,7 +36,7 @@ function ScrollToBottom() {
 }
 
 const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isChatLoading, setIsChatLoading } = useAppContext();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -60,6 +62,7 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
               messageId = data.id;
             })
             .with({ type: "text" }, (part) => {
+              setIsChatLoading(false);
               if (messageId) updateChat(messageId, part, vars.chatId);
             })
             .with({ type: "profile" }, (part) => {
@@ -82,17 +85,16 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
                 },
               );
             });
-
-        setIsLoading(false);
       },
 
       onError: () => {
-        setIsLoading(false);
+        setIsChatLoading(false);
       },
     }),
   );
 
   const onSubmit = async (message: string) => {
+    setIsChatLoading(true);
     const stringChatId = typeof chatId === "string" ? chatId : await chatId();
 
     mutate({ chatId: stringChatId, input: message });
@@ -113,13 +115,16 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
                 : messages.map((message) => (
                     <ChatMessage key={message.id} message={message} />
                   ))}
+              {isChatLoading && (
+                <Loader2 className="h-4 w-4 mt-2 animate-spin" />
+              )}
             </StickToBottom.Content>
 
             <ScrollToBottom />
             <ChatInput
               className="mx-auto mt-auto max-w-[655px] p-4"
               onSubmit={onSubmit}
-              isLoading={isLoading}
+              isLoading={isChatLoading}
             />
           </StickToBottom>
         </ResizablePanel>
