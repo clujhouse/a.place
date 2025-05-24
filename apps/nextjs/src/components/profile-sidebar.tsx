@@ -40,7 +40,6 @@ export function ProfileSidebar({
       <SheetContent className="w-full max-w-md overflow-y-auto sm:max-w-lg">
         <SheetHeader className="pb-4">
           <SheetTitle>Profile Details</SheetTitle>
-          <SheetDescription>View this user's profile information</SheetDescription>
         </SheetHeader>
         
         {isLoading ? (
