@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Card, CardContent, CardHeader } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
@@ -26,7 +27,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-sm">
+      <Card className="w-full p-2">
         <CardHeader className="flex flex-row items-center gap-4 pb-2">
           <Skeleton className="h-12 w-12 rounded-full" />
           <div className="space-y-2">
@@ -50,16 +51,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   return (
     <>
-      <Card 
-        className="w-full max-w-[33%] transition-all cursor-pointer hover:border-gray-300 hover:bg-gray-50"
+      <Card
+        className="w-full cursor-pointer gap-2 p-3 transition-all hover:border-primary hover:bg-accent"
         onClick={() => setIsSidebarOpen(true)}
       >
-        <CardHeader className="flex flex-row items-center gap-4 pb-2">
-          <Avatar className="h-12 w-12">
+        <CardHeader className="flex flex-row items-center gap-4 p-0">
+          <Avatar className="h-12 w-12 border border-secondary">
             {displayImage ? (
-              <AvatarImage 
-                src={displayImage} 
-                alt={displayName} 
+              <AvatarImage
+                src={displayImage}
+                alt={displayName}
+                className="object-cover"
               />
             ) : (
               <AvatarFallback>
@@ -67,28 +69,28 @@ export function ProfileCard({ profile }: ProfileCardProps) {
               </AvatarFallback>
             )}
           </Avatar>
-          <h3 className="text-lg font-semibold truncate max-w-[100%]" title={displayName}>
-              {displayName}
-          </h3>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
+          <p className="truncate text-lg font-semibold" title={displayName}>
+            {displayName}
+          </p>
           {displayText ? (
-            <p className="text-sm text-muted-foreground">
-              {displayText.length > 80 
-                ? `${displayText.slice(0, 80)}...` 
-                : displayText}
+            <p className="line-clamp-2 text-sm text-muted-foreground">
+              {displayText.slice(0, 100)}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">No profile description available</p>
+            <p className="text-sm text-muted-foreground">
+              No profile description available
+            </p>
           )}
         </CardContent>
       </Card>
 
-      <ProfileSidebar 
+      <ProfileSidebar
         profileId={profile.id}
         profileName={profile.name}
-        open={isSidebarOpen} 
-        onOpenChange={setIsSidebarOpen} 
+        open={isSidebarOpen}
+        onOpenChange={setIsSidebarOpen}
       />
     </>
   );

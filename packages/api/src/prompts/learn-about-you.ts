@@ -58,27 +58,3 @@ export const learnAboutYouPrompt = `You are a professional profiling specialist 
 - Core Values, Primary Motivators, Work-Life Priorities
 
 Begin by introducing yourself and asking an engaging opening question that invites them to share something meaningful about themselves.`;
-
-export const createLearnAboutYouPromptWithSuggestions = (
-  suggestedQuestions: string[] = [],
-) => {
-  let prompt = learnAboutYouPrompt;
-
-  if (suggestedQuestions.length > 0) {
-    prompt += `\n\n## Suggested Follow-up Questions:
-Based on the conversation analysis, here are some specific questions that would help complete their profile:
-${suggestedQuestions.map((q) => `- ${q}`).join("\n")}
-
-Consider incorporating these questions naturally into the conversation when appropriate, but don't feel obligated to ask them all at once. Choose the most relevant one based on the flow of the conversation.`;
-  }
-
-  return prompt;
-};
-
-export const judgePrompt = `
-
-Where are you from 
-What's your story
-What do you want from life
-
-`;

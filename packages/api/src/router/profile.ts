@@ -20,13 +20,18 @@ export const profileRouter = {
 
   getById: protectedProcedure
     .input(z.string())
-    .query(async ({ ctx, input }): Promise<InferSelectModel<typeof profile> | null> => {
-      const userProfile = await ctx.db.query.profile.findFirst({
-        where: (profile, { eq }) => eq(profile.userId, input),
-      });
+    .query(
+      async ({
+        ctx,
+        input,
+      }): Promise<InferSelectModel<typeof profile> | null> => {
+        const userProfile = await ctx.db.query.profile.findFirst({
+          where: (profile, { eq }) => eq(profile.userId, input),
+        });
 
-      return userProfile ?? null;
-    }),
+        return userProfile ?? null;
+      },
+    ),
 
   updateProfileImage: protectedProcedure
     .input(z.string().url())
