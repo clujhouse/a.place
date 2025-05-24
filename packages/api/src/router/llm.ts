@@ -9,10 +9,7 @@ import type { AMessage } from "@acme/validators/message";
 import { message, profile } from "@acme/db/schema";
 
 import { judgePrompt } from "../prompts/judge-prompt";
-import {
-  learnAboutYouPrompt,
-  learnWithRemainingQuestionsEmphasized,
-} from "../prompts/learn-about-you";
+import { learnWithRemainingQuestionsEmphasized } from "../prompts/learn-about-you";
 import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
