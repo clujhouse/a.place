@@ -29,6 +29,7 @@
     "./textarea": "./src/textarea.tsx",
     "./skeleton": "./src/skeleton.tsx",
     "./resizable": "./src/resizable.tsx",
+    "./drawer": "./src/drawer.tsx",
     "./tooltip": "./src/tooltip.tsx",
     "./badge": "./src/badge.tsx",
     "./icon": "./src/icon.tsx",

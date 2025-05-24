@@ -122,9 +122,9 @@ export function ConversationView({
   return (
     <>
       <div className="flex h-full flex-col">
-        {/* Header */}
+        {/* Header - Hidden on mobile, shown on desktop */}
         <div
-          className="flex cursor-pointer items-center gap-3 border-b p-4 transition-colors hover:bg-accent"
+          className="hidden cursor-pointer items-center gap-3 border-b p-4 transition-colors hover:bg-accent md:flex"
           onClick={handleHeaderClick}
         >
           <Avatar className="h-10 w-10">

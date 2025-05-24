@@ -4,7 +4,11 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { SidebarMenuButton, SidebarMenuItem } from "@acme/ui/sidebar";
+import {
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@acme/ui/sidebar";
 
 import { ChatActionsDropdown } from "./chat-actions-dropdown";
 
@@ -28,6 +32,14 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
   const pathname = usePathname();
 
   const isSelected = pathname === `/talking-stage/${chat.id}`;
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  // Function to close sidebar on mobile when link is clicked
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   useEffect(() => {
     // Only start streaming if the title actually changed
@@ -58,7 +70,7 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
       onMouseLeave={() => setIsHovering(false)}
     >
       <SidebarMenuButton asChild isActive={isSelected}>
-        <Link href={`/talking-stage/${chat.id}`}>
+        <Link href={`/talking-stage/${chat.id}`} onClick={handleLinkClick}>
           {/* <Icon as={MessageCircle} size="sm" /> */}
           <span className="truncate pr-6">
             {displayedTitle}

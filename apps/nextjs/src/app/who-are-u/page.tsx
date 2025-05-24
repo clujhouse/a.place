@@ -34,7 +34,7 @@ const WhoAreYouPage = () => {
     );
 
   return (
-    <div className="h-screen w-full">
+    <div className="w-full">
       <ProfileChat messages={message} chatId={profileChat.id} />
     </div>
   );

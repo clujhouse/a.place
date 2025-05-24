@@ -18,6 +18,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from "@acme/ui/sidebar";
 
 import ClujhouseSimpleIcon from "~/components/clujhouse";
@@ -30,6 +31,7 @@ import { CosmosLogo } from "./cosmos-logo";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trpc = useTRPC();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const { data: conversations } = useQuery({
     ...trpc.conversation.getConversations.queryOptions(),
@@ -44,6 +46,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ) || 0;
 
   const pathname = usePathname();
+  // Function to close sidebar on mobile when link is clicked
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -63,6 +72,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <Link
                 href="/letters"
                 className="flex w-full items-center justify-between"
+                onClick={handleLinkClick}
               >
                 <span>letters</span>
                 {totalUnreadCount > 0 && (

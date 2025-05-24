@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Raleway } from "next/font/google";
 
 import { cn } from "@acme/ui";
-import { SidebarProvider, SidebarTrigger } from "@acme/ui/sidebar";
+import { SidebarProvider } from "@acme/ui/sidebar";
 import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
@@ -22,6 +22,7 @@ import { GeistSans } from "geist/font/sans";
 
 import { AppProvider } from "../context/app-context";
 import { AppSidebar } from "./_components/app-sidebar";
+import { HamburgerMenu } from "./_components/hamburger-menu";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -71,9 +72,10 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <ThemeToggle />
           <TRPCReactProvider>
-            <SidebarProvider>
+            <SidebarProvider className="md:flex md:min-h-svh">
               <AppProvider>
                 <AppSidebar />
+                <HamburgerMenu />
                 <main className="w-full">
                   {/* <SidebarTrigger /> */}
                   {props.children}
