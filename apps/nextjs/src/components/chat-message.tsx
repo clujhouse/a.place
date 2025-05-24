@@ -19,7 +19,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           {message.role === "user" ? "you" : "dylan"}
         </span>
       </div>
-      <div className={cn("flex flex-col gap-2")}>
+      <div className={cn("flex flex-col gap-4")}>
         {message.parts.map((part) => {
           return match(part)
             .with({ type: "text" }, (textPart) => {

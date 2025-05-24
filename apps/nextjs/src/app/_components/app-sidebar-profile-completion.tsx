@@ -15,7 +15,7 @@ export const AppSidebarProfileCompletion = () => {
 
   return (
     <Link href="/who-are-u">
-      <div className="space-y-3 border p-4 hover:bg-accent">
+      <div className="space-y-3 border bg-background p-4 hover:bg-accent">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Profile Completion</h3>
           <span className="text-xs font-medium">{completionPercentage}%</span>

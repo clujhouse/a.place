@@ -1,10 +1,14 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
+import { MessageCircle, Plus } from "lucide-react";
 
+import { Icon } from "@acme/ui/icon";
 import {
   SidebarMenu,
+  SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
 } from "@acme/ui/sidebar";
@@ -39,6 +43,14 @@ export const AppSidebarChats = () => {
 
   return (
     <SidebarMenu>
+      <SidebarMenuItem>
+        <SidebarMenuButton asChild>
+          <Link href="/">
+            <Icon as={Plus} size="xs" />
+            new chat
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
       {chats?.map((chat: Chat) => (
         <AppSidebarChatItem key={chat.id} chat={chat} />
       ))}

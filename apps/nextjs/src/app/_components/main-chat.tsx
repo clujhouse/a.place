@@ -10,9 +10,9 @@ import { ResizablePanel, ResizablePanelGroup } from "@acme/ui/resizable";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
+import { MainChatProvider } from "~/context/main-chat-context";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
-import { MainChatProvider } from "~/context/main-chat-context";
 
 interface MainChatProps {
   messages: AMessage[];
@@ -93,13 +93,11 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
   );
 
   const onSubmit = async (message: string) => {
-    const stringChatId =
-      typeof chatId === "string" ? chatId : await chatId();
+    const stringChatId = typeof chatId === "string" ? chatId : await chatId();
 
     mutate({ chatId: stringChatId, input: message });
-  }
+  };
 
-  console.log(messages);
   return (
     <MainChatProvider sendMessage={onSubmit}>
       <ResizablePanelGroup direction="horizontal">
@@ -109,12 +107,12 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
             resize="smooth"
             initial="smooth"
           >
-            <StickToBottom.Content className="mx-auto h-full flex max-w-[655px] flex-col gap-6 p-4 pb-12">
-              {messageReplacement 
-              ? messageReplacement 
-              : messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
-              ))}
+            <StickToBottom.Content className="mx-auto flex h-full max-w-[655px] flex-col gap-6 p-4 pb-12">
+              {messageReplacement
+                ? messageReplacement
+                : messages.map((message) => (
+                    <ChatMessage key={message.id} message={message} />
+                  ))}
             </StickToBottom.Content>
 
             <ScrollToBottom />

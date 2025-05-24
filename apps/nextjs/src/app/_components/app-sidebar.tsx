@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { Button } from "@acme/ui";
 import { Badge } from "@acme/ui/badge";
 import {
   Sidebar,
@@ -18,12 +20,13 @@ import {
   SidebarSeparator,
 } from "@acme/ui/sidebar";
 
-import { UpgradeButton } from "~/components/upgrade-button";
+import ClujhouseSimpleIcon from "~/components/clujhouse";
 import { useTRPC } from "~/trpc/react";
 import { AppSidebarChats } from "./app-sidebar-chats";
 import { AppSidebarPlanIndicator } from "./app-sidebar-plan-indicator";
 import { AppSidebarProfileCompletion } from "./app-sidebar-profile-completion";
 import { AppSidebarUser } from "./app-sidebar-user";
+import { CosmosLogo } from "./cosmos-logo";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trpc = useTRPC();
@@ -40,25 +43,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       0,
     ) || 0;
 
+  const pathname = usePathname();
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
         <SidebarMenu>
+          <Link href="/">
+            <Button variant="ghost" size="icon" className="mb-4">
+              <ClujhouseSimpleIcon className="h-6 w-6" />
+            </Button>
+          </Link>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <Link href="/" className="text-base font-semibold">a.place</Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
+            <CosmosLogo href="/" />
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
-            >
-              <Link href="/">the world is not that small</Link>
-            </SidebarMenuButton>
-            <SidebarMenuButton
-              asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              isActive={pathname === "/letters"}
             >
               <Link
                 href="/letters"
@@ -78,8 +78,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
+              isActive={pathname === "/similar-profiles"}
             >
-              <Link href="/similar-profiles">find your people</Link>
+              <Link href="/similar-profiles">babel's tower </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -87,15 +88,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>your chats</SidebarGroupLabel>
+          <SidebarGroupLabel>your history</SidebarGroupLabel>
           <SidebarGroupContent>
             <AppSidebarChats />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <UpgradeButton />
-
         <AppSidebarPlanIndicator />
 
         <AppSidebarProfileCompletion />
