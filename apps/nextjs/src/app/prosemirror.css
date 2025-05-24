@@ -38,7 +38,6 @@
     left: 50%;
     width: 24px;
     height: 24px;
-    border-radius: 50%;
     border: 3.5px solid #ffffff;
     border-top-color: #bcbcbc;
     animation: spinning 0.4s linear infinite;
@@ -81,7 +80,6 @@ ul[data-type="taskList"] li > label input[type="checkbox"] {
   border: 1.5px solid hsl(var(--text-placeholder));
   display: grid;
   place-content: center;
-  border-radius: 4px;
 
   &::before {
     content: "";

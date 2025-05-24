@@ -22,7 +22,6 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5% 64.9%;
-  --radius: 0.5rem;
 }
 
 @media (prefers-color-scheme: dark) {
