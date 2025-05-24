@@ -7,7 +7,7 @@ export function HamburgerMenu() {
   const { toggleSidebar } = useSidebar();
 
   return (
-    <div className="fixed left-4 top-4 z-50">
+    <div className="fixed left-4 top-4 z-50 block md:hidden">
       <Button
         variant="outline"
         size="icon"
