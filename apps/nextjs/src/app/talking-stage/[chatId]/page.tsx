@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useMemo } from "react";
+import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
 import { messageSchema } from "@acme/validators/message";
 
+import MainChat from "~/app/_components/main-chat";
 import { useTRPC } from "~/trpc/react";
-import MainChat from "./_components/main-chat";
 
 const Homepage = () => {
   const trpc = useTRPC();
-
-  const { data: chat } = useQuery(trpc.chat.create.queryOptions("cool-chat"));
+  const { chatId } = useParams();
 
   const { data } = useQuery(
-    trpc.chat.get.queryOptions("cool-chat", {
-      enabled: !!chat,
+    trpc.chat.get.queryOptions(chatId as string, {
+      enabled: !!chatId,
     }),
   );
 
@@ -23,9 +23,8 @@ const Homepage = () => {
     return data?.map((message) => messageSchema.parse(message));
   }, [data]);
 
-  if (!chat || !message) return <div>Loading...</div>;
-
-  return <MainChat messages={message} chatId={chat} />;
+  if (!message) return <div>Loading...</div>;
+  return <MainChat messages={message} chatId={chatId as string} />;
 };
 
 export default Homepage;

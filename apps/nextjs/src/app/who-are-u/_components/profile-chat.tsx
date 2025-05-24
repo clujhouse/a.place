@@ -112,7 +112,6 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
                 updateProfileMessage(messageId, chunk.textDelta);
             })
             .with({ type: "profile" }, ({ chunk }) => {
-              console.log("profile", chunk);
               if (chunk.type === "text-delta")
                 newProfileText += chunk.textDelta;
               updateProfileBio(newProfileText);

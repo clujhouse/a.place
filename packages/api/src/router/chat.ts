@@ -7,10 +7,22 @@ import { chat } from "@acme/db/schema";
 import { protectedProcedure } from "../trpc";
 
 export const chatRouter = {
+  getAll: protectedProcedure.query(async ({ ctx }) => {
+    return await ctx.db.query.chat.findMany({
+      where: (chat, { eq }) => eq(chat.userId, ctx.session.user.id),
+      orderBy: (chat, { desc }) => [desc(chat.createdAt)],
+    });
+  }),
+
   get: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {
-    return (await ctx.db.query.message.findMany({
+    const chat = await ctx.db.query.chat.findFirst({
       where: (chat, { eq }) => eq(chat.id, input),
-    })) as AMessage[];
+      with: {
+        messages: true,
+      },
+    });
+
+    return (chat?.messages ?? []) as AMessage[];
   }),
 
   create: protectedProcedure.input(z.string()).query(async ({ ctx, input }) => {

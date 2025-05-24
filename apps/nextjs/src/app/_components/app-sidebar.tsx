@@ -16,6 +16,7 @@ import {
   SidebarSeparator,
 } from "@acme/ui/sidebar";
 
+import { AppSidebarChats } from "./app-sidebar-chats";
 import { AppSidebarProfileCompletion } from "./app-sidebar-profile-completion";
 import { AppSidebarUser } from "./app-sidebar-user";
 
@@ -47,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
-            {/* <SidebarMenu></SidebarMenu> */}
+            <AppSidebarChats />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
