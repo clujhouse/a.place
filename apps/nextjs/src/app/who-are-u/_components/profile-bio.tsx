@@ -15,6 +15,7 @@ import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
 import { useAppContext } from "~/context/app-context";
+import ClujhouseIcon from "~/components/clujhouse-icon";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -165,7 +166,7 @@ export const ProfileBio = () => {
   };
 
   if (isProfileLoading || isSessionLoading) {
-    return <div className="h-48 animate-pulse rounded-lg bg-muted"></div>;
+    return <ClujhouseIcon className="h-16 w-16 animate-pulse rounded-lg bg-muted" />;
   }
 
   if (!session?.user) {
@@ -190,7 +191,7 @@ export const ProfileBio = () => {
           </Avatar>
           <div
             className={cn(
-              "absolute inset-0 flex items-center justify-center rounded-full bg-black/50",
+              "absolute inset-0 flex items-center justify-center bg-black/50",
               loadingImageIndex === -1
                 ? "opacity-100"
                 : "opacity-0 group-hover:opacity-100",

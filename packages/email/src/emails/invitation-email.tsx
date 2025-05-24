@@ -83,7 +83,6 @@ const main = {
 const container = {
   backgroundColor: "#ffffff",
   border: "1px solid #e2e8f0",
-  borderRadius: "5px",
   boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)",
   margin: "0 auto",
   maxWidth: "600px",
@@ -112,7 +111,6 @@ const buttonContainer = {
 
 const button = {
   backgroundColor: "#000000",
-  borderRadius: "5px",
   color: "#ffffff",
   display: "inline-block",
   fontSize: "16px",

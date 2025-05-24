@@ -93,7 +93,6 @@ export const config = {
                     margin: 0 auto;
                     padding: 20px;
                     background-color: #ffffff;
-                    border-radius: 8px;
                     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
                   }
                   .header {
@@ -117,7 +116,6 @@ export const config = {
                     padding: 15px;
                     margin: 25px 0;
                     background-color: #f3f4f6;
-                    border-radius: 6px;
                     display: inline-block;
                   }
                   .footer {
@@ -133,7 +131,6 @@ export const config = {
                     background-color: #4f46e5;
                     color: white;
                     text-decoration: none;
-                    border-radius: 4px;
                     font-weight: 600;
                     margin-top: 20px;
                   }
@@ -150,7 +147,7 @@ export const config = {
                     <div class="logo">comment.video</div>
                   </div>
                   <div class="content">
-                    <div style="background-color: #ffe8e8; padding: 10px; margin-bottom: 20px; border-radius: 4px; text-align: left;">
+                    <div style="background-color: #ffe8e8; padding: 10px; margin-bottom: 20px; text-align: left;">
                       <strong>Development Mode Notice:</strong> This email was intended for <strong>${email}</strong> but was sent to you because of Resend's test mode limitations.
                     </div>
                     <h2>${getEmailHeading(type)}</h2>

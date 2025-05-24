@@ -128,7 +128,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           "Hello! Tell me more about this profile creation page and let's get started.",
       });
     }
-  }, [messages, mutate, chatId]);
+  }, []);
 
   return (
     <ResizablePanelGroup direction="horizontal">

@@ -9,7 +9,7 @@ import type { AMessage } from "@acme/validators/message";
 import { message, profile } from "@acme/db/schema";
 
 import { judgePrompt } from "../prompts/judge-prompt";
-import { learnAboutYouPrompt } from "../prompts/learn-about-you";
+import { learnWithRemainingQuestionsEmphasized } from "../prompts/learn-about-you";
 import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
@@ -74,17 +74,21 @@ export const llmRouter = {
         schema: validationResponseSchema,
         prompt: `${judgePrompt}\n\n## Conversation to Analyze:\n${conversationForValidation}`,
       });
+
       yield {
         type: "completionPercentage" as const,
         validation: validation.object.completionPercentage,
       };
 
+      const customPrompt = learnWithRemainingQuestionsEmphasized(
+        validation.object.suggestedFollowUpQuestions,
+      );
       const aiMessageId = nanoid();
       const result = streamText({
         model: google("gemini-2.0-flash"),
         messages: convertMessageToCoreMessage(allMessages),
         experimental_telemetry: { isEnabled: true },
-        system: learnAboutYouPrompt,
+        system: customPrompt,
       });
 
       yield {
