@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
+import { useAppContext } from "~/context/app-context";
 
 import type { AMessage } from "@acme/validators/message";
 import {
@@ -38,7 +39,7 @@ function ScrollToBottom() {
 }
 
 const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const { isProfileCreating, setIsProfileCreating } = useAppContext();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -64,6 +65,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
   const { mutate } = useMutation(
     trpc.llm.learnAboutYou.mutationOptions({
       onMutate: ({ input, chatId }) => {
+        setIsProfileCreating(true);
         const message: AMessage = {
           role: "user",
           parts: [{ id: nanoid(), type: "text", text: input }],
@@ -90,6 +92,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
               if (chunk.type === "text") updateChat(messageId, chunk, chatId);
             })
             .with({ type: "profile" }, ({ chunk }) => {
+              setIsProfileCreating(false);
               if (chunk.type === "text-delta")
                 newProfileText += chunk.textDelta;
 
@@ -99,15 +102,19 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
               console.log("Received validation result:", validation);
               updateProfileCompletion(validation.completionPercentage);
             });
-
-        setIsLoading(false);
       },
 
       onError: () => {
-        setIsLoading(false);
+        setIsProfileCreating(false);
       },
     }),
   );
+  
+  useEffect(() => {
+    if (messages.length === 0) {
+      mutate({ chatId, input: "Hello! Tell me more about this profile creation page and let's get started." });
+    }
+  }, [messages, mutate, chatId]);
 
   return (
     <ResizablePanelGroup direction="horizontal">
@@ -128,7 +135,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           <ChatInput
             className="mx-auto mt-auto max-w-4xl p-4"
             onSubmit={(message) => mutate({ chatId, input: message })}
-            isLoading={isLoading}
+            isLoading={isProfileCreating}
           />
         </StickToBottom>
       </ResizablePanel>

@@ -64,6 +64,21 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
               if (messageId) {
                 updateChat(messageId, part, vars.chatId);
               }
+            })
+            .with({ type: "chatTitle" }, (part) => {
+              // Optimistically update the chat list with the new title
+              queryClient.setQueryData(
+                trpc.chat.getAll.queryKey(),
+                (oldChats) => {
+                  if (!oldChats) return oldChats;
+
+                  return oldChats.map((chat) =>
+                    chat.id === part.chatId
+                      ? { ...chat, title: part.title }
+                      : chat,
+                  );
+                },
+              );
             });
 
         setIsLoading(false);

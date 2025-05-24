@@ -14,6 +14,7 @@ import { toast } from "@acme/ui/toast";
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
+import { useAppContext } from "~/context/app-context";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -37,6 +38,8 @@ export const ProfileBio = () => {
   const [loadingImageIndex, setLoadingImageIndex] = useState<number | null>(
     null,
   );
+
+  const { isProfileCreating } = useAppContext();
 
   const { mutate: updateProfileImage } = useMutation(
     trpc.profile.updateProfileImage.mutationOptions({
@@ -203,7 +206,7 @@ export const ProfileBio = () => {
             className="hidden"
             onChange={handleProfileImageUpload}
             accept="image/*"
-            disabled={isUploading}
+            disabled={isUploading || isProfileCreating}
           />
         </div>
         <div>
@@ -213,7 +216,13 @@ export const ProfileBio = () => {
       </div>
 
       <div className="h-full min-h-0 overflow-y-auto">
-        <MarkdownContent content={profile?.text ?? ""} id="bio" />
+        {isProfileCreating ? (
+          <div className="flex h-full items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          </div>
+        ) : (
+          <MarkdownContent content={profile?.text ?? ""} id="bio" />
+        )}
       </div>
 
       <div className="space-y-4">

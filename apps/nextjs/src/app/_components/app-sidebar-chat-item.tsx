@@ -1,0 +1,72 @@
+"use client";
+
+import React, { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+
+import { SidebarMenuButton, SidebarMenuItem } from "@acme/ui/sidebar";
+
+import { ChatActionsDropdown } from "./chat-actions-dropdown";
+
+interface Chat {
+  id: string;
+  title: string;
+  userId: string;
+  visibility: "public" | "private";
+  createdAt: Date;
+}
+
+interface AppSidebarChatItemProps {
+  chat: Chat;
+}
+
+export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
+  const [displayedTitle, setDisplayedTitle] = useState(chat.title);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const previousTitleRef = useRef(chat.title);
+
+  useEffect(() => {
+    // Only start streaming if the title actually changed
+    if (chat.title !== previousTitleRef.current) {
+      previousTitleRef.current = chat.title;
+      setIsStreaming(true);
+      setDisplayedTitle("");
+
+      let currentIndex = 0;
+      const streamInterval = setInterval(() => {
+        if (currentIndex < chat.title.length) {
+          setDisplayedTitle(chat.title.slice(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          setIsStreaming(false);
+          clearInterval(streamInterval);
+        }
+      }, 50); // Adjust speed as needed
+
+      return () => clearInterval(streamInterval);
+    }
+  }, [chat.title]); // Only depend on chat.title, not displayedTitle
+
+  return (
+    <SidebarMenuItem
+      className="relative"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      <SidebarMenuButton asChild>
+        <Link href={`/talking-stage/${chat.id}`}>
+          {/* <Icon as={MessageCircle} size="sm" /> */}
+          <span className="truncate pr-6">
+            {displayedTitle}
+            {isStreaming && (
+              <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-current opacity-75" />
+            )}
+          </span>
+        </Link>
+      </SidebarMenuButton>
+      <div className="absolute right-1 top-1.5">
+        <ChatActionsDropdown chat={chat} isVisible={isHovering} />
+      </div>
+    </SidebarMenuItem>
+  );
+};

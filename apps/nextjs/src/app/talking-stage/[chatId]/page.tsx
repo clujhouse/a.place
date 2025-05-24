@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { messageSchema } from "@acme/validators/message";
 
 import MainChat from "~/app/_components/main-chat";
+import ClujhouseIcon from "~/components/clujhouse-icon";
 import { useTRPC } from "~/trpc/react";
 
 const Homepage = () => {
@@ -23,7 +24,13 @@ const Homepage = () => {
     return data?.map((message) => messageSchema.parse(message));
   }, [data]);
 
-  if (!message) return <div>Loading...</div>;
+  if (!message) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <ClujhouseIcon />
+      </div>
+    );
+  }
   return <MainChat messages={message} chatId={chatId as string} />;
 };
 

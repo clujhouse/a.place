@@ -21,6 +21,7 @@ import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 
 import { AppSidebar } from "./_components/app-sidebar";
+import { AppProvider } from "../context/app-context";
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -71,11 +72,13 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <ThemeToggle />
           <TRPCReactProvider>
             <SidebarProvider>
-              <AppSidebar />
-              <main className="w-full">
-                {/* <SidebarTrigger /> */}
-                {props.children}
-              </main>
+              <AppProvider>
+                <AppSidebar />
+                <main className="w-full">
+                  {/* <SidebarTrigger /> */}
+                  {props.children}
+                </main>
+              </AppProvider>
             </SidebarProvider>
           </TRPCReactProvider>
           <Toaster />

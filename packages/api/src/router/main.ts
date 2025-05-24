@@ -1,13 +1,13 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
-import { smoothStream, streamText } from "ai";
+import { generateText, smoothStream, streamText } from "ai";
 import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
 
 import type { AMessage, ProfilePart } from "@acme/validators/message";
-import { message, profile, user } from "@acme/db/schema";
+import { chat, message, profile, user } from "@acme/db/schema";
 
 import { createSystemPromptWithProfiles } from "../prompts/main";
 import { protectedProcedure } from "../trpc";
@@ -85,7 +85,7 @@ export const mainRouter = {
       // Get recent chat history
       const chatHistory = (await ctx.db.query.message.findMany({
         where: (message, { eq }) => eq(message.chatId, chatId),
-        orderBy: (message, { desc }) => desc(message.createdAt),
+        orderBy: (message, { asc }) => asc(message.createdAt),
         limit: 10,
       })) as AMessage[];
 
@@ -136,5 +136,36 @@ export const mainRouter = {
         chatId: chatId,
         attachments: [],
       });
+
+      // Generate chat title if this is a new conversation (few messages)
+      if (chatHistory.length <= 2) {
+        const titleResult = await generateText({
+          model: google("gemini-2.0-flash"),
+          messages: [
+            {
+              role: "system",
+              content:
+                "Generate a short, descriptive title for this conversation. The title should be 3-7 words and capture the main topic or question. Return only the title without quotes or extra text.",
+            },
+            {
+              role: "user",
+              content: `Based on this conversation:\nUser: ${userInput}\nAssistant: ${textResponse}\n\nGenerate a title:`,
+            },
+          ],
+        });
+
+        // Update the chat title in the database
+        await ctx.db
+          .update(chat)
+          .set({ title: titleResult.text })
+          .where(eq(chat.id, chatId));
+
+        // Yield the title update for client-side optimistic updates
+        yield {
+          type: "chatTitle" as const,
+          title: titleResult.text,
+          chatId: chatId,
+        };
+      }
     }),
 } satisfies TRPCRouterRecord;

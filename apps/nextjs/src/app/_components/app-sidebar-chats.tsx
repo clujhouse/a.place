@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { MessageCircle, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Icon } from "@acme/ui/icon";
 import {
@@ -15,6 +14,7 @@ import {
 } from "@acme/ui/sidebar";
 
 import { useTRPC } from "~/trpc/react";
+import { AppSidebarChatItem } from "./app-sidebar-chat-item";
 
 interface Chat {
   id: string;
@@ -57,14 +57,7 @@ export const AppSidebarChats = () => {
       </SidebarMenuItem>
 
       {chats?.map((chat: Chat) => (
-        <SidebarMenuItem key={chat.id}>
-          <SidebarMenuButton asChild>
-            <Link href={`/talking-stage/${chat.id}`}>
-              <Icon as={MessageCircle} size="sm" />
-              <span className="truncate">{chat.title}</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
+        <AppSidebarChatItem key={chat.id} chat={chat} />
       ))}
 
       {(!chats || chats.length === 0) && (

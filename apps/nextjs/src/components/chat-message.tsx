@@ -28,9 +28,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
             .with({ type: "profile" }, (profilePart) => {
               return (
                 <div key={part.id}>
-                  {profilePart.profiles
-                    .map((profile) => profile.name)
-                    .join(", ")}
+                  {profilePart.profiles.map((profile) => profile.id).join(", ")}
                 </div>
               );
             })
