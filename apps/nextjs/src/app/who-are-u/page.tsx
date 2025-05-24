@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { messageSchema } from "@acme/validators/message";
 
+import ClujhouseIcon from "~/components/clujhouse-icon";
 import { useTRPC } from "~/trpc/react";
 import ProfileChat from "./_components/profile-chat";
 
@@ -25,7 +26,12 @@ const WhoAreYouPage = () => {
     return data?.map((message) => messageSchema.parse(message));
   }, [data]);
 
-  if (!profileChat || !message) return <div>Loading...</div>;
+  if (!profileChat || !message)
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <ClujhouseIcon />
+      </div>
+    );
 
   return (
     <div className="h-screen w-full">
