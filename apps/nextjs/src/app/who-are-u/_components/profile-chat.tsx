@@ -140,7 +140,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           resize="smooth"
           initial="smooth"
         >
-          <StickToBottom.Content className="mx-auto flex max-w-4xl flex-col gap-6 p-4 pb-12">
+          <StickToBottom.Content className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-12">
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
@@ -149,7 +149,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           <ScrollToBottom />
 
           <ChatInput
-            className="mx-auto mt-auto max-w-4xl p-4"
+            className="mx-auto mt-auto max-w-xl p-4"
             onSubmit={(message) => mutate({ chatId, input: message })}
             isLoading={isProfileCreating}
           />

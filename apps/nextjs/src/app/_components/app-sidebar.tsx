@@ -37,7 +37,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link href="/">discover</Link>
+              <Link href="/">the world is not that small</Link>
             </SidebarMenuButton>
             <SidebarMenuButton className="data-[slot=sidebar-menu-button]:!p-1.5">
               letters
@@ -48,7 +48,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarSeparator />
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Chats</SidebarGroupLabel>
+          <SidebarGroupLabel>your chats</SidebarGroupLabel>
           <SidebarGroupContent>
             <AppSidebarChats />
           </SidebarGroupContent>
