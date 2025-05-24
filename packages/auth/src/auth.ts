@@ -1,15 +1,22 @@
 import type { BetterAuthOptions } from "better-auth";
 import { expo } from "@better-auth/expo";
+import { stripe } from "@better-auth/stripe";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { emailOTP, oAuthProxy } from "better-auth/plugins";
 import { Resend } from "resend";
+import Stripe from "stripe";
 
 import { db } from "@acme/db/client";
 
 import { env } from "../env";
 
 const resend = new Resend(env.RESEND_API_KEY);
+
+// Initialize Stripe client with the new environment variable
+const stripeClient = new Stripe(env.STRIPE_SECRET_KEY!, {
+  apiVersion: "2025-04-30.basil",
+});
 
 export const config = {
   database: drizzleAdapter(db, {
@@ -19,6 +26,35 @@ export const config = {
   plugins: [
     oAuthProxy(),
     expo(),
+    stripe({
+      stripeClient,
+      stripeWebhookSecret: env.STRIPE_WEBHOOK_SECRET!,
+      createCustomerOnSignUp: true,
+      subscription: {
+        enabled: true,
+        plans: [
+          {
+            name: "basic",
+            priceId: "price_basic", // Replace with your actual Stripe price ID
+            limits: {
+              projects: 5,
+              storage: 10,
+            },
+          },
+          {
+            name: "pro",
+            priceId: "price_pro", // Replace with your actual Stripe price ID
+            limits: {
+              projects: 20,
+              storage: 50,
+            },
+            freeTrial: {
+              days: 14,
+            },
+          },
+        ],
+      },
+    }),
     emailOTP({
       async sendVerificationOTP({ email, otp, type }) {
         // Always log the OTP to the console for testing

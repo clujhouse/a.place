@@ -15,7 +15,8 @@ export const env = createEnv({
         : z.string().min(1).optional(),
     NODE_ENV: z.enum(["development", "production"]).optional(),
 
-    // STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_SECRET_KEY: z.string().min(1),
+    STRIPE_WEBHOOK_SECRET: z.string().min(1),
     // STRIPE_WEBHOOK_SECRET:
     //   process.env.NODE_ENV === "production"
     //     ? z.string().min(1)

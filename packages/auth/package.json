@@ -26,7 +26,7 @@
     "@auth/core": "0.34.2",
     "@auth/drizzle-adapter": "1.8.0",
     "@better-auth/expo": "catalog:",
-    "@better-auth/stripe": "^1.2.3",
+    "@better-auth/stripe": "^1.2.8",
     "@sindresorhus/slugify": "^2.2.1",
     "@t3-oss/env-nextjs": "^0.11.1",
     "better-auth": "catalog:",
@@ -35,7 +35,7 @@
     "react": "catalog:react19",
     "react-dom": "catalog:react19",
     "resend": "^4.1.2",
-    "stripe": "^17.7.0",
+    "stripe": "^18.1.1",
     "zod": "catalog:"
   },
   "devDependencies": {

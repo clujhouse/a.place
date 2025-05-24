@@ -1,5 +1,6 @@
 import {
   boolean,
+  int,
   mysqlTable,
   text,
   timestamp,
@@ -10,10 +11,17 @@ export const user = mysqlTable("user", {
   id: varchar("id", { length: 36 }).primaryKey(),
   name: text("name").notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: boolean("email_verified").notNull(),
+  emailVerified: boolean("email_verified")
+    .$defaultFn(() => false)
+    .notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at").notNull(),
-  updatedAt: timestamp("updated_at").notNull(),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
 });
 
 export const session = mysqlTable("session", {
@@ -24,7 +32,7 @@ export const session = mysqlTable("session", {
   updatedAt: timestamp("updated_at").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
-  userId: varchar("user_id", { length: 36 })
+  userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
 });
@@ -33,7 +41,7 @@ export const account = mysqlTable("account", {
   id: varchar("id", { length: 36 }).primaryKey(),
   accountId: text("account_id").notNull(),
   providerId: text("provider_id").notNull(),
-  userId: varchar("user_id", { length: 36 })
+  userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
   accessToken: text("access_token"),
@@ -52,6 +60,23 @@ export const verification = mysqlTable("verification", {
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at"),
-  updatedAt: timestamp("updated_at"),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+});
+
+export const subscription = mysqlTable("subscription", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  plan: text("plan").notNull(),
+  referenceId: text("reference_id").notNull(),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  status: text("status"),
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end"),
+  seats: int("seats"),
 });
