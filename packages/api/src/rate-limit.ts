@@ -44,3 +44,64 @@ export const checkLimitsPublic = async (
     anonUser,
   };
 };
+
+export const checkSearchLimits = async (ctx: TRPCContext) => {
+  // If user is not logged in, they can't search
+  if (!ctx.session?.user?.id) {
+    throw new TRPCError({
+      code: "UNAUTHORIZED",
+      message: "You must be logged in to search",
+    });
+  }
+
+  const userId = ctx.session.user.id;
+  const stripeCustomerId = ctx.session.user.stripeCustomerId;
+
+  // Check if user has an active subscription
+  let activeSubscription = null;
+  if (stripeCustomerId) {
+    activeSubscription = await ctx.db.query.subscription.findFirst({
+      where: (subscription, { eq, and }) =>
+        and(
+          eq(subscription.stripeCustomerId, stripeCustomerId),
+          eq(subscription.status, "active"),
+        ),
+    });
+  }
+
+  // If user has an active subscription, no limits
+  if (activeSubscription) {
+    return {
+      type: "premium" as const,
+      userId,
+      plan: activeSubscription.plan,
+    };
+  }
+
+  // For free users, limit to 5 searches per day
+  const ratelimit = new Ratelimit({
+    redis: Redis.fromEnv(),
+    limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 requests per day
+    analytics: true,
+  });
+
+  const { success, limit, remaining, reset } = await ratelimit.limit(
+    `search:${userId}`,
+  );
+
+  if (!success) {
+    const resetTime = new Date(reset).toLocaleString();
+    throw new TRPCError({
+      code: "TOO_MANY_REQUESTS",
+      message: `You've reached your daily search limit of ${limit} searches. Your limit will reset at ${resetTime}. Upgrade to a paid plan for unlimited searches.`,
+    });
+  }
+
+  return {
+    type: "free" as const,
+    userId,
+    remaining,
+    limit,
+    reset,
+  };
+};

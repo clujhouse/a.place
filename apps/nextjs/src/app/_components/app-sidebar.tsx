@@ -22,6 +22,7 @@ import {
 } from "@acme/ui/sidebar";
 
 import ClujhouseSimpleIcon from "~/components/clujhouse";
+import { SearchUsageIndicator } from "~/components/search-usage-indicator";
 import { useTRPC } from "~/trpc/react";
 import { AppSidebarChats } from "./app-sidebar-chats";
 import { AppSidebarPlanIndicator } from "./app-sidebar-plan-indicator";
@@ -105,6 +106,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <SearchUsageIndicator />
+
         <AppSidebarPlanIndicator />
 
         <AppSidebarProfileCompletion />

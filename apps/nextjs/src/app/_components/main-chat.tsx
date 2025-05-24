@@ -8,6 +8,7 @@ import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 import type { AMessage } from "@acme/validators/message";
 import { ResizablePanel, ResizablePanelGroup } from "@acme/ui/resizable";
+import { toast } from "@acme/ui/toast";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
@@ -85,10 +86,22 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
                 },
               );
             });
+
+        // Invalidate search usage to update the indicator
+        void queryClient.invalidateQueries({
+          queryKey: trpc.main.getSearchUsage.queryKey(),
+        });
       },
 
-      onError: () => {
+      onError: (error) => {
         setIsChatLoading(false);
+
+        // Show specific error message for rate limiting
+        if (error.data?.code === "TOO_MANY_REQUESTS") {
+          toast.error(error.message);
+        } else {
+          toast.error("Failed to send message. Please try again.");
+        }
       },
     }),
   );

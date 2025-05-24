@@ -10,10 +10,65 @@ import type { AMessage, ProfilePart } from "@acme/validators/message";
 import { chat, message, profile, user } from "@acme/db/schema";
 
 import { createSystemPromptWithProfiles } from "../prompts/main";
+import { checkSearchLimits } from "../rate-limit";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
 export const mainRouter = {
+  getSearchUsage: protectedProcedure.query(async ({ ctx }) => {
+    // If user is not logged in, return null
+    if (!ctx.session?.user?.id) {
+      return null;
+    }
+
+    const userId = ctx.session.user.id;
+    const stripeCustomerId = ctx.session.user.stripeCustomerId;
+
+    // Check if user has an active subscription
+    let activeSubscription = null;
+    if (stripeCustomerId) {
+      activeSubscription = await ctx.db.query.subscription.findFirst({
+        where: (subscription, { eq, and }) =>
+          and(
+            eq(subscription.stripeCustomerId, stripeCustomerId),
+            eq(subscription.status, "active"),
+          ),
+      });
+    }
+
+    // If user has an active subscription, they have unlimited searches
+    if (activeSubscription) {
+      return {
+        type: "premium" as const,
+        plan: activeSubscription.plan,
+        unlimited: true,
+      };
+    }
+
+    // For free users, check their current usage
+    const { Ratelimit } = await import("@upstash/ratelimit");
+    const { Redis } = await import("@upstash/redis");
+
+    const ratelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 requests per day
+      analytics: true,
+    });
+
+    const { remaining, reset } = await ratelimit.getRemaining(
+      `search:${userId}`,
+    );
+    const limit = 5; // We know the limit is 5 searches per day
+
+    return {
+      type: "free" as const,
+      limit,
+      remaining,
+      used: limit - remaining,
+      reset,
+    };
+  }),
+
   chat: protectedProcedure
     .input(
       z.object({
@@ -23,6 +78,9 @@ export const mainRouter = {
     )
     .mutation(async function* ({ ctx, input }) {
       const { chatId, input: userInput } = input;
+
+      // Check search limits for free users
+      const searchLimitResult = await checkSearchLimits(ctx);
 
       // Create embedding for the user's message
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
