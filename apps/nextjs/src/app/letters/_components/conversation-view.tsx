@@ -28,6 +28,7 @@ export function ConversationView({
   const [hasInitiallyScrolled, setHasInitiallyScrolled] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const previousMessageCount = useRef(0);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
@@ -66,13 +67,24 @@ export function ConversationView({
   // Reset scroll flag when switching conversations
   useEffect(() => {
     setHasInitiallyScrolled(false);
+    previousMessageCount.current = 0;
   }, [partnerId]);
 
   useEffect(() => {
-    if (messages && messages.length > 0 && !hasInitiallyScrolled) {
-      // Only auto-scroll once when initially entering a conversation
-      setTimeout(scrollToBottom, 100);
-      setHasInitiallyScrolled(true);
+    if (messages && messages.length > 0) {
+      const currentMessageCount = messages.length;
+      const hasNewMessages = currentMessageCount > previousMessageCount.current;
+
+      if (!hasInitiallyScrolled) {
+        // Initial load - always scroll to bottom
+        setTimeout(scrollToBottom, 100);
+        setHasInitiallyScrolled(true);
+      } else if (hasNewMessages) {
+        // New messages arrived - always scroll to show them
+        setTimeout(scrollToBottom, 100);
+      }
+
+      previousMessageCount.current = currentMessageCount;
     }
   }, [messages, hasInitiallyScrolled]);
 
