@@ -1,6 +1,7 @@
 import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   customType,
   index,
   int,
@@ -109,6 +110,21 @@ export const message = mysqlTable("message", {
   attachments: json("attachments").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+export const conversationMessage = mysqlTable("conversation_message", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  senderId: varchar("sender_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  recieverId: varchar("reciever_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  read: boolean("read").notNull().default(false),
+});
 
 export const messageRelations = relations(message, ({ one }) => ({
   chat: one(chat, {
@@ -116,6 +132,20 @@ export const messageRelations = relations(message, ({ one }) => ({
     references: [chat.id],
   }),
 }));
+
+export const conversationMessageRelations = relations(
+  conversationMessage,
+  ({ one }) => ({
+    sender: one(user, {
+      fields: [conversationMessage.senderId],
+      references: [user.id],
+    }),
+    receiver: one(user, {
+      fields: [conversationMessage.recieverId],
+      references: [user.id],
+    }),
+  }),
+);
 
 export type DBMessage = InferSelectModel<typeof message>;
 
