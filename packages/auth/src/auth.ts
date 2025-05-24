@@ -34,25 +34,28 @@ export const config = {
         enabled: true,
         plans: [
           {
-            name: "basic",
-            priceId: "price_basic", // Replace with your actual Stripe price ID
-            limits: {
-              projects: 5,
-              storage: 10,
-            },
-          },
-          {
             name: "pro",
-            priceId: "price_pro", // Replace with your actual Stripe price ID
+            priceId: env.PRO_PRODUCT_PRICE_ID,
             limits: {
               projects: 20,
               storage: 50,
             },
-            freeTrial: {
-              days: 14,
+          },
+          {
+            name: "pro_exclusive",
+            priceId: env.ULTIMATE_PRODUCT_PRICE_ID,
+            limits: {
+              projects: 100,
+              storage: 500,
             },
           },
         ],
+        onSubscriptionComplete: async ({ subscription, plan }) => {
+          console.log(
+            `Subscription ${subscription.id} completed for plan ${plan.name}`,
+          );
+          // You can add custom logic here when a subscription is completed
+        },
       },
     }),
     emailOTP({

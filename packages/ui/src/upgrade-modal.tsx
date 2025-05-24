@@ -45,7 +45,7 @@ export function UpgradeModal({
       price: "$20",
       period: "/month",
       description: "Perfect for professionals and growing teams",
-      icon: <Crown className="h-6 w-6 text-blue-600" />,
+      icon: <Crown className="h-5 w-5" />,
       features: [
         "20 projects",
         "50GB storage",
@@ -53,7 +53,6 @@ export function UpgradeModal({
         "Priority support",
         "14-day free trial",
         "API access",
-        "Custom integrations",
       ],
       popular: true,
       disabled:
@@ -65,7 +64,7 @@ export function UpgradeModal({
       price: "$69",
       period: "/month",
       description: "For power users who need everything",
-      icon: <Sparkles className="h-6 w-6 text-purple-600" />,
+      icon: <Sparkles className="h-5 w-5" />,
       features: [
         "100 projects",
         "500GB storage",
@@ -73,7 +72,6 @@ export function UpgradeModal({
         "24/7 priority support",
         "White-label options",
         "Advanced API access",
-        "Custom integrations",
         "Dedicated account manager",
         "Early access to features",
       ],
@@ -84,16 +82,15 @@ export function UpgradeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div>
-              <DialogTitle className="text-2xl font-bold">
+              <DialogTitle className="text-xl font-semibold">
                 Upgrade Your Plan
               </DialogTitle>
-              <DialogDescription className="mt-2">
-                Choose the perfect plan for your needs and unlock powerful
-                features
+              <DialogDescription className="mt-1 text-sm">
+                Choose the plan that fits your needs
               </DialogDescription>
             </div>
             <Button
@@ -107,70 +104,66 @@ export function UpgradeModal({
           </div>
         </DialogHeader>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-2">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-lg border-2 p-6 ${
-                plan.popular
-                  ? "border-blue-500 bg-blue-50/50"
-                  : "border-gray-200 bg-white"
+              className={`relative rounded-lg border p-4 ${
+                plan.popular ? "border-2" : "border"
               } ${plan.disabled ? "opacity-60" : ""}`}
             >
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white">
+                <div className="absolute -top-2 left-4">
+                  <span className="rounded bg-foreground px-2 py-0.5 text-xs font-medium text-background">
                     Most Popular
                   </span>
                 </div>
               )}
 
-              <div className="mb-4 flex items-center gap-3">
+              <div className="mb-3 flex items-center gap-2">
                 {plan.icon}
-                <h3 className="text-xl font-semibold">{plan.name}</h3>
+                <h3 className="font-semibold">{plan.name}</h3>
               </div>
 
-              <div className="mb-4">
+              <div className="mb-3">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">{plan.price}</span>
-                  <span className="text-gray-500">{plan.period}</span>
+                  <span className="text-2xl font-bold">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {plan.period}
+                  </span>
                 </div>
-                <p className="mt-2 text-sm text-gray-600">{plan.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {plan.description}
+                </p>
               </div>
 
               <Button
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={plan.disabled || isLoading !== null}
-                className={`mb-6 w-full ${
-                  plan.popular
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-gray-900 hover:bg-gray-800"
-                }`}
+                variant={plan.disabled ? "outline" : undefined}
+                className="mb-4 w-full"
               >
                 {isLoading === plan.id ? (
                   <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
                     Processing...
                   </div>
                 ) : plan.disabled ? (
                   currentMembership === plan.id ? (
                     "Current Plan"
                   ) : (
-                    "Downgrade Not Available"
+                    "Not Available"
                   )
                 ) : (
                   `Upgrade to ${plan.name}`
                 )}
               </Button>
 
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-900">
-                  Everything included:
-                </p>
+              <div className="space-y-2">
                 {plan.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <Check className="h-4 w-4 flex-shrink-0 text-green-500" />
-                    <span className="text-sm text-gray-600">{feature}</span>
+                  <div key={index} className="flex items-center gap-2">
+                    <Check className="h-3 w-3 flex-shrink-0" />
+                    <span className="text-xs">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -178,9 +171,9 @@ export function UpgradeModal({
           ))}
         </div>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-500">
-            All plans include a 30-day money-back guarantee. Cancel anytime.
+        <div className="mt-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            30-day money-back guarantee. Cancel anytime.
           </p>
         </div>
       </DialogContent>

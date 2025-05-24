@@ -33,6 +33,23 @@ export const profileRouter = {
       },
     ),
 
+  createCheckoutSession: protectedProcedure
+    .input(
+      z.object({
+        plan: z.enum(["pro", "pro_exclusive"]),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // This will use better-auth's Stripe integration to create a checkout session
+      // The better-auth client will handle the actual Stripe checkout
+
+      return {
+        success: true,
+        plan: input.plan,
+        message: "Use better-auth client to create checkout session",
+      };
+    }),
+
   updateProfileImage: protectedProcedure
     .input(z.string().url())
     .mutation(async ({ ctx, input }) => {

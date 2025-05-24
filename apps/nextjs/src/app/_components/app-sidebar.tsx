@@ -16,7 +16,9 @@ import {
   SidebarSeparator,
 } from "@acme/ui/sidebar";
 
+import { UpgradeButton } from "~/components/upgrade-button";
 import { AppSidebarChats } from "./app-sidebar-chats";
+import { AppSidebarPlanIndicator } from "./app-sidebar-plan-indicator";
 import { AppSidebarProfileCompletion } from "./app-sidebar-profile-completion";
 import { AppSidebarUser } from "./app-sidebar-user";
 
@@ -53,6 +55,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <div className="p-2">
+          <UpgradeButton />
+        </div>
+
+        <AppSidebarPlanIndicator />
+
         <AppSidebarProfileCompletion />
 
         <AppSidebarUser />
