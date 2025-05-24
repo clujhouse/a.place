@@ -39,8 +39,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <Link href="/">the world is not that small</Link>
             </SidebarMenuButton>
-            <SidebarMenuButton className="data-[slot=sidebar-menu-button]:!p-1.5">
-              letters
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <Link href="/letters">letters</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

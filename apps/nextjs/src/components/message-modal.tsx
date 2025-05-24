@@ -1,0 +1,111 @@
+"use client";
+
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Mail, Send } from "lucide-react";
+
+import { Button } from "@acme/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@acme/ui/dialog";
+import { Textarea } from "@acme/ui/textarea";
+import { toast } from "@acme/ui/toast";
+
+import { useTRPC } from "~/trpc/react";
+
+interface MessageModalProps {
+  receiverId: string;
+  receiverName: string;
+  trigger?: React.ReactNode;
+}
+
+export function MessageModal({
+  receiverId,
+  receiverName,
+  trigger,
+}: MessageModalProps) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState("");
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+
+  const { mutate: sendMessage, isPending } = useMutation(
+    trpc.conversation.sendMessage.mutationOptions({
+      onSuccess: () => {
+        toast.success("Letter sent successfully!");
+        setMessage("");
+        setOpen(false);
+        // Invalidate conversations to update the list
+        void queryClient.invalidateQueries({
+          queryKey: trpc.conversation.getConversations.queryKey(),
+        });
+      },
+      onError: () => {
+        toast.error("Failed to send letter");
+      },
+    }),
+  );
+
+  const handleSend = () => {
+    if (!message.trim()) return;
+
+    sendMessage({
+      receiverId,
+      text: message.trim(),
+    });
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger || (
+          <Button variant="outline" size="sm">
+            <Mail className="mr-2 h-4 w-4" />
+            Send Letter
+          </Button>
+        )}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Send Letter</DialogTitle>
+          <DialogDescription>Send a letter to {receiverName}</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Textarea
+            placeholder="Type your letter here..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={4}
+            maxLength={1000}
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">
+              {message.length}/1000
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSend}
+                disabled={!message.trim() || isPending}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                {isPending ? "Sending..." : "Send"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
