@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "lucide-react";
 
+import { cn } from "@acme/ui";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Card, CardContent, CardHeader } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
-import { cn } from "@acme/ui";
 
 import { useTRPC } from "~/trpc/react";
 import { ProfileSidebar } from "./profile-sidebar";
@@ -21,12 +21,13 @@ interface ProfileCardProps {
   containerClassName?: string;
 }
 
-export function ProfileCard({ 
-  profile, 
-  containerClassName, 
-  profileImageDisplay = "icon" 
+export function ProfileCard({
+  profile,
+  containerClassName,
+  profileImageDisplay = "icon",
 }: ProfileCardProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
     trpc.profile.getById.queryOptions(profile.id),
@@ -34,7 +35,12 @@ export function ProfileCard({
 
   if (isLoading) {
     return (
-      <Card className={cn("flex w-full min-w-0 flex-col gap-2 p-3", containerClassName)}>
+      <Card
+        className={cn(
+          "flex w-full min-w-0 flex-col gap-2 p-3",
+          containerClassName,
+        )}
+      >
         <CardHeader className="flex flex-row items-center gap-4 p-0">
           <Skeleton className="h-12 w-12" />
         </CardHeader>
@@ -53,16 +59,26 @@ export function ProfileCard({
   return (
     <>
       <Card
-        className={cn("flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent", containerClassName)}
+        className={cn(
+          "flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent",
+          containerClassName,
+        )}
         onClick={() => setIsSidebarOpen(true)}
       >
         <CardHeader className="flex flex-row items-center gap-4 p-0">
-          <Avatar className={cn("border border-secondary", profileImageDisplay === "full" ? "w-full h-auto max-h-24" : "h-12 w-12")}>
+          <Avatar
+            className={cn(
+              "border border-secondary",
+              profileImageDisplay === "full"
+                ? "h-auto max-h-24 w-full"
+                : "h-12 w-12",
+            )}
+          >
             {displayImage ? (
               <AvatarImage
                 src={displayImage}
                 alt={displayName}
-                className="object-cover"
+                className="object-cover grayscale-0"
               />
             ) : (
               <AvatarFallback>

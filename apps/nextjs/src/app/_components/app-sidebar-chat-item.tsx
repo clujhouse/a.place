@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { SidebarMenuButton, SidebarMenuItem } from "@acme/ui/sidebar";
 
@@ -24,6 +25,9 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const previousTitleRef = useRef(chat.title);
+  const pathname = usePathname();
+
+  const isSelected = pathname === `/talking-stage/${chat.id}`;
 
   useEffect(() => {
     // Only start streaming if the title actually changed
@@ -53,7 +57,7 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
-      <SidebarMenuButton asChild>
+      <SidebarMenuButton asChild isActive={isSelected}>
         <Link href={`/talking-stage/${chat.id}`}>
           {/* <Icon as={MessageCircle} size="sm" /> */}
           <span className="truncate pr-6">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { match } from "ts-pattern";
@@ -19,6 +19,7 @@ import { useAppContext } from "~/context/app-context";
 import { useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
 import { ProfileBio } from "./profile-bio";
+import { ProfileConfetti, useProfileConfetti } from "./profile-confetti";
 
 interface ProfileChatProps {
   messages: AMessage[];
@@ -72,6 +73,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
       return { ...old, completionPercentage };
     });
   };
+  const { setShowConfetti } = useProfileConfetti();
 
   const { mutate } = useMutation(
     trpc.llm.learnAboutYou.mutationOptions({
@@ -111,7 +113,11 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
             })
             .with({ type: "completionPercentage" }, (completionPercentage) => {
               updateProfileCompletion(completionPercentage.validation);
-            });
+            })
+            .with({ type: "confetti" }, () => {
+              setShowConfetti(true);
+            })
+            .exhaustive();
       },
 
       onError: () => {
@@ -133,33 +139,37 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
   }, []);
 
   return (
-    <ResizablePanelGroup direction="horizontal">
-      <ResizablePanel>
-        <StickToBottom
-          className="flex h-full flex-col"
-          resize="smooth"
-          initial="smooth"
-        >
-          <StickToBottom.Content className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-12">
-            {messages.map((message) => (
-              <ChatMessage key={message.id} message={message} />
-            ))}
-          </StickToBottom.Content>
+    <>
+      <ProfileConfetti />
 
-          <ScrollToBottom />
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel>
+          <StickToBottom
+            className="flex h-full flex-col"
+            resize="smooth"
+            initial="smooth"
+          >
+            <StickToBottom.Content className="mx-auto flex max-w-xl flex-col gap-6 p-4 pb-12">
+              {messages.map((message) => (
+                <ChatMessage key={message.id} message={message} />
+              ))}
+            </StickToBottom.Content>
 
-          <ChatInput
-            className="mx-auto mt-auto max-w-xl p-4"
-            onSubmit={(message) => mutate({ chatId, input: message })}
-            isLoading={isProfileCreating}
-          />
-        </StickToBottom>
-      </ResizablePanel>
-      <ResizableHandle />
-      <ResizablePanel defaultSize={30}>
-        <ProfileBio />
-      </ResizablePanel>
-    </ResizablePanelGroup>
+            <ScrollToBottom />
+
+            <ChatInput
+              className="mx-auto mt-auto max-w-xl p-4"
+              onSubmit={(message) => mutate({ chatId, input: message })}
+              isLoading={isProfileCreating}
+            />
+          </StickToBottom>
+        </ResizablePanel>
+        <ResizableHandle />
+        <ResizablePanel defaultSize={30}>
+          <ProfileBio />
+        </ResizablePanel>
+      </ResizablePanelGroup>
+    </>
   );
 };
 

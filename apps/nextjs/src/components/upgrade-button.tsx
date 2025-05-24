@@ -6,6 +6,7 @@ import { Crown } from "lucide-react";
 import { authClient } from "@acme/auth/client";
 import { UpgradeModal } from "@acme/ui";
 import { Button } from "@acme/ui/button";
+import { Icon } from "@acme/ui/icon";
 
 import { useSubscription } from "~/hooks/use-subscription";
 
@@ -59,7 +60,7 @@ export function UpgradeButton() {
         size="sm"
         className="flex w-full items-center gap-2"
       >
-        <Crown className="h-4 w-4" />
+        <Icon as={Crown} />
         {currentPlan === "pro" ? "Upgrade to Pro Exclusive" : "Upgrade Plan"}
       </Button>
 

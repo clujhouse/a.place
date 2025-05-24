@@ -46,6 +46,7 @@
     "next": "^15.2.1",
     "node-vibrant": "^4.0.3",
     "react": "catalog:react19",
+    "react-confetti": "^6.4.0",
     "react-dom": "catalog:react19",
     "react-dom-confetti": "^0.2.0",
     "react-dropzone": "^14.3.8",

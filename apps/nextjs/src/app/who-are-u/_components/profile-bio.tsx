@@ -10,7 +10,6 @@ import { MarkdownContent } from "@acme/ui/markdown-content";
 import { toast } from "@acme/ui/toast";
 
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
-import ClujhouseIcon from "~/components/clujhouse-icon";
 import { useAppContext } from "~/context/app-context";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";

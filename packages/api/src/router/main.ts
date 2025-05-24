@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
 import { generateText, smoothStream, streamText } from "ai";
-import { eq, sql } from "drizzle-orm";
+import { eq, ne, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
@@ -43,6 +43,7 @@ export const mainRouter = {
           sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingData)}), ${profile.embedding}, 'L2_SQUARED')`,
         )
         .leftJoin(user, eq(profile.userId, user.id))
+        .where(ne(profile.userId, ctx.session.user.id))
         .limit(10);
 
       // Write the SQL query to a file for debugging

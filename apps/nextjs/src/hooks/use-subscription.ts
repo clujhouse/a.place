@@ -31,8 +31,6 @@ export function useSubscription(): UseSubscriptionReturn {
       // Use better-auth's subscription.list method to get active subscriptions
       const { data: subscriptions } = await authClient.subscription.list();
 
-      console.log("All subscriptions:", subscriptions);
-
       // Find the active subscription
       const activeSubscription = subscriptions?.find(
         (sub: any) => sub.status === "active" || sub.status === "trialing",
