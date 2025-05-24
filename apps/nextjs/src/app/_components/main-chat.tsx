@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
@@ -10,11 +11,10 @@ import { ResizablePanel, ResizablePanelGroup } from "@acme/ui/resizable";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
+import { useAppContext } from "~/context/app-context";
 import { MainChatProvider } from "~/context/main-chat-context";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
-import { useAppContext } from "~/context/app-context";
-import { Loader2 } from "lucide-react";
 
 interface MainChatProps {
   messages: AMessage[];
@@ -49,7 +49,7 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
         const userMessage = createUserMessage(input, chatId);
 
         queryClient.setQueryData(trpc.chat.get.queryKey(chatId), (old) => {
-          if (!old) return [];
+          if (!old) return [userMessage];
 
           return [...old, userMessage];
         });
@@ -116,7 +116,7 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
                     <ChatMessage key={message.id} message={message} />
                   ))}
               {isChatLoading && (
-                <Loader2 className="h-4 w-4 mt-2 animate-spin" />
+                <Loader2 className="mt-2 h-4 w-4 animate-spin" />
               )}
             </StickToBottom.Content>
 
