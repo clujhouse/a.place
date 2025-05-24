@@ -4,6 +4,7 @@ import { match } from "ts-pattern";
 
 import type { AMessage } from "@acme/validators/message";
 import { cn } from "@acme/ui";
+import { ProfileCard } from "./profile-card";
 
 interface ChatMessageProps {
   message: AMessage;
@@ -27,8 +28,9 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
             })
             .with({ type: "profile" }, (profilePart) => {
               return (
-                <div key={part.id}>
-                  {profilePart.profiles.map((profile) => profile.id).join(", ")}
+                <div key={part.id} className="flex flex-row justify-around gap-6 py-4 border-y border-y-gray-200">
+                  {profilePart.profiles
+                    .map((profile) => <ProfileCard profile={profile} />)}
                 </div>
               );
             })
