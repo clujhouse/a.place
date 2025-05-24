@@ -32,7 +32,7 @@ export const llmRouter = {
         role: "user" as const,
         chatId: chatId,
         attachments: [],
-        parts: [{ type: "text", text: input }],
+        parts: [{ id: nanoid(), type: "text", text: input }],
       };
 
       const userMessageId = await ctx.db
@@ -52,18 +52,31 @@ export const llmRouter = {
         system: learnAboutYouPrompt,
       });
 
-      for await (const chunk of result.fullStream) {
+      const aiMessageId = nanoid();
+
+      yield {
+        type: "learnAboutYou" as const,
+        chunk: { type: "messageId" as const, id: aiMessageId },
+      };
+
+      const learnAboutYouPartId = nanoid();
+      for await (const chunk of result.textStream) {
         yield {
           type: "learnAboutYou" as const,
-          chunk: chunk,
+          chunk: {
+            id: learnAboutYouPartId,
+            type: "text" as const,
+            text: chunk,
+          },
         };
       }
 
       const responseText = await result.text;
 
       await ctx.db.insert(message).values({
+        id: aiMessageId,
         role: "assistant",
-        parts: [{ type: "text", text: responseText }],
+        parts: [{ id: learnAboutYouPartId, type: "text", text: responseText }],
         chatId: chatId,
         attachments: [],
       });

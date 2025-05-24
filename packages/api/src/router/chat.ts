@@ -22,7 +22,9 @@ export const chatRouter = {
       },
     });
 
-    return (chat?.messages ?? []) as AMessage[];
+    return (chat?.messages.sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    ) ?? []) as AMessage[];
   }),
 
   create: protectedProcedure

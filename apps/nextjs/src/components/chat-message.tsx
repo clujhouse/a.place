@@ -1,5 +1,6 @@
 import React from "react";
 import ReactMarkdown from "react-markdown";
+import { match } from "ts-pattern";
 
 import type { AMessage } from "@acme/validators/message";
 import { cn } from "@acme/ui";
@@ -17,9 +18,24 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         </span>
       </div>
       <div className={cn("flex flex-col gap-2")}>
-        <ReactMarkdown>
-          {message.parts.map((part) => part.text).join("")}
-        </ReactMarkdown>
+        {message.parts.map((part) => {
+          return match(part)
+            .with({ type: "text" }, (textPart) => {
+              return (
+                <ReactMarkdown key={part.id}>{textPart.text}</ReactMarkdown>
+              );
+            })
+            .with({ type: "profile" }, (profilePart) => {
+              return (
+                <div key={part.id}>
+                  {profilePart.profiles
+                    .map((profile) => profile.name)
+                    .join(", ")}
+                </div>
+              );
+            })
+            .exhaustive();
+        })}
       </div>
     </div>
   );

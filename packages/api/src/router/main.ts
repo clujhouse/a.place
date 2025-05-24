@@ -1,14 +1,15 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
-import { sql } from "drizzle-orm";
+import { smoothStream, streamText } from "ai";
+import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
 
-import type { AMessage } from "@acme/validators/message";
-import { message, profile } from "@acme/db/schema";
+import type { AMessage, ProfilePart } from "@acme/validators/message";
+import { message, profile, user } from "@acme/db/schema";
 
+import { createSystemPromptWithProfiles } from "../prompts/main";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
@@ -36,11 +37,12 @@ export const mainRouter = {
       }
 
       const query = ctx.db
-        .select({ text: profile.text })
+        .select({ id: profile.userId, text: profile.text, name: user.name })
         .from(profile)
         .orderBy(
           sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingData)}), ${profile.embedding}, 'L2_SQUARED')`,
         )
+        .leftJoin(user, eq(profile.userId, user.id))
         .limit(10);
 
       // Write the SQL query to a file for debugging
@@ -61,7 +63,7 @@ export const mainRouter = {
         role: "user",
         chatId: chatId,
         attachments: [],
-        parts: [{ type: "text", text: userInput }],
+        parts: [{ id: nanoid(), type: "text", text: userInput }],
         createdAt: new Date(),
       };
 
@@ -73,11 +75,12 @@ export const mainRouter = {
         })
         .$returningId();
 
+      const aiMessageId = nanoid();
+      yield { id: aiMessageId, type: "messageId" as const };
+
       if (!insertResult[0]) {
         throw new Error("Failed to insert user message");
       }
-
-      const userMessageId = insertResult[0].id;
 
       // Get recent chat history
       const chatHistory = (await ctx.db.query.message.findMany({
@@ -88,29 +91,48 @@ export const mainRouter = {
 
       // Stream the response
       const result = streamText({
-        model: google("gemini-2.0-flash"),
-        messages: convertMessageToCoreMessage([
-          ...chatHistory,
-          { ...userMessageData, id: userMessageId } as AMessage,
-        ]),
+        model: google("gemini-2.5-flash-preview-04-17"),
+        messages: convertMessageToCoreMessage(chatHistory),
         experimental_telemetry: { isEnabled: true },
-        system: `You are an interactive chat system that responds based on user profiles.
-                Here are the most similar user profiles to reference:
-                ${similarProfiles.map((profile) => profile.text).join("\n\n")}
-                
-                Respond in a friendly, conversational manner. Use information from the profiles when relevant, but be natural.
-                Keep responses concise and engage with the user's specific interests and background.`,
+        system: createSystemPromptWithProfiles(similarProfiles),
+        experimental_transform: smoothStream({
+          delayInMs: 20, // optional: defaults to 10ms
+          chunking: "word", // optional: defaults to 'word'
+        }),
       });
 
       // Stream the response chunks
-      for await (const chunk of result.fullStream) yield chunk;
+      const textPartId = nanoid();
+      for await (const chunk of result.textStream)
+        yield { id: textPartId, type: "text" as const, text: chunk };
 
       const textResponse = await result.text;
 
-      // Store the final response
+      // Store the final response with profiles if any were found
+      const responseParts = [] as AMessage["parts"];
+
+      // Add text part
+      responseParts.push({ id: textPartId, type: "text", text: textResponse });
+
+      // Add profile part if we have similar profiles
+      if (similarProfiles.length > 0) {
+        const profilePart: ProfilePart = {
+          id: nanoid(),
+          type: "profile",
+          profiles: similarProfiles.map((p) => ({
+            id: p.id,
+            name: p.name ?? "Unknown",
+          })),
+        };
+        responseParts.push(profilePart);
+
+        yield profilePart;
+      }
+
       await ctx.db.insert(message).values({
+        id: aiMessageId,
         role: "assistant",
-        parts: [{ type: "text", text: textResponse }],
+        parts: responseParts,
         chatId: chatId,
         attachments: [],
       });

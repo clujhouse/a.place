@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 
@@ -10,6 +10,7 @@ import { useTRPC } from "~/trpc/react";
 import MainChat from "./_components/main-chat";
 
 const Homepage = () => {
+  const [chatId, setChatId] = useState<string | null>(null);
   const trpc = useTRPC();
 
   const { data: chat, mutateAsync } = useMutation(
@@ -26,7 +27,11 @@ const Homepage = () => {
     <MainChat
       messages={message ?? []}
       chatId={() => {
-        return mutateAsync(nanoid());
+        if (chatId) return chatId;
+
+        const id = nanoid();
+        setChatId(id);
+        return mutateAsync(id);
       }}
     />
   );
