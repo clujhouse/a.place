@@ -19,9 +19,10 @@ export default function LettersPage() {
   >(null);
   const trpc = useTRPC();
 
-  const { data: conversations, isLoading } = useQuery(
-    trpc.conversation.getConversations.queryOptions(),
-  );
+  const { data: conversations, isLoading } = useQuery({
+    ...trpc.conversation.getConversations.queryOptions(),
+    refetchInterval: 2000, // Refetch every 2 seconds
+  });
 
   if (isLoading) {
     return (
@@ -67,7 +68,6 @@ export default function LettersPage() {
       <div className="w-1/3 overflow-y-auto border-r">
         <div className="border-b p-4">
           <h1 className="flex items-center gap-2 text-2xl font-semibold">
-            <MessageCircle className="h-6 w-6" />
             Letters
           </h1>
         </div>

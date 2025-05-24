@@ -25,14 +25,16 @@ export function ConversationView({
 }: ConversationViewProps) {
   const [newMessage, setNewMessage] = useState("");
   const [profileOpen, setProfileOpen] = useState(false);
+  const [hasInitiallyScrolled, setHasInitiallyScrolled] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const trpc = useTRPC();
   const queryClient = useQueryClient();
 
-  const { data: messages, isLoading } = useQuery(
-    trpc.conversation.getMessagesWithUser.queryOptions(partnerId),
-  );
+  const { data: messages, isLoading } = useQuery({
+    ...trpc.conversation.getMessagesWithUser.queryOptions(partnerId),
+    refetchInterval: 2000, // Refetch every 2 seconds
+  });
 
   const { data: partnerProfile } = useQuery(
     trpc.profile.getById.queryOptions(partnerId),
@@ -61,12 +63,18 @@ export function ConversationView({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
+  // Reset scroll flag when switching conversations
   useEffect(() => {
-    if (messages && messages.length > 0) {
-      // Use setTimeout to ensure DOM is updated
+    setHasInitiallyScrolled(false);
+  }, [partnerId]);
+
+  useEffect(() => {
+    if (messages && messages.length > 0 && !hasInitiallyScrolled) {
+      // Only auto-scroll once when initially entering a conversation
       setTimeout(scrollToBottom, 100);
+      setHasInitiallyScrolled(true);
     }
-  }, [messages]);
+  }, [messages, hasInitiallyScrolled]);
 
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
@@ -181,6 +189,7 @@ export function ConversationView({
               onKeyPress={handleKeyPress}
               disabled={isPending}
               maxLength={1000}
+              autoFocus
             />
             <Button
               onClick={handleSendMessage}
