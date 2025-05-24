@@ -30,6 +30,7 @@
     "@acme/email": "workspace:*",
     "@acme/upstash": "workspace:*",
     "@acme/validators": "workspace:*",
+    "@ai-sdk/google": "^1.2.18",
     "@aws-sdk/client-lambda": "^3.758.0",
     "@aws-sdk/client-s3": "^3.758.0",
     "@aws-sdk/s3-request-presigner": "^3.758.0",
