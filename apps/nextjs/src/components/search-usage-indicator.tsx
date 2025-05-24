@@ -54,7 +54,7 @@ export function SearchUsageIndicator() {
       <div className="space-y-3 border p-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-medium">Daily Searches</h3>
-          <span className="text-md font-medium text-yellow-500">∞</span>
+          <span className="text-lg font-medium text-yellow-500">∞</span>
         </div>
         <p className="text-xs text-muted-foreground">
           unlimited searches with your {searchUsage.plan} plan
