@@ -1,0 +1,109 @@
+.ProseMirror a {
+  @apply text-muted-foreground hover:text-foreground;
+}
+
+.ProseMirror p.is-empty:last-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--text-placeholder));
+  pointer-events: none;
+  height: 0;
+}
+
+/* Custom image styles */
+
+.ProseMirror img {
+  transition: opacity 0.1s ease-in-out !important;
+
+  &:hover {
+    cursor: pointer;
+    filter: brightness(90%);
+  }
+
+  &.ProseMirror-selectednode {
+    outline: 3px solid #5abbf7;
+    filter: brightness(90%);
+    opacity: 50%;
+  }
+}
+
+.img-placeholder {
+  position: relative;
+
+  &:before {
+    content: "";
+    box-sizing: border-box;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 3.5px solid #ffffff;
+    border-top-color: #bcbcbc;
+    animation: spinning 0.4s linear infinite;
+  }
+}
+
+@keyframes spinning {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+ul[data-type="taskList"] li > label {
+  margin-right: 0.2rem;
+  user-select: none;
+}
+
+@media screen and (max-width: 768px) {
+  ul[data-type="taskList"] li > label {
+    margin-right: 0.2rem;
+  }
+}
+
+ul[data-type="taskList"] li > label {
+  user-select: none;
+  color: hsl(var(--foreground));
+}
+
+ul[data-type="taskList"] li > label input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: hsl(var(--background));
+  margin: 0;
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  width: 1em;
+  height: 1em;
+  position: relative;
+  top: 4px;
+  border: 1.5px solid hsl(var(--text-placeholder));
+  display: grid;
+  place-content: center;
+  border-radius: 4px;
+
+  &::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    transform: scale(0);
+    transition: 120ms transform ease-in-out;
+    box-shadow: inset 1em 1em;
+    transform-origin: center;
+    clip-path: polygon(14% 52%, 2% 65%, 48% 95%, 100% 20%, 87% 10%, 43% 72%);
+  }
+
+  &:checked::before {
+    transform: scale(1);
+  }
+}
+
+ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
+ul[data-type="taskList"] li > div > p {
+  color: hsl(var(--foreground));
+}
