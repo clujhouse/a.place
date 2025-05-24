@@ -22,7 +22,7 @@ export const vector = customType<{
   driverData: Buffer;
 }>({
   dataType(config) {
-    return `VECTOR(${config.length})`;
+    return `vector(${config.length})`;
   },
   fromDriver(value) {
     return value.buffer as ArrayBuffer;
@@ -42,7 +42,8 @@ export const profile = mysqlTable("profile", {
 
   text: text("text"),
   embedding: vector("embedding", { length: 1024 }),
-
+  profileImage: json("profile_image").$type<string>(),
+  images: json("images").$type<string[]>().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
