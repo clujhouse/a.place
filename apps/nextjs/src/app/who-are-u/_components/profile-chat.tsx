@@ -53,6 +53,14 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
     });
   };
 
+  const updateProfileCompletion = (completionPercentage: number) => {
+    queryClient.setQueryData(trpc.profile.get.queryKey(), (old) => {
+      if (!old) return null;
+
+      return { ...old, completionPercentage };
+    });
+  };
+
   const { mutate } = useMutation(
     trpc.llm.learnAboutYou.mutationOptions({
       onMutate: ({ input, chatId }) => {
@@ -86,6 +94,10 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
                 newProfileText += chunk.textDelta;
 
               updateProfileBio(newProfileText);
+            })
+            .with({ type: "validation" }, ({ validation }) => {
+              console.log("Received validation result:", validation);
+              updateProfileCompletion(validation.completionPercentage);
             });
 
         setIsLoading(false);
@@ -112,6 +124,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           </StickToBottom.Content>
 
           <ScrollToBottom />
+
           <ChatInput
             className="mx-auto mt-auto max-w-4xl p-4"
             onSubmit={(message) => mutate({ chatId, input: message })}
