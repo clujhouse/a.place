@@ -88,7 +88,7 @@ export const message = mysqlTable("message", {
     .$defaultFn(() => nanoid()),
   chatId: varchar("chat_id", { length: 36 })
     .notNull()
-    .references(() => chat.id),
+    .references(() => chat.id, { onDelete: "cascade" }),
   role: varchar("role", { length: 50, enum: ["user", "assistant"] }).notNull(),
   parts: json("content").notNull(),
   attachments: json("attachments").notNull(),

@@ -1,4 +1,5 @@
 import type { TRPCRouterRecord } from "@trpc/server";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import type { AMessage } from "@acme/validators/message";
@@ -37,12 +38,22 @@ export const chatRouter = {
       if (!newChat) {
         await ctx.db.insert(chat).values({
           id: input,
-          title: "Profile Chat",
+          title: "yo, this is a chat for real",
           userId: ctx.session.user.id,
         });
 
         return input;
       }
       return input;
+    }),
+
+  delete: protectedProcedure
+    .input(z.string())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(chat)
+        .where(and(eq(chat.id, input), eq(chat.userId, ctx.session.user.id)));
+
+      return { success: true };
     }),
 } satisfies TRPCRouterRecord;
