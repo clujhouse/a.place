@@ -90,6 +90,7 @@ const MainChat = ({ messages, chatId }: MainChatProps) => {
     }),
   );
 
+  console.log(messages);
   return (
     <ResizablePanelGroup direction="horizontal">
       <ResizablePanel>

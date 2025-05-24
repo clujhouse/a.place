@@ -2,6 +2,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import {
   customType,
+  index,
   int,
   json,
   mysqlTable,
@@ -58,21 +59,34 @@ export const profileRelations = relations(profile, ({ one }) => ({
   }),
 }));
 
-export const chat = mysqlTable("chat", {
-  id: varchar("id", { length: 36 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => nanoid()),
-  title: text("title").notNull(),
-  userId: varchar("user_id", { length: 36 })
-    .notNull()
-    .references(() => user.id),
-  visibility: varchar("visibility", { length: 10, enum: ["public", "private"] })
-    .notNull()
-    .default("private"),
+export const chat = mysqlTable(
+  "chat",
+  {
+    id: varchar("id", { length: 36 })
+      .primaryKey()
+      .notNull()
+      .$defaultFn(() => nanoid()),
+    title: text("title").notNull(),
 
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
+    type: varchar("type", { length: 10, enum: ["profile", "main"] })
+      .default("main")
+      .notNull(),
+    userId: varchar("user_id", { length: 36 })
+      .notNull()
+      .references(() => user.id),
+    visibility: varchar("visibility", {
+      length: 10,
+      enum: ["public", "private"],
+    })
+      .notNull()
+      .default("private"),
+
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    typeIndex: index("type_index").on(table.type),
+  }),
+);
 
 export const chatRelations = relations(chat, ({ one, many }) => ({
   user: one(user, {

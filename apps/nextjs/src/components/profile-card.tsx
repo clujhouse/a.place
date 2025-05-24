@@ -27,16 +27,13 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="w-full max-w-[33%] py-3 px-2 gap-2">
-        <CardHeader className="flex flex-row items-center p-0 pb-2">
-          <Skeleton className="h-12 w-12 rounded-full" />
+      <Card className="flex w-full min-w-0 flex-col gap-2 p-3">
+        <CardHeader className="flex flex-row items-center gap-4 p-0">
+          <Skeleton className="h-12 w-12" />
         </CardHeader>
         <CardContent className="p-0">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="mt-2 h-12 w-full" />
         </CardContent>
       </Card>
     );
@@ -44,12 +41,12 @@ export function ProfileCard({ profile }: ProfileCardProps) {
 
   const displayName = profile.name;
   const displayImage = data?.profileImage;
-  const displayText = data?.text;
+  const displayText = data?.shortBio;
 
   return (
     <>
       <Card
-        className="w-full cursor-pointer gap-2 p-3 hover:border-primary hover:bg-accent"
+        className="flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent"
         onClick={() => setIsSidebarOpen(true)}
       >
         <CardHeader className="flex flex-row items-center gap-4 p-0">

@@ -115,7 +115,8 @@ export const profileRouter = {
 
   getProfileChat: protectedProcedure.query(async ({ ctx }) => {
     const profileChat = await ctx.db.query.chat.findFirst({
-      where: (chat, { eq }) => eq(chat.userId, ctx.session.user.id),
+      where: (chat, { eq, and }) =>
+        and(eq(chat.userId, ctx.session.user.id), eq(chat.type, "profile")),
     });
 
     if (!profileChat) {
@@ -124,6 +125,7 @@ export const profileRouter = {
         .values({
           title: "Profile Chat",
           userId: ctx.session.user.id,
+          type: "profile",
         })
         .$returningId();
 

@@ -3,27 +3,22 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generateReactHelpers } from "@uploadthing/react";
 import { Plus } from "lucide-react";
 
-import type { RouterOutputs } from "@acme/api";
 import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Badge } from "@acme/ui/badge";
-import { Button } from "@acme/ui/button";
 import { MarkdownContent } from "@acme/ui/markdown-content";
 import { toast } from "@acme/ui/toast";
 
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
+import ClujhouseIcon from "~/components/clujhouse-icon";
+import { useAppContext } from "~/context/app-context";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
-import { useAppContext } from "~/context/app-context";
-import ClujhouseIcon from "~/components/clujhouse-icon";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-type Profile = RouterOutputs["profile"]["get"];
-
 export const ProfileBio = () => {
   const profileImageInputRef = useRef<HTMLInputElement>(null);
-  const additionalImagesInputRef = useRef<HTMLInputElement>(null);
   const imageInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const trpc = useTRPC();
@@ -110,34 +105,6 @@ export const ProfileBio = () => {
     }
   };
 
-  const handleAdditionalImagesUpload = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    if (!e.target.files) return;
-
-    const files = Array.from(e.target.files);
-    const remainingSlots = 3 - (profile?.images?.length ?? 0);
-
-    if (files.length > remainingSlots) {
-      toast.error(
-        `You can only upload ${remainingSlots} more image${remainingSlots === 1 ? "" : "s"}`,
-      );
-      return;
-    }
-
-    try {
-      setLoadingImageIndex(-2); // -2 for additional images
-      const uploadedFiles = await startUpload(files);
-      if (!uploadedFiles) return;
-
-      const imageUrls = uploadedFiles.map((file) => file.url);
-      updateAdditionalImages(imageUrls);
-    } catch (err) {
-      toast.error("Failed to upload additional images");
-      setLoadingImageIndex(null);
-    }
-  };
-
   const handleUpdateSingleImage = async (
     e: React.ChangeEvent<HTMLInputElement>,
     index: number,
@@ -166,14 +133,12 @@ export const ProfileBio = () => {
   };
 
   if (isProfileLoading || isSessionLoading) {
-    return <ClujhouseIcon className="h-16 w-16 animate-pulse rounded-lg bg-muted" />;
+    return <div className="h-48 animate-pulse bg-muted"></div>;
   }
 
   if (!session?.user) {
     return <div>Not logged in</div>;
   }
-
-  const canAddMoreImages = !profile?.images || profile.images.length < 3;
 
   return (
     <div className="flex h-screen flex-col gap-4 p-6">
@@ -238,7 +203,7 @@ export const ProfileBio = () => {
               <div
                 key={i}
                 className={cn(
-                  "group relative aspect-square cursor-pointer rounded-lg",
+                  "group relative aspect-square cursor-pointer",
                   isPlaceholder
                     ? "border-2 border-dashed border-muted-foreground/25"
                     : "",
@@ -264,11 +229,11 @@ export const ProfileBio = () => {
                     <img
                       src={image}
                       alt={`Additional image ${i + 1}`}
-                      className="h-full w-full rounded-lg object-cover"
+                      className="h-full w-full object-cover"
                     />
                     <div
                       className={cn(
-                        "absolute inset-0 flex items-center justify-center rounded-lg bg-black/50",
+                        "absolute inset-0 flex items-center justify-center bg-black/50",
                         loadingImageIndex === i
                           ? "opacity-100"
                           : "opacity-0 group-hover:opacity-100",

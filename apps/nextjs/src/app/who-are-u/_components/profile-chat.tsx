@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { match } from "ts-pattern";
@@ -120,12 +120,14 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
     }),
   );
 
+  const isInitialMessage = useRef(true);
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 && isInitialMessage.current) {
+      isInitialMessage.current = false;
       mutate({
         chatId,
         input:
-          "Hello! Tell me more about this profile creation page and let's get started.",
+          "yo i'm new here, really trying to get the vibe, what's this????",
       });
     }
   }, []);

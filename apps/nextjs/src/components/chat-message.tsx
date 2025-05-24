@@ -29,9 +29,9 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
             })
             .with({ type: "profile" }, (profilePart) => {
               return (
-                <div key={part.id} className="flex flex-row gap-2">
+                <div key={part.id} className="grid grid-cols-3 gap-2">
                   {profilePart.profiles.map((profile) => (
-                    <ProfileCard profile={profile} />
+                    <ProfileCard key={profile.id} profile={profile} />
                   ))}
                 </div>
               );
