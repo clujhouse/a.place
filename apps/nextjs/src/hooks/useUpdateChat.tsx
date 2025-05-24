@@ -50,17 +50,17 @@ export const useUpdateChat = () => {
 
       return old.map((msg) => {
         if (msg.id === messageId) {
-          match(part)
+          return match(part)
             .with({ type: "text" }, (textPart) => {
               const parts = msg.parts;
 
               return {
                 ...msg,
-                parts: parts.map((part) => {
-                  if (part.id === textPart.id && part.type === "text") {
+                parts: parts.map((currentPart) => {
+                  if (part.id === textPart.id && currentPart.type === "text") {
                     return {
                       ...part,
-                      text: part.text + textPart.text,
+                      text: currentPart.text + textPart.text,
                     };
                   }
                   return part;
