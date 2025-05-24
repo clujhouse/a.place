@@ -46,7 +46,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton>
-              <span className="text-base font-semibold">a.place</span>
+              <Link href="/" className="text-base font-semibold">a.place</Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
