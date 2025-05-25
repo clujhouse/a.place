@@ -129,7 +129,7 @@ const MainChat = ({
   );
 
   const onSubmit = async (message: string) => {
-    if (!checkLimitsBeforeSearch()) return;
+    // if (!checkLimitsBeforeSearch()) return;
 
     _onSubmit?.(message);
     if (chatId) {
@@ -171,7 +171,7 @@ const MainChat = ({
           </StickToBottom.Content>
         )}
 
-        <ScrollToBottom />
+        {/* <ScrollToBottom /> */}
         <ChatInput
           className="mx-auto mt-auto max-w-[655px] p-4"
           onSubmit={onSubmit}
