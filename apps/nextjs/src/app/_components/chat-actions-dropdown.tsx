@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, Trash2 } from "lucide-react";
 
+import { Button } from "@acme/ui";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,19 +64,19 @@ export const ChatActionsDropdown = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={`flex size-5 items-center justify-center rounded-md transition-opacity hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus:opacity-100 ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
+        asChild
+        className={` ${isVisible ? "opacity-100" : "opacity-0"}`}
         onClick={(e) => e.stopPropagation()}
       >
-        <Icon as={MoreHorizontal} size="sm" />
-        <span className="sr-only">Chat actions</span>
+        <Button variant="ghost" size="icon" className="h-6 w-6">
+          <Icon as={MoreHorizontal} size="sm" />
+        </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="right">
+      <DropdownMenuContent align="end" side="bottom">
         <DropdownMenuItem
+          className="gap-2"
           onClick={handleDeleteChat}
           disabled={isPending}
-          className="text-destructive focus:text-destructive"
         >
           <Icon as={Trash2} size="sm" />
           <span>{isPending ? "Deleting..." : "Delete chat"}</span>
