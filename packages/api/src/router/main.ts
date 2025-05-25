@@ -52,14 +52,14 @@ export const mainRouter = {
 
     const ratelimit = new Ratelimit({
       redis: Redis.fromEnv(),
-      limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 requests per day
+      limiter: Ratelimit.slidingWindow(50, "1 d"), // 50 requests per day
       analytics: true,
     });
 
     const { remaining, reset } = await ratelimit.getRemaining(
       `search:${userId}`,
     );
-    const limit = 5; // We know the limit is 5 searches per day
+    const limit = 50; // We know the limit is 50 searches per day
 
     return {
       type: "free" as const,
