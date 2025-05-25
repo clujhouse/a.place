@@ -41,6 +41,7 @@ export const profile = mysqlTable("profile", {
     .references(() => user.id),
 
   completionPercentage: int("completion_percentage").notNull().default(0),
+  isOnboarded: boolean("is_onboarded").notNull().default(false),
 
   text: text("text"),
   shortBio: text("short_bio"),
@@ -172,6 +173,34 @@ export const profileNoteRelations = relations(profileNote, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const onboardingState = mysqlTable("onboarding_state", {
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id)
+    .primaryKey(),
+  currentStep: varchar("current_step", { length: 50 })
+    .notNull()
+    .default("initial"),
+  extractedName: varchar("extracted_name", { length: 255 }),
+  extractedLocation: varchar("extracted_location", { length: 255 }),
+  extractedOneLiner: text("extracted_one_liner"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const onboardingStateRelations = relations(
+  onboardingState,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [onboardingState.userId],
+      references: [user.id],
+    }),
+  }),
+);
 
 export type DBMessage = InferSelectModel<typeof message>;
 export type DBProfileNote = InferSelectModel<typeof profileNote>;

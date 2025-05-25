@@ -17,6 +17,7 @@ import { GeistSans } from "geist/font/sans";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { env } from "~/env";
+import { OnboardingWrapper } from "../components/onboarding-wrapper";
 import { AppProvider } from "../context/app-context";
 import { AppSidebar } from "./_components/app-sidebar";
 import { HamburgerMenu } from "./_components/hamburger-menu";
@@ -63,12 +64,14 @@ export default function RootLayout(props: { children: React.ReactNode }) {
               <NuqsAdapter>
                 <SidebarProvider>
                   <AppProvider>
-                    <AppSidebar />
-                    <HamburgerMenu />
-                    <main className="h-dvh w-full pt-12 md:pt-0">
-                      {/* <SidebarTrigger /> */}
-                      {props.children}
-                    </main>
+                    <OnboardingWrapper>
+                      <AppSidebar />
+                      <HamburgerMenu />
+                      <main className="h-dvh w-full pt-12 md:pt-0">
+                        {/* <SidebarTrigger /> */}
+                        {props.children}
+                      </main>
+                    </OnboardingWrapper>
                   </AppProvider>
                 </SidebarProvider>
               </NuqsAdapter>

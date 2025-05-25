@@ -129,6 +129,19 @@ export const profileRouter = {
         })
         .$returningId();
 
+      // Also ensure user has a profile entry
+      const existingProfile = await ctx.db.query.profile.findFirst({
+        where: (profile, { eq }) => eq(profile.userId, ctx.session.user.id),
+      });
+
+      if (!existingProfile) {
+        await ctx.db.insert(profile).values({
+          userId: ctx.session.user.id,
+          completionPercentage: 0,
+          isOnboarded: false,
+        });
+      }
+
       return data[0];
     }
     return profileChat;
