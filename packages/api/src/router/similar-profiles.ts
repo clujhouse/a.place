@@ -40,7 +40,7 @@ export const similarProfilesRouter = {
           : sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingArray)}), ${profile.embedding}, 'L2_SQUARED')`
       )
       .leftJoin(user, eq(profile.userId, user.id))
-      .limit(10);
+      .limit(8);
 
     return similarProfiles.map((profile) => ({
       id: profile.id,
