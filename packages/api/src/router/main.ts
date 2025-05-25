@@ -117,7 +117,11 @@ export const mainRouter = {
         client,
         userInput,
         profileItems,
-        { topK: 3, relevanceThreshold: 0.1 },
+        { 
+          topK: 3, 
+          relevanceThreshold: 0.3,
+          model: "rerank-2"
+        },
       );
 
       // Get the current user's chat
