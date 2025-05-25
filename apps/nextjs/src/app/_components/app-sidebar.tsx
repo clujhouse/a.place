@@ -58,13 +58,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader className="pt-4">
         <SidebarMenu>
-          <Link href="/">
+          <Link href="/" onClick={handleLinkClick}>
             <Button variant="ghost" size="icon" className="mb-4">
               <ClujhouseSimpleIcon className="h-6 w-6" />
             </Button>
           </Link>
           <SidebarMenuItem>
-            <CosmosLogo href="/" />
+            <CosmosLogo href="/" onClick={handleLinkClick} />
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
@@ -91,7 +91,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
               isActive={pathname === "/similar-profiles"}
             >
-              <Link href="/similar-profiles">babel's tower </Link>
+              <Link href="/similar-profiles" onClick={handleLinkClick}>
+                babel's tower{" "}
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

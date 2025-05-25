@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSkeleton,
+  useSidebar,
 } from "@acme/ui/sidebar";
 
 import { useTRPC } from "~/trpc/react";
@@ -26,8 +27,16 @@ interface Chat {
 
 export const AppSidebarChats = () => {
   const trpc = useTRPC();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const { data: chats, isLoading } = useQuery(trpc.chat.getAll.queryOptions());
+
+  // Function to close sidebar on mobile when link is clicked
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -45,7 +54,7 @@ export const AppSidebarChats = () => {
     <SidebarMenu>
       <SidebarMenuItem>
         <SidebarMenuButton asChild>
-          <Link href="/">
+          <Link href="/" onClick={handleLinkClick}>
             <Icon as={Plus} size="xs" />
             new chat
           </Link>

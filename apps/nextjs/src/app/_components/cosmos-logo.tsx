@@ -8,6 +8,7 @@ import { cn } from "~/lib/utils";
 
 interface CosmosLogoProps {
   href?: string;
+  onClick?: () => void;
 }
 
 // // Predefined star configurations to avoid random generation on each render
@@ -74,12 +75,12 @@ interface CosmosLogoProps {
 //   },
 // ];
 
-export function CosmosLogo({ href = "/" }: CosmosLogoProps) {
+export function CosmosLogo({ href = "/", onClick }: CosmosLogoProps) {
   const pathname = usePathname();
   const isActive = pathname === href;
 
   return (
-    <Link href={href}>
+    <Link href={href} onClick={onClick}>
       <div
         className={cn(
           "group relative flex h-9 w-full items-center justify-start overflow-hidden rounded-md border border-yellow-800/40 bg-gradient-to-br from-gray-500/10 via-yellow-400/10 to-amber-500/10 pl-3 transition-all duration-300 hover:border-yellow-500/50 hover:from-gray-500/20 hover:via-yellow-400/20 hover:to-amber-500/20",
