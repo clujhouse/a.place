@@ -109,7 +109,11 @@ export function ProfileSidebar({
                   receiverId={profileId}
                   receiverName={profileName}
                   trigger={
-                    <Button variant="outline" size="sm" className="w-fit gap-2">
+                    <Button
+                      variant="outline"
+                      size="md"
+                      className="mr-8 w-fit gap-2"
+                    >
                       <Icon as={Mail} />
                       Send Letter
                     </Button>
@@ -121,8 +125,8 @@ export function ProfileSidebar({
                     <TooltipTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="w-fit gap-2"
+                        size="md"
+                        className="mr-8 w-fit gap-2"
                         disabled
                       >
                         <Icon as={Mail} />
@@ -142,6 +146,7 @@ export function ProfileSidebar({
                 {profile?.shortBio}
               </p>
             </div>
+
             <div>
               <MarkdownContent
                 content={profile?.text ?? "No profile description available"}
