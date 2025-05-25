@@ -5,10 +5,10 @@ import ClujhouseIcon from "~/components/clujhouse-icon";
 import { ProfileCard } from "~/components/profile-card";
 import { useTRPC } from "~/trpc/react";
 
-export function SimilarProfilesCardGrid() {
+export function SimilarProfilesCardGrid({ reverse }: {reverse?: boolean}) {
   const trpc = useTRPC();
   const { data } = useQuery(
-    trpc.similarProfiles.getSimilarUsers.queryOptions(),
+    trpc.similarProfiles.getSimilarUsers.queryOptions({ reverse }),
   );
 
   if (!data) {

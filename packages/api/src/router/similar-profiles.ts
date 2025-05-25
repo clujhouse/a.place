@@ -14,7 +14,7 @@ import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
 export const similarProfilesRouter = {
-  getSimilarUsers: protectedProcedure.query(async ({ ctx }) => {
+  getSimilarUsers: protectedProcedure.input(z.object({ reverse: z.boolean().optional() })).query(async ({ ctx, input }) => {
     // Fetch the current user's profile
     const currentUserProfile = await ctx.db.query.profile.findFirst({
       where: (profile, { eq }) => eq(profile.userId, ctx.session.user.id),
@@ -35,7 +35,9 @@ export const similarProfilesRouter = {
       .from(profile)
       .where(ne(profile.userId, ctx.session.user.id))
       .orderBy(
-        sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingArray)}), ${profile.embedding}, 'L2_SQUARED')`,
+        input.reverse 
+          ? sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingArray)}), ${profile.embedding}, 'L2_SQUARED') DESC`
+          : sql`DISTANCE(TO_VECTOR(${JSON.stringify(embeddingArray)}), ${profile.embedding}, 'L2_SQUARED')`
       )
       .leftJoin(user, eq(profile.userId, user.id))
       .limit(10);

@@ -20,6 +20,14 @@ export default function SimilarProfilesPage() {
       <Suspense fallback={<SimilarProfilesSkeleton />}>
         <SimilarProfilesCardGrid />
       </Suspense>
+
+      <PageHeader
+        title="Opposite Profiles"
+        description="Discover users with opposite interests and profiles"
+      />
+      <Suspense fallback={<SimilarProfilesSkeleton />}>
+        <SimilarProfilesCardGrid reverse />
+      </Suspense>
     </div>
   );
 } 
