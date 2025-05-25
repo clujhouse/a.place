@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { chat, profile } from "@acme/db/schema";
 
-import { protectedProcedure } from "../trpc";
+import { protectedProcedure, publicProcedure } from "../trpc";
 
 export const profileRouter = {
   get: protectedProcedure.query(
@@ -18,7 +18,7 @@ export const profileRouter = {
     },
   ),
 
-  getById: protectedProcedure
+  getById: publicProcedure
     .input(z.string())
     .query(
       async ({

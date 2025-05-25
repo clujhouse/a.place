@@ -61,11 +61,11 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             <ThemeToggle />
             <TRPCReactProvider>
               <NuqsAdapter>
-                <SidebarProvider className="md:flex md:min-h-svh">
+                <SidebarProvider>
                   <AppProvider>
                     <AppSidebar />
                     <HamburgerMenu />
-                    <main className="w-full">
+                    <main className="h-dvh w-full pt-12 md:pt-0">
                       {/* <SidebarTrigger /> */}
                       {props.children}
                     </main>

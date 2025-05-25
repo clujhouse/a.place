@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { atom, useAtom } from "jotai";
 
 import { authClient } from "@acme/auth/client";
 
@@ -14,10 +15,17 @@ interface UseSubscriptionReturn {
   refetch: () => Promise<void>;
 }
 
+// Atoms for subscription state
+const subscriptionAtom = atom<any | null>(null);
+const currentPlanAtom = atom<SubscriptionPlan>("standard");
+const isLoadingAtom = atom<boolean>(true);
+const hasInitializedAtom = atom<boolean>(false);
+
 export function useSubscription(): UseSubscriptionReturn {
-  const [currentPlan, setCurrentPlan] = useState<SubscriptionPlan>("standard");
-  const [isLoading, setIsLoading] = useState(true);
-  const [subscription, setSubscription] = useState<any | null>(null);
+  const [subscription, setSubscription] = useAtom(subscriptionAtom);
+  const [currentPlan, setCurrentPlan] = useAtom(currentPlanAtom);
+  const [isLoading, setIsLoading] = useAtom(isLoadingAtom);
+  const [hasInitialized, setHasInitialized] = useAtom(hasInitializedAtom);
   const { data: session } = authClient.useSession();
 
   const fetchSubscription = async () => {
@@ -56,8 +64,18 @@ export function useSubscription(): UseSubscriptionReturn {
   };
 
   useEffect(() => {
-    fetchSubscription();
-  }, [session?.user]);
+    // Only fetch if we haven't initialized yet and we have a session
+    if (!hasInitialized && session?.user) {
+      setHasInitialized(true);
+      fetchSubscription();
+    } else if (!session?.user && hasInitialized) {
+      // Reset state when user logs out
+      setCurrentPlan("standard");
+      setSubscription(null);
+      setIsLoading(false);
+      setHasInitialized(false);
+    }
+  }, [session?.user, hasInitialized, setHasInitialized]);
 
   return {
     currentPlan,

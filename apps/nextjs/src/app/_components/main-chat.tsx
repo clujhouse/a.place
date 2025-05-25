@@ -158,7 +158,7 @@ const MainChat = ({
         currentMembership={currentPlan}
       />
       <StickToBottom
-        className={cn("flex flex-col", !isHomepage && "h-screen")}
+        className={cn("flex flex-col", !isHomepage && "h-full")}
         resize="smooth"
         initial="smooth"
       >
