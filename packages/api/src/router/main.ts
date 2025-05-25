@@ -80,7 +80,7 @@ export const mainRouter = {
       const { chatId, input: userInput } = input;
 
       // Check search limits for free users
-      // const searchLimitResult = await checkSearchLimits(ctx);
+      await checkSearchLimits(ctx);
 
       // Create embedding for the user's message
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });

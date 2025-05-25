@@ -7,6 +7,7 @@ import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 import type { AMessage } from "@acme/validators/message";
+import { UpgradeModal } from "@acme/ui";
 import { ResizablePanel, ResizablePanelGroup } from "@acme/ui/resizable";
 import { toast } from "@acme/ui/toast";
 
@@ -14,6 +15,8 @@ import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
 import { useAppContext } from "~/context/app-context";
 import { MainChatProvider } from "~/context/main-chat-context";
+import { useSearchLimits } from "~/hooks/use-search-limits";
+import { useSubscription } from "~/hooks/use-subscription";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
 import { useTRPC } from "~/trpc/react";
 
@@ -38,6 +41,13 @@ function ScrollToBottom() {
 
 const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
   const { isChatLoading, setIsChatLoading } = useAppContext();
+  const { currentPlan } = useSubscription();
+  const {
+    isUpgradeModalOpen,
+    setIsUpgradeModalOpen,
+    handleUpgrade,
+    checkLimitsBeforeSearch,
+  } = useSearchLimits();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -107,6 +117,10 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
   );
 
   const onSubmit = async (message: string) => {
+    if (!checkLimitsBeforeSearch()) {
+      return;
+    }
+
     setIsChatLoading(true);
     const stringChatId = typeof chatId === "string" ? chatId : await chatId();
 
@@ -144,6 +158,13 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
         {/* <ResizableHandle /> */}
         {/* <ResizablePanel defaultSize={30}></ResizablePanel> */}
       </ResizablePanelGroup>
+
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        onUpgrade={handleUpgrade}
+        currentMembership={currentPlan}
+      />
     </MainChatProvider>
   );
 };

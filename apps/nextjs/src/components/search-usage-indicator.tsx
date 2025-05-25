@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { authClient } from "@acme/auth/client";
 import { UpgradeModal } from "@acme/ui";
+import { Button } from "@acme/ui/button";
 import { Progress } from "@acme/ui/progress";
 
 import { useTRPC } from "~/trpc/react";
@@ -63,35 +64,41 @@ export function SearchUsageIndicator() {
     );
   }
 
+  // Free plan
+  const isNearLimit = searchUsage.remaining <= 1;
   const progressPercentage = (searchUsage.used / searchUsage.limit) * 100;
-  const isAtLimit = searchUsage.remaining === 0;
 
   return (
     <>
-      <div
-        className="cursor-pointer space-y-3 border p-4 hover:bg-accent"
-        onClick={() => setIsUpgradeModalOpen(true)}
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium">Daily Searches</h3>
-          <span className="text-xs font-medium">
-            {searchUsage.remaining}/{searchUsage.limit}
+      <div className="border-b p-3">
+        <div className="flex items-center justify-between text-sm">
+          <span className="text-muted-foreground">Daily searches</span>
+          <span className={isNearLimit ? "font-medium" : ""}>
+            {searchUsage.used}/{searchUsage.limit}
           </span>
         </div>
-        <Progress value={progressPercentage} className="h-2 w-full" />
-        {isAtLimit ? (
-          <p className="text-xs text-muted-foreground">
-            you've hit your daily limit. upgrade for unlimited searches
+        <Progress value={progressPercentage} className="mt-2 h-1" />
+        {searchUsage.remaining === 0 ? (
+          <p className="mt-2 text-xs">
+            You've reached your daily limit! Upgrade for unlimited searches.
           </p>
-        ) : searchUsage.remaining <= 1 ? (
-          <p className="text-xs text-muted-foreground">
-            almost at your daily limit. consider upgrading
+        ) : isNearLimit ? (
+          <p className="mt-2 text-xs">
+            You're almost out of searches! Upgrade for unlimited access.
           </p>
         ) : (
-          <p className="text-xs text-muted-foreground">
-            resets at {new Date(searchUsage.reset).toLocaleTimeString()}
+          <p className="mt-2 text-xs">
+            {searchUsage.remaining} searches remaining today
           </p>
         )}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-2 h-auto w-full justify-start p-0 text-xs text-muted-foreground hover:text-foreground"
+          onClick={() => setIsUpgradeModalOpen(true)}
+        >
+          Upgrade for unlimited searches →
+        </Button>
       </div>
 
       <UpgradeModal
