@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,9 +20,22 @@ const Homepage = () => {
     }),
   );
 
+  // Get all chats to find the current chat's title
+  const { data: allChats } = useQuery(trpc.chat.getAll.queryOptions());
+
+  // Find the current chat to get its title
+  const currentChat = allChats?.find((chat) => chat.id === chatId);
+
   const message = useMemo(() => {
     return data?.map((message) => messageSchema.parse(message));
   }, [data]);
+
+  // Update document title when chat title is available
+  useEffect(() => {
+    if (currentChat?.title) {
+      document.title = currentChat.title;
+    }
+  }, [currentChat?.title]);
 
   if (!message) {
     return (
