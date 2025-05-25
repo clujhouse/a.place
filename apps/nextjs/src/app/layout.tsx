@@ -27,20 +27,10 @@ export const metadata: Metadata = {
       ? "https://turbo.t3.gg"
       : "http://localhost:3000",
   ),
-  title: "Create T3 Turbo",
-  description: "Simple monorepo with shared backend for web & mobile apps",
-  openGraph: {
-    title: "Create T3 Turbo",
-    description: "Simple monorepo with shared backend for web & mobile apps",
-    url: "https://create-t3-turbo.vercel.app",
-    siteName: "Create T3 Turbo",
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@jullerino",
-    creator: "@jullerino",
-  },
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: "a.place",
+  description:
+    "a.place is a new spot on the internet for builders, makers, & creators to find and be found by the right group of ppl. any idea goes. a hip-hop album, short film, a novel, some indie software, a youtube channel — whatever.",
+  icons: [{ rel: "icon", url: "/" }],
 };
 
 const raleway = Raleway({
