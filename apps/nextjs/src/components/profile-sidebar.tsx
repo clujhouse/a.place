@@ -6,6 +6,7 @@ import { Mail, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Badge } from "@acme/ui/badge";
 import { Button } from "@acme/ui/button";
+import { Icon } from "@acme/ui/icon";
 import { MarkdownContent } from "@acme/ui/markdown-content";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@acme/ui/sheet";
 
@@ -32,16 +33,15 @@ export function ProfileSidebar({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full max-w-md overflow-y-auto sm:max-w-lg">
-        <SheetHeader className="pb-4">
-          <SheetTitle>Profile Details</SheetTitle>
-        </SheetHeader>
-
+      <SheetHeader className="sr-only">
+        <SheetTitle>Profile Details</SheetTitle>
+      </SheetHeader>
+      <SheetContent className="w-full max-w-md overflow-y-auto p-8 sm:max-w-lg">
         {isLoading ? (
           <div className="h-48 animate-pulse rounded-lg bg-muted"></div>
         ) : (
           <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-4">
+            <div className="flex justify-between gap-4">
               <Avatar className="h-20 w-20">
                 {profile?.profileImage ? (
                   <AvatarImage src={profile.profileImage} alt={profileName} />
@@ -51,25 +51,24 @@ export function ProfileSidebar({
                   </AvatarFallback>
                 )}
               </Avatar>
-              <div className="flex-1">
-                <h2 className="text-2xl font-semibold">{profileName}</h2>
-                <div className="mt-2">
-                  <MessageModal
-                    receiverId={profileId}
-                    receiverName={profileName}
-                    trigger={
-                      <Button variant="outline" size="sm" className="w-full">
-                        <Mail className="mr-2 h-4 w-4" />
-                        Send Letter
-                      </Button>
-                    }
-                  />
-                </div>
-              </div>
+              <MessageModal
+                receiverId={profileId}
+                receiverName={profileName}
+                trigger={
+                  <Button variant="outline" size="sm" className="w-fit gap-2">
+                    <Icon as={Mail} />
+                    Send Letter
+                  </Button>
+                }
+              />
             </div>
-
-            <div className="pr-4">
-              <h3 className="mb-2 text-lg font-medium">About</h3>
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold">{profileName}</h2>
+              <p className="text-sm text-muted-foreground">
+                {profile?.shortBio}
+              </p>
+            </div>
+            <div>
               <MarkdownContent
                 content={profile?.text ?? "No profile description available"}
                 id="profile-view"
@@ -95,12 +94,6 @@ export function ProfileSidebar({
                 </div>
               </div>
             )}
-
-            <div className="mt-auto flex flex-wrap gap-1">
-              <Badge variant="outline">developer</Badge>
-              <Badge variant="outline">brainrot</Badge>
-              <Badge variant="outline">part of the team</Badge>
-            </div>
           </div>
         )}
       </SheetContent>
