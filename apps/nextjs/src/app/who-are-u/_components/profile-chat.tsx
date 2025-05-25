@@ -79,6 +79,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           updatedAt: new Date(),
           userId: "",
           embedding: null,
+          isOnboarded: false,
           profileImage: null,
           images: [],
         };

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { MessageCircle, Plus } from "lucide-react";
 
+import { authClient } from "@acme/auth/client";
 import { Icon } from "@acme/ui/icon";
 import {
   SidebarMenu,
@@ -29,7 +30,11 @@ export const AppSidebarChats = () => {
   const trpc = useTRPC();
   const { isMobile, setOpenMobile } = useSidebar();
 
-  const { data: chats, isLoading } = useQuery(trpc.chat.getAll.queryOptions());
+  const { data: session } = authClient.useSession();
+  const { data: chats, isLoading } = useQuery({
+    ...trpc.chat.getAll.queryOptions(),
+    enabled: !!session,
+  });
 
   // Function to close sidebar on mobile when link is clicked
   const handleLinkClick = () => {

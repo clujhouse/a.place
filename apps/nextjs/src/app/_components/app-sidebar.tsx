@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 
+import { authClient } from "@acme/auth/client";
 import { Button } from "@acme/ui";
 import { Badge } from "@acme/ui/badge";
 import {
@@ -32,9 +33,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const trpc = useTRPC();
   const { isMobile, setOpenMobile } = useSidebar();
 
+  const { data: session } = authClient.useSession();
   const { data: conversations } = useQuery({
     ...trpc.conversation.getConversations.queryOptions(),
     refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
+    enabled: !!session,
   });
 
   // Calculate total unread count

@@ -10,10 +10,12 @@ import { useTRPC } from "~/trpc/react";
 export function useSearchLimits() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const trpc = useTRPC();
+  const { data: session } = authClient.useSession();
 
   const { data: searchUsage, isLoading } = useQuery({
     ...trpc.main.getSearchUsage.queryOptions(),
     refetchInterval: 30000, // Refetch every 30 seconds
+    enabled: !!session,
   });
 
   const handleUpgrade = async (plan: "pro" | "pro_exclusive") => {
