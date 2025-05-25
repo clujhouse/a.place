@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Mail, Plus, StickyNote, User } from "lucide-react";
 
@@ -8,9 +8,6 @@ import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Badge } from "@acme/ui/badge";
 import { Button } from "@acme/ui/button";
-import { Icon } from "@acme/ui/icon";
-import { MarkdownContent } from "@acme/ui/markdown-content";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@acme/ui/sheet";
 import {
   Dialog,
   DialogContent,
@@ -18,12 +15,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@acme/ui/dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@acme/ui/tooltip";
+import { Icon } from "@acme/ui/icon";
+import { MarkdownContent } from "@acme/ui/markdown-content";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@acme/ui/sheet";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@acme/ui/tooltip";
 
 import { MessageModal } from "~/components/message-modal";
 import { ProfileNote } from "~/components/profile-note";
-import { useTRPC } from "~/trpc/react";
 import { useSubscription } from "~/hooks/use-subscription";
+import { useTRPC } from "~/trpc/react";
 
 interface ProfileSidebarProps {
   profileId: string;
@@ -43,13 +54,19 @@ export function ProfileSidebar({
   const [isRefetchingNotes, setIsRefetchingNotes] = useState(false);
   const { data: session } = authClient.useSession();
   const { currentPlan } = useSubscription();
-  
+
   const { data: profile, isLoading } = useQuery(
     trpc.profile.getById.queryOptions(profileId),
   );
-  
-  const { data: notes, isLoading: isLoadingNotes, refetch: refetchNotes } = useQuery(
-    trpc.profileNote.getByReceivingUserId.queryOptions({ receivingUserId: profileId }),
+
+  const {
+    data: notes,
+    isLoading: isLoadingNotes,
+    refetch: refetchNotes,
+  } = useQuery(
+    trpc.profileNote.getByReceivingUserId.queryOptions({
+      receivingUserId: profileId,
+    }),
   );
 
   const handleRefetchNotes = async () => {
@@ -59,15 +76,16 @@ export function ProfileSidebar({
   };
 
   const canAddNote = useMemo(() => {
-    if (!session?.user?.id || !notes || currentPlan !== "pro_exclusive") return false;
-    
+    if (!session?.user.id || !notes || currentPlan !== "pro_exclusive")
+      return false;
+
     // Check if the current user has already added a note
     return !notes.some((note) => note.postingUserId === session.user.id);
-  }, [notes, session?.user?.id, currentPlan]);
+  }, [notes, session?.user.id, currentPlan]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetHeader className="sr-only">
+      <SheetHeader className="sr-only hidden">
         <SheetTitle>Profile Details</SheetTitle>
       </SheetHeader>
       <SheetContent className="w-full max-w-md overflow-y-auto p-8 sm:max-w-lg">
@@ -134,27 +152,36 @@ export function ProfileSidebar({
               <Badge variant="outline">brainrot</Badge>
               <Badge variant="outline">part of the team</Badge>
             </div>
-            
+
             {/* Notes Section */}
-            <div className="space-y-3 pt-4 border-t border-border">
+            <div className="space-y-3 border-t border-border pt-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium">Notes</h3>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div>
-                        <Dialog open={isNoteModalOpen && canAddNote} onOpenChange={(open) => canAddNote && setIsNoteModalOpen(open)}>
+                        <Dialog
+                          open={isNoteModalOpen && canAddNote}
+                          onOpenChange={(open) =>
+                            canAddNote && setIsNoteModalOpen(open)
+                          }
+                        >
                           <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              disabled={!canAddNote || isLoadingNotes || isRefetchingNotes}
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              disabled={
+                                !canAddNote ||
+                                isLoadingNotes ||
+                                isRefetchingNotes
+                              }
                             >
                               <Plus className="mr-2 h-4 w-4" />
                               Add Note
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-md p-0">
+                          <DialogContent className="p-0 sm:max-w-md">
                             <ProfileNote
                               currentUser={session?.user}
                               receivingUserId={profileId}
@@ -179,7 +206,7 @@ export function ProfileSidebar({
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              
+
               <div className="space-y-3">
                 {isLoadingNotes || isRefetchingNotes ? (
                   <div className="h-20 animate-pulse rounded-lg bg-muted"></div>
@@ -195,7 +222,7 @@ export function ProfileSidebar({
                   ))
                 ) : (
                   <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
-                    <StickyNote className="h-8 w-8 mb-2" />
+                    <StickyNote className="mb-2 h-8 w-8" />
                     <p>No notes yet</p>
                   </div>
                 )}

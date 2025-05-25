@@ -60,7 +60,7 @@ export function ProfileCard({
     <>
       <Card
         className={cn(
-          "flex w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent",
+          "flex h-full min-h-0 w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent",
           containerClassName,
         )}
         onClick={() => setIsSidebarOpen(true)}

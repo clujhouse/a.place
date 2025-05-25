@@ -1,9 +1,9 @@
 import React from "react";
-import ReactMarkdown from "react-markdown";
 import { match } from "ts-pattern";
 
 import type { AMessage } from "@acme/validators/message";
 import { cn } from "@acme/ui";
+import { MarkdownContent } from "@acme/ui/markdown-content";
 
 import { ProfileCard } from "./profile-card";
 
@@ -24,7 +24,11 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           return match(part)
             .with({ type: "text" }, (textPart) => {
               return (
-                <ReactMarkdown key={part.id}>{textPart.text}</ReactMarkdown>
+                <MarkdownContent
+                  id={part.id}
+                  key={part.id}
+                  content={textPart.text}
+                />
               );
             })
             .with({ type: "profile" }, (profilePart) => {
