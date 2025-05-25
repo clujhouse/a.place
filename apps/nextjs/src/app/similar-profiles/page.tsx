@@ -1,15 +1,13 @@
+"use client";
+
 import { Suspense } from "react";
 
+import { AuthGuard } from "~/components/auth-guard";
 import { PageHeader } from "~/components/page-header";
 import { SimilarProfilesCardGrid } from "./_components/similar-profiles-grid";
 import { SimilarProfilesSkeleton } from "./_components/similar-profiles-skeleton";
 
-export const metadata = {
-  title: "similar Profiles",
-  description: "discover users with similar interests and profiles",
-};
-
-export default function SimilarProfilesPage() {
+function SimilarProfilesPageContent() {
   return (
     <div className="container mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8">
       <PageHeader
@@ -29,5 +27,13 @@ export default function SimilarProfilesPage() {
         <SimilarProfilesCardGrid reverse />
       </Suspense>
     </div>
+  );
+}
+
+export default function SimilarProfilesPage() {
+  return (
+    <AuthGuard>
+      <SimilarProfilesPageContent />
+    </AuthGuard>
   );
 }

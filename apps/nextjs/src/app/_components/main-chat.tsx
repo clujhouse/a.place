@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, Loader2 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
@@ -8,6 +9,7 @@ import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 import type { AMessage } from "@acme/validators/message";
+import { authClient } from "@acme/auth/client";
 import { Button, UpgradeModal } from "@acme/ui";
 import { Icon } from "@acme/ui/icon";
 import { toast } from "@acme/ui/toast";
@@ -49,6 +51,7 @@ const MainChat = ({
   onSubmit: _onSubmit,
 }: MainChatProps) => {
   const [query, setQuery] = useQueryState("query", parseAsString);
+  const router = useRouter();
 
   const initialQueryRefRun = useRef<boolean>(false);
 
@@ -60,6 +63,7 @@ const MainChat = ({
     handleUpgrade,
     checkLimitsBeforeSearch,
   } = useSearchLimits();
+  const { data: session } = authClient.useSession();
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -129,6 +133,12 @@ const MainChat = ({
   );
 
   const onSubmit = async (message: string) => {
+    // Check if user is logged in
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
+
     // if (!checkLimitsBeforeSearch()) return;
 
     _onSubmit?.(message);

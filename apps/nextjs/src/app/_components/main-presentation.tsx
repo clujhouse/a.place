@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 
+import { authClient } from "@acme/auth/client";
 import { Marquee } from "@acme/ui/marquee";
 
 import { ProfileCard } from "~/components/profile-card";
@@ -38,15 +39,20 @@ const prompts = [
 const PromptBox = ({
   prompt,
   onClick,
+  isAuthenticated,
 }: {
   prompt: string;
   onClick: ((message: string) => void) | null;
+  isAuthenticated: boolean;
 }) => {
   return (
     <button
       key={prompt}
-      className="text-md max-w-80 border px-3 py-1 text-center transition-all hover:border-primary hover:bg-accent"
+      className={`text-md max-w-80 border px-3 py-1 text-center transition-all hover:border-primary hover:bg-accent ${
+        isAuthenticated ? "cursor-pointer" : "cursor-pointer opacity-90"
+      }`}
       onClick={() => onClick?.(prompt)}
+      title={!isAuthenticated ? "Login required to search" : undefined}
     >
       {prompt}
     </button>
@@ -56,8 +62,15 @@ const PromptBox = ({
 const MainPresentation = () => {
   const router = useRouter();
   const { createChat } = useCreateChat();
+  const { data: session } = authClient.useSession();
 
   const handleClick = async (prompt: string) => {
+    // Check if user is logged in
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
+
     const chatId = nanoid();
     await createChat(chatId);
     router.push(`/talking-stage/${chatId}?query=${prompt}`);
@@ -85,6 +98,7 @@ const MainPresentation = () => {
               key={prompt}
               prompt={prompt}
               onClick={() => handleClick(prompt)}
+              isAuthenticated={!!session?.user}
             />
           ))}
         </Marquee>
@@ -94,6 +108,7 @@ const MainPresentation = () => {
               key={prompt}
               prompt={prompt}
               onClick={() => handleClick(prompt)}
+              isAuthenticated={!!session?.user}
             />
           ))}
         </Marquee>

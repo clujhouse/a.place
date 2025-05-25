@@ -11,10 +11,11 @@ import { Badge } from "@acme/ui/badge";
 import { Card, CardContent } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
 
+import { AuthGuard } from "~/components/auth-guard";
 import { useTRPC } from "~/trpc/react";
 import { ConversationView } from "./_components/conversation-view";
 
-export default function LettersPage() {
+function LettersPageContent() {
   const router = useRouter();
   const trpc = useTRPC();
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
@@ -313,5 +314,13 @@ export default function LettersPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LettersPage() {
+  return (
+    <AuthGuard>
+      <LettersPageContent />
+    </AuthGuard>
   );
 }

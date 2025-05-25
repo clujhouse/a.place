@@ -63,11 +63,12 @@ export function ProfileSidebar({
     data: notes,
     isLoading: isLoadingNotes,
     refetch: refetchNotes,
-  } = useQuery(
-    trpc.profileNote.getByReceivingUserId.queryOptions({
+  } = useQuery({
+    ...trpc.profileNote.getByReceivingUserId.queryOptions({
       receivingUserId: profileId,
     }),
-  );
+    enabled: !!session?.user,
+  });
 
   const handleRefetchNotes = async () => {
     setIsRefetchingNotes(true);
@@ -103,16 +104,37 @@ export function ProfileSidebar({
                   </AvatarFallback>
                 )}
               </Avatar>
-              <MessageModal
-                receiverId={profileId}
-                receiverName={profileName}
-                trigger={
-                  <Button variant="outline" size="sm" className="w-fit gap-2">
-                    <Icon as={Mail} />
-                    Send Letter
-                  </Button>
-                }
-              />
+              {session?.user ? (
+                <MessageModal
+                  receiverId={profileId}
+                  receiverName={profileName}
+                  trigger={
+                    <Button variant="outline" size="sm" className="w-fit gap-2">
+                      <Icon as={Mail} />
+                      Send Letter
+                    </Button>
+                  }
+                />
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-fit gap-2"
+                        disabled
+                      >
+                        <Icon as={Mail} />
+                        Send Letter
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Please log in to send letters</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
             <div className="flex-1">
               <h2 className="text-2xl font-semibold">{profileName}</h2>
@@ -147,12 +169,6 @@ export function ProfileSidebar({
               </div>
             )}
 
-            <div className="mt-auto flex flex-wrap gap-1">
-              <Badge variant="outline">developer</Badge>
-              <Badge variant="outline">brainrot</Badge>
-              <Badge variant="outline">part of the team</Badge>
-            </div>
-
             {/* Notes Section */}
             <div className="space-y-3 border-t border-border pt-4">
               <div className="flex items-center justify-between">
@@ -162,9 +178,13 @@ export function ProfileSidebar({
                     <TooltipTrigger asChild>
                       <div>
                         <Dialog
-                          open={isNoteModalOpen && canAddNote}
+                          open={
+                            isNoteModalOpen && canAddNote && !!session?.user
+                          }
                           onOpenChange={(open) =>
-                            canAddNote && setIsNoteModalOpen(open)
+                            canAddNote &&
+                            !!session?.user &&
+                            setIsNoteModalOpen(open)
                           }
                         >
                           <DialogTrigger asChild>
@@ -172,6 +192,7 @@ export function ProfileSidebar({
                               variant="outline"
                               size="sm"
                               disabled={
+                                !session?.user ||
                                 !canAddNote ||
                                 isLoadingNotes ||
                                 isRefetchingNotes
@@ -194,7 +215,11 @@ export function ProfileSidebar({
                         </Dialog>
                       </div>
                     </TooltipTrigger>
-                    {!canAddNote && currentPlan === "pro_exclusive" ? (
+                    {!session?.user ? (
+                      <TooltipContent>
+                        <p>Please log in to add notes</p>
+                      </TooltipContent>
+                    ) : !canAddNote && currentPlan === "pro_exclusive" ? (
                       <TooltipContent>
                         <p>You can only add one note per profile</p>
                       </TooltipContent>
@@ -208,7 +233,12 @@ export function ProfileSidebar({
               </div>
 
               <div className="space-y-3">
-                {isLoadingNotes || isRefetchingNotes ? (
+                {!session?.user ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                    <StickyNote className="mb-2 h-8 w-8" />
+                    <p>Log in to view notes</p>
+                  </div>
+                ) : isLoadingNotes || isRefetchingNotes ? (
                   <div className="h-20 animate-pulse rounded-lg bg-muted"></div>
                 ) : notes && notes.length > 0 ? (
                   notes.map((note) => (

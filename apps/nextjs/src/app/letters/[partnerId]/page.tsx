@@ -8,6 +8,7 @@ import { ArrowLeft, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Button } from "@acme/ui/button";
 
+import { AuthGuard } from "~/components/auth-guard";
 import { useTRPC } from "~/trpc/react";
 import { ConversationView } from "../_components/conversation-view";
 
@@ -17,7 +18,7 @@ interface ConversationPageProps {
   }>;
 }
 
-export default function ConversationPage({ params }: ConversationPageProps) {
+function ConversationPageContent({ params }: ConversationPageProps) {
   const router = useRouter();
   const trpc = useTRPC();
   const { partnerId } = use(params);
@@ -76,5 +77,13 @@ export default function ConversationPage({ params }: ConversationPageProps) {
         <ConversationView partnerId={partnerId} partnerName={partnerName} />
       </div>
     </div>
+  );
+}
+
+export default function ConversationPage({ params }: ConversationPageProps) {
+  return (
+    <AuthGuard>
+      <ConversationPageContent params={params} />
+    </AuthGuard>
   );
 }
