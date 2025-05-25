@@ -8,6 +8,8 @@ import { Toaster } from "@acme/ui/toast";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
+import { PostHogProvider } from "../components/PostHogProvider";
+
 import "~/app/globals.css";
 import "~/app/prosemirror.css";
 
@@ -69,22 +71,24 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           GeistMono.variable,
         )}
       >
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ThemeToggle />
-          <TRPCReactProvider>
-            <SidebarProvider className="md:flex md:min-h-svh">
-              <AppProvider>
-                <AppSidebar />
-                <HamburgerMenu />
-                <main className="w-full">
-                  {/* <SidebarTrigger /> */}
-                  {props.children}
-                </main>
-              </AppProvider>
-            </SidebarProvider>
-          </TRPCReactProvider>
-          <Toaster />
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <ThemeToggle />
+            <TRPCReactProvider>
+              <SidebarProvider className="md:flex md|min-h-svh">
+                <AppProvider>
+                  <AppSidebar />
+                  <HamburgerMenu />
+                  <main className="w-full">
+                    {/* <SidebarTrigger /> */}
+                    {props.children}
+                  </main>
+                </AppProvider>
+              </SidebarProvider>
+            </TRPCReactProvider>
+            <Toaster />
+          </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   );
