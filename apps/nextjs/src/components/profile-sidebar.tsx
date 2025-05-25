@@ -1,17 +1,29 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Mail, User } from "lucide-react";
+import { Mail, Plus, StickyNote, User } from "lucide-react";
 
+import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Badge } from "@acme/ui/badge";
 import { Button } from "@acme/ui/button";
 import { Icon } from "@acme/ui/icon";
 import { MarkdownContent } from "@acme/ui/markdown-content";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@acme/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@acme/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@acme/ui/tooltip";
 
 import { MessageModal } from "~/components/message-modal";
+import { ProfileNote } from "~/components/profile-note";
 import { useTRPC } from "~/trpc/react";
+import { useSubscription } from "~/hooks/use-subscription";
 
 interface ProfileSidebarProps {
   profileId: string;
@@ -27,9 +39,31 @@ export function ProfileSidebar({
   onOpenChange,
 }: ProfileSidebarProps) {
   const trpc = useTRPC();
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [isRefetchingNotes, setIsRefetchingNotes] = useState(false);
+  const { data: session } = authClient.useSession();
+  const { currentPlan } = useSubscription();
+  
   const { data: profile, isLoading } = useQuery(
     trpc.profile.getById.queryOptions(profileId),
   );
+  
+  const { data: notes, isLoading: isLoadingNotes, refetch: refetchNotes } = useQuery(
+    trpc.profileNote.getByReceivingUserId.queryOptions({ receivingUserId: profileId }),
+  );
+
+  const handleRefetchNotes = async () => {
+    setIsRefetchingNotes(true);
+    await refetchNotes();
+    setIsRefetchingNotes(false);
+  };
+
+  const canAddNote = useMemo(() => {
+    if (!session?.user?.id || !notes || currentPlan !== "pro_exclusive") return false;
+    
+    // Check if the current user has already added a note
+    return !notes.some((note) => note.postingUserId === session.user.id);
+  }, [notes, session?.user?.id, currentPlan]);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -94,6 +128,79 @@ export function ProfileSidebar({
                 </div>
               </div>
             )}
+
+            <div className="mt-auto flex flex-wrap gap-1">
+              <Badge variant="outline">developer</Badge>
+              <Badge variant="outline">brainrot</Badge>
+              <Badge variant="outline">part of the team</Badge>
+            </div>
+            
+            {/* Notes Section */}
+            <div className="space-y-3 pt-4 border-t border-border">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium">Notes</h3>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <Dialog open={isNoteModalOpen && canAddNote} onOpenChange={(open) => canAddNote && setIsNoteModalOpen(open)}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              disabled={!canAddNote || isLoadingNotes || isRefetchingNotes}
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add Note
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-md p-0">
+                            <ProfileNote
+                              currentUser={session?.user}
+                              receivingUserId={profileId}
+                              onNoteAdded={() => {
+                                setIsNoteModalOpen(false);
+                                void handleRefetchNotes();
+                              }}
+                            />
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </TooltipTrigger>
+                    {!canAddNote && currentPlan === "pro_exclusive" ? (
+                      <TooltipContent>
+                        <p>You can only add one note per profile</p>
+                      </TooltipContent>
+                    ) : (
+                      <TooltipContent>
+                        <p>Upgrade to Pro Exclusive (69$) to add notes</p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              
+              <div className="space-y-3">
+                {isLoadingNotes || isRefetchingNotes ? (
+                  <div className="h-20 animate-pulse rounded-lg bg-muted"></div>
+                ) : notes && notes.length > 0 ? (
+                  notes.map((note) => (
+                    <ProfileNote
+                      key={note.id}
+                      note={note}
+                      currentUser={session?.user}
+                      receivingUserId={profileId}
+                      onNoteUpdated={() => void handleRefetchNotes()}
+                    />
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 text-muted-foreground">
+                    <StickyNote className="h-8 w-8 mb-2" />
+                    <p>No notes yet</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
       </SheetContent>

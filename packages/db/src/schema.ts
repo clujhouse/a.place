@@ -147,6 +147,33 @@ export const conversationMessageRelations = relations(
   }),
 );
 
+export const profileNote = mysqlTable("profile_note", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  postingUserId: varchar("posting_user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  receivingUserId: varchar("receiving_user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  text: text("text").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const profileNoteRelations = relations(profileNote, ({ one }) => ({
+  postingUser: one(user, {
+    fields: [profileNote.postingUserId],
+    references: [user.id],
+  }),
+  receivingUser: one(user, {
+    fields: [profileNote.receivingUserId],
+    references: [user.id],
+  }),
+}));
+
 export type DBMessage = InferSelectModel<typeof message>;
+export type DBProfileNote = InferSelectModel<typeof profileNote>;
 
 export * from "./auth-schema";

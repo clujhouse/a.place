@@ -3,6 +3,7 @@ import { conversationRouter } from "./router/conversation";
 import { llmRouter } from "./router/llm";
 import { mainRouter } from "./router/main";
 import { profileRouter } from "./router/profile";
+import { profileNoteRouter } from "./router/profile-note";
 import { similarProfilesRouter } from "./router/similar-profiles";
 import { createTRPCRouter } from "./trpc";
 
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   chat: chatRouter,
   similarProfiles: similarProfilesRouter,
   conversation: conversationRouter,
+  profileNote: profileNoteRouter,
 });
 
 // export type definition of API
