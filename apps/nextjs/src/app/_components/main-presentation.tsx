@@ -17,7 +17,7 @@ const users = [
 
 const prompts = [
   "looking for a designer",
-  "musticians growing fast",
+  "musicians growing fast",
   "great software engineers",
   "amazing product managers for growth",
   "looking for a marketer",
