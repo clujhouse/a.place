@@ -283,7 +283,17 @@ export const llmRouter = {
       // Generate profile content for saving
       const profileText = await generateProfileText(allMessages);
       const shortBioText = await generateShortBio(allMessages);
-      const embeddingBuffer = await createProfileEmbedding(profileText);
+
+      const embeddedProfileText = `
+name: ${ctx.session.user.name}
+
+one liner
+${shortBioText}
+
+${profileText}
+      
+`;
+      const embeddingBuffer = await createProfileEmbedding(embeddedProfileText);
 
       await updateProfile(
         ctx,
