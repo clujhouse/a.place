@@ -59,7 +59,7 @@ export function UpgradeModal({
     },
     {
       id: "pro_exclusive" as const,
-      name: "Pro Exclusive",
+      name: "69 plan",
       price: "$69",
       period: "/month",
       description: "69 plan",
@@ -80,49 +80,49 @@ export function UpgradeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle className="text-xl font-semibold">
-                Upgrade Your Plan
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-sm">
-                Choose the plan that fits your needs
-              </DialogDescription>
-            </div>
-          </div>
+      <DialogContent className="max-h-[85vh] w-[95vw] max-w-2xl overflow-y-auto sm:w-auto sm:max-w-4xl">
+        <DialogHeader className="space-y-2 pb-4 text-center sm:text-left">
+          <DialogTitle className="text-lg font-semibold sm:text-xl">
+            Upgrade Your Plan
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Choose the plan that fits your needs
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative rounded-lg border p-4 ${
-                plan.popular ? "border-2" : "border"
+              className={`relative rounded-lg border p-4 transition-colors ${
+                plan.popular
+                  ? "border-2 border-primary"
+                  : "border border-border hover:border-muted-foreground/50"
               } ${plan.disabled ? "opacity-60" : ""}`}
             >
               {plan.popular && (
-                <div className="absolute -top-2 left-4">
-                  <span className="rounded bg-foreground px-2 py-0.5 text-xs font-medium text-background">
+                <div className="absolute -top-3 left-4">
+                  <span className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
                     Most Popular
                   </span>
                 </div>
               )}
 
-              <div className="mb-3 flex items-center gap-2">
-                {plan.icon}
-                <h3 className="font-semibold">{plan.name}</h3>
+              <div className="mb-4 flex items-center gap-3">
+                <div className="rounded-full bg-muted p-2">{plan.icon}</div>
+                <h3 className="text-lg font-semibold">{plan.name}</h3>
               </div>
 
-              <div className="mb-3">
+              <div className="mb-4">
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold">{plan.price}</span>
+                  <span className="text-2xl font-bold sm:text-3xl">
+                    {plan.price}
+                  </span>
                   <span className="text-sm text-muted-foreground">
                     {plan.period}
                   </span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   {plan.description}
                 </p>
               </div>
@@ -130,12 +130,19 @@ export function UpgradeModal({
               <Button
                 onClick={() => handleUpgrade(plan.id)}
                 disabled={plan.disabled || isLoading !== null}
-                variant={plan.disabled ? "outline" : undefined}
+                variant={
+                  plan.disabled
+                    ? "outline"
+                    : plan.popular
+                      ? "primary"
+                      : "outline"
+                }
                 className="mb-4 w-full"
+                size="sm"
               >
                 {isLoading === plan.id ? (
                   <div className="flex items-center gap-2">
-                    <div className="h-3 w-3 animate-spin rounded-full border border-current border-t-transparent" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                     Processing...
                   </div>
                 ) : plan.disabled ? (
@@ -149,11 +156,13 @@ export function UpgradeModal({
                 )}
               </Button>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {plan.features.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-2">
-                    <Check className="h-3 w-3 flex-shrink-0" />
-                    <span className="text-xs">{feature}</span>
+                  <div key={index} className="flex items-center gap-3">
+                    <div className="rounded-full p-1">
+                      <Check className="h-3 w-3" />
+                    </div>
+                    <span className="text-sm">{feature}</span>
                   </div>
                 ))}
               </div>
@@ -161,9 +170,9 @@ export function UpgradeModal({
           ))}
         </div>
 
-        <div className="mt-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            30-day money-back guarantee. Cancel anytime.
+        <div className="mt-6 rounded-lg bg-muted/50 p-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            30-day money-back guarantee • Cancel anytime • Secure payment
           </p>
         </div>
       </DialogContent>
