@@ -18,6 +18,7 @@ const extractTextContent = (node: React.ReactNode): string => {
     return node.map(extractTextContent).join("");
   }
   if (isValidElement(node)) {
+    //@ts-expect-error - TODO: fix this
     return extractTextContent(node.props.children);
   }
   return "";
@@ -248,7 +249,7 @@ const components: Partial<Components> = {
     const match = /language-(\w+)/.exec(className || "");
     if (match) {
       return (
-        <CodeBlock language={match[1]} className={className} {...props}>
+        <CodeBlock language={match[1] ?? ""} className={className} {...props}>
           {children}
         </CodeBlock>
       );

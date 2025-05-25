@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
 
@@ -15,16 +15,18 @@ const Homepage = () => {
   return (
     <div className="flex h-screen flex-col">
       <MainPresentation />
-      <MainChat
-        isHomepage
-        messages={[]}
-        onSubmit={async (message) => {
-          const chatId = nanoid();
-          await createChat(chatId);
+      <Suspense fallback={null}>
+        <MainChat
+          isHomepage
+          messages={[]}
+          onSubmit={async (message) => {
+            const chatId = nanoid();
+            await createChat(chatId);
 
-          router.push(`/talking-stage/${chatId}?query=${message}`);
-        }}
-      />
+            router.push(`/talking-stage/${chatId}?query=${message}`);
+          }}
+        />
+      </Suspense>
     </div>
   );
 };
