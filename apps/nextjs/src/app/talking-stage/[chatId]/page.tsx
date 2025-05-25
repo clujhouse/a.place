@@ -33,7 +33,7 @@ const Homepage = () => {
   // Update document title when chat title is available
   useEffect(() => {
     if (currentChat?.title) {
-      document.title = currentChat.title;
+      document.title = currentChat.title.toLowerCase();
     }
   }, [currentChat?.title]);
 
