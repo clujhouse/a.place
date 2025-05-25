@@ -63,7 +63,7 @@ export const AppSidebarUser = () => {
     });
   }, [router]);
 
-  if (isPending || !data)
+  if (isPending || !userClientData)
     return (
       <div className="flex h-full w-full items-center justify-center">
         <Link href="/login" className="w-full" onClick={handleLinkClick}>
@@ -81,13 +81,13 @@ export const AppSidebarUser = () => {
     >
       <div className="flex items-center gap-2">
         <Avatar>
-          <AvatarImage src={data.profileImage ?? ""} />
+          {data?.profileImage && <AvatarImage src={data.profileImage} />}
           <AvatarFallback>
-            {userClientData?.user.name.charAt(0).toUpperCase()}
+            {userClientData.user.name.charAt(0).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div>
-          <p className="text-sm font-medium">{userClientData?.user.name}</p>
+          <p className="text-sm font-medium">{userClientData.user.name}</p>
           <p className="text-xs text-muted-foreground">{config.name}</p>
         </div>
       </div>

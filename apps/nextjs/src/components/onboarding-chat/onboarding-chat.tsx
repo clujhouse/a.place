@@ -32,8 +32,8 @@ function ScrollToBottom() {
   );
 }
 
-export const OnboardingChat = () => {
-  const [isOpen, setIsOpen] = useState(false);
+export const OnboardingChat = ({ open }: { open: boolean }) => {
+  const [isOpen, setIsOpen] = useState(open);
   const [currentStep, setCurrentStep] = useState("");
 
   const trpc = useTRPC();

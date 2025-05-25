@@ -102,7 +102,7 @@ export const ProfileImageUpload = ({
 
         <div
           className={cn(
-            "absolute inset-0 flex items-center justify-center rounded-full bg-black/50 transition-opacity",
+            "absolute inset-0 flex items-center justify-center bg-black/50 transition-opacity",
             isUploading
               ? "opacity-100"
               : currentImage
@@ -112,7 +112,7 @@ export const ProfileImageUpload = ({
         >
           {isUploading ? (
             <div className="flex flex-col items-center space-y-2">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              <div className="h-6 w-6 animate-spin border-2 border-white border-t-transparent" />
               <p className="text-xs text-white">Uploading...</p>
             </div>
           ) : (

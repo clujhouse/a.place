@@ -139,7 +139,7 @@ const MainChat = ({
       return;
     }
 
-    // if (!checkLimitsBeforeSearch()) return;
+    if (!checkLimitsBeforeSearch()) return;
 
     _onSubmit?.(message);
     if (chatId) {

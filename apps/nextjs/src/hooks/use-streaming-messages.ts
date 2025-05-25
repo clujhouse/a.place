@@ -128,7 +128,6 @@ export function useStreamingMessages(options?: UseStreamingMessagesOptions) {
 
       try {
         for await (const part of stream) {
-          console.log("part", part);
           processStreamPart(part, messageState);
         }
       } finally {
