@@ -1,9 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { nanoid } from "nanoid";
+
 import { Marquee } from "@acme/ui/marquee";
 
 import { ProfileCard } from "~/components/profile-card";
-import { useMainChatContext } from "~/context/main-chat-context";
+import { useCreateChat } from "~/hooks/use-create-chat";
 
 const users = [
   { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR", name: "Andrei Tudorache" },
@@ -51,10 +54,17 @@ const PromptBox = ({
 };
 
 const MainPresentation = () => {
-  const { sendMessage } = useMainChatContext();
+  const router = useRouter();
+  const { createChat } = useCreateChat();
+
+  const handleClick = async (prompt: string) => {
+    const chatId = nanoid();
+    await createChat(chatId);
+    router.push(`/talking-stage/${chatId}?query=${prompt}`);
+  };
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center gap-4 px-4">
+    <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pb-12">
       <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
         find and be found.
       </h1>
@@ -71,12 +81,20 @@ const MainPresentation = () => {
       <div className="flex w-full flex-col gap-2">
         <Marquee className="w-full p-0 [--duration:80s] [--gap:0.5rem]" reverse>
           {prompts.slice(0, Math.ceil(prompts.length / 2)).map((prompt) => (
-            <PromptBox key={prompt} prompt={prompt} onClick={sendMessage} />
+            <PromptBox
+              key={prompt}
+              prompt={prompt}
+              onClick={() => handleClick(prompt)}
+            />
           ))}
         </Marquee>
         <Marquee className="w-full p-0 [--duration:80s] [--gap:0.5rem]">
           {prompts.slice(Math.ceil(prompts.length / 2)).map((prompt) => (
-            <PromptBox key={prompt} prompt={prompt} onClick={sendMessage} />
+            <PromptBox
+              key={prompt}
+              prompt={prompt}
+              onClick={() => handleClick(prompt)}
+            />
           ))}
         </Marquee>
       </div>

@@ -13,11 +13,12 @@ import { createSystemPromptWithProfiles } from "../prompts/main";
 import { checkSearchLimits } from "../rate-limit";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
+import { rerankWithVoyage } from "../utils/rerank";
 
 export const mainRouter = {
   getSearchUsage: protectedProcedure.query(async ({ ctx }) => {
     // If user is not logged in, return null
-    if (!ctx.session?.user?.id) {
+    if (!ctx.session.user.id) {
       return null;
     }
 
@@ -80,7 +81,7 @@ export const mainRouter = {
       const { chatId, input: userInput } = input;
 
       // Check search limits for free users
-      await checkSearchLimits(ctx);
+      // await checkSearchLimits(ctx);
 
       // Create embedding for the user's message
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
@@ -102,11 +103,22 @@ export const mainRouter = {
         )
         .leftJoin(user, eq(profile.userId, user.id))
         .where(ne(profile.userId, ctx.session.user.id))
-        .limit(10);
+        .limit(20); // Increased limit to get more candidates for reranking
 
-      // Write the SQL query to a file for debugging
+      const initialProfiles = await query;
 
-      const similarProfiles = await query;
+      // Rerank the profiles using Voyage AI for better relevance
+      const profileItems = initialProfiles.map((profile) => ({
+        text: profile.text,
+        data: profile,
+      }));
+
+      const similarProfiles = await rerankWithVoyage(
+        client,
+        userInput,
+        profileItems,
+        { topK: 5, relevanceThreshold: 0.5 },
+      );
 
       // Get the current user's chat
       const userChat = await ctx.db.query.chat.findFirst({

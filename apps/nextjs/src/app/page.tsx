@@ -1,49 +1,31 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
-import { skipToken, useQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 
-import { messageSchema } from "@acme/validators/message";
-
 import { useCreateChat } from "~/hooks/use-create-chat";
-import { useTRPC } from "~/trpc/react";
 import MainChat from "./_components/main-chat";
 import MainPresentation from "./_components/main-presentation";
 
 const Homepage = () => {
-  const [chatId, setChatId] = useState<string | null>(null);
   const router = useRouter();
-  const trpc = useTRPC();
-  const { createChat, createdChat } = useCreateChat();
-
-  const { data } = useQuery(
-    trpc.chat.get.queryOptions(createdChat ?? skipToken),
-  );
-
-  const message = useMemo(() => {
-    return data?.map((message) => messageSchema.parse(message));
-  }, [data]);
-
-  useEffect(() => {
-    if (chatId) {
-      router.push(`/talking-stage/${chatId}`);
-    }
-  }, [chatId, router]);
+  const { createChat } = useCreateChat();
 
   return (
-    <MainChat
-      messages={message ?? []}
-      chatId={() => {
-        if (chatId) return chatId;
+    <div className="flex h-screen flex-col">
+      <MainPresentation />
+      <MainChat
+        isHomepage
+        messages={[]}
+        onSubmit={async (message) => {
+          const chatId = nanoid();
+          await createChat(chatId);
 
-        const id = nanoid();
-        setChatId(id);
-        return createChat(id);
-      }}
-      messageReplacement={<MainPresentation />}
-    />
+          router.push(`/talking-stage/${chatId}?query=${message}`);
+        }}
+      />
+    </div>
   );
 };
 

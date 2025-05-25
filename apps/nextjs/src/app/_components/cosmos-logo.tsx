@@ -10,69 +10,69 @@ interface CosmosLogoProps {
   href?: string;
 }
 
-// Predefined star configurations to avoid random generation on each render
-const STAR_VARIANTS = [
-  {
-    id: 0,
-    size: 1.5,
-    delay: 0,
-    duration: 4,
-    positions: {
-      x: [20, -30, 40],
-      y: [10, -5, 12],
-    },
-  },
-  {
-    id: 1,
-    size: 2,
-    delay: 0.5,
-    duration: 5,
-    positions: {
-      x: [-25, 35, -20],
-      y: [-8, 15, -10],
-    },
-  },
-  {
-    id: 2,
-    size: 1,
-    delay: 1,
-    duration: 3.5,
-    positions: {
-      x: [45, -10, 30],
-      y: [5, -12, 8],
-    },
-  },
-  {
-    id: 3,
-    size: 2.5,
-    delay: 1.5,
-    duration: 4.5,
-    positions: {
-      x: [-40, 25, -35],
-      y: [12, -3, 10],
-    },
-  },
-  {
-    id: 4,
-    size: 1.8,
-    delay: 2,
-    duration: 5.5,
-    positions: {
-      x: [30, -45, 20],
-      y: [-10, 8, -5],
-    },
-  },
-  {
-    id: 5,
-    size: 1.2,
-    delay: 0.8,
-    duration: 4.2,
-    positions: {
-      x: [-15, 40, -25],
-      y: [8, -14, 6],
-    },
-  },
-];
+// // Predefined star configurations to avoid random generation on each render
+// const STAR_VARIANTS = [
+//   {
+//     id: 0,
+//     size: 1.5,
+//     delay: 0,
+//     duration: 4,
+//     positions: {
+//       x: [20, -30, 40],
+//       y: [10, -5, 12],
+//     },
+//   },
+//   {
+//     id: 1,
+//     size: 2,
+//     delay: 0.5,
+//     duration: 5,
+//     positions: {
+//       x: [-25, 35, -20],
+//       y: [-8, 15, -10],
+//     },
+//   },
+//   {
+//     id: 2,
+//     size: 1,
+//     delay: 1,
+//     duration: 3.5,
+//     positions: {
+//       x: [45, -10, 30],
+//       y: [5, -12, 8],
+//     },
+//   },
+//   {
+//     id: 3,
+//     size: 2.5,
+//     delay: 1.5,
+//     duration: 4.5,
+//     positions: {
+//       x: [-40, 25, -35],
+//       y: [12, -3, 10],
+//     },
+//   },
+//   {
+//     id: 4,
+//     size: 1.8,
+//     delay: 2,
+//     duration: 5.5,
+//     positions: {
+//       x: [30, -45, 20],
+//       y: [-10, 8, -5],
+//     },
+//   },
+//   {
+//     id: 5,
+//     size: 1.2,
+//     delay: 0.8,
+//     duration: 4.2,
+//     positions: {
+//       x: [-15, 40, -25],
+//       y: [8, -14, 6],
+//     },
+//   },
+// ];
 
 export function CosmosLogo({ href = "/" }: CosmosLogoProps) {
   const pathname = usePathname();
@@ -92,7 +92,7 @@ export function CosmosLogo({ href = "/" }: CosmosLogoProps) {
         </div>
 
         {/* Floating stars/particles */}
-        {STAR_VARIANTS.map((star) => (
+        {/* {STAR_VARIANTS.map((star) => (
           <motion.div
             key={star.id}
             className="absolute h-px w-px rounded-full bg-yellow-200"
@@ -118,7 +118,7 @@ export function CosmosLogo({ href = "/" }: CosmosLogoProps) {
               boxShadow: `0 0 ${star.size * 2}px rgba(251, 191, 36, 0.8)`,
             }}
           />
-        ))}
+        ))} */}
 
         {/* Main text with gradient */}
         <motion.span

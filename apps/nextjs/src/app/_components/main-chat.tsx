@@ -1,45 +1,57 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { ArrowDown, Loader2 } from "lucide-react";
+import { parseAsString, useQueryState } from "nuqs";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 import type { AMessage } from "@acme/validators/message";
-import { UpgradeModal } from "@acme/ui";
-import { ResizablePanel, ResizablePanelGroup } from "@acme/ui/resizable";
+import { Button, UpgradeModal } from "@acme/ui";
+import { Icon } from "@acme/ui/icon";
 import { toast } from "@acme/ui/toast";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
 import { useAppContext } from "~/context/app-context";
-import { MainChatProvider } from "~/context/main-chat-context";
 import { useSearchLimits } from "~/hooks/use-search-limits";
 import { useSubscription } from "~/hooks/use-subscription";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
+import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
 
 interface MainChatProps {
   messages: AMessage[];
-  chatId: string | (() => Promise<string> | string);
-  messageReplacement?: React.ReactNode;
+  chatId?: string;
+  onSubmit?: (message: string) => void;
+  isHomepage?: boolean;
 }
 
 function ScrollToBottom() {
   const { isAtBottom, scrollToBottom } = useStickToBottomContext();
-
   return (
     !isAtBottom && (
-      <button
-        className="i-ph-arrow-circle-down-fill absolute bottom-0 left-[50%] translate-x-[-50%] rounded-lg text-4xl"
+      <Button
+        className="absolute bottom-0 right-0 translate-x-[-50%] rounded-lg text-4xl"
         onClick={() => scrollToBottom()}
-      />
+      >
+        <Icon as={ArrowDown} />
+      </Button>
     )
   );
 }
 
-const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
+const MainChat = ({
+  messages,
+  chatId,
+  isHomepage,
+  onSubmit: _onSubmit,
+}: MainChatProps) => {
+  const [query, setQuery] = useQueryState("query", parseAsString);
+
+  const initialQueryRefRun = useRef<boolean>(false);
+
   const { isChatLoading, setIsChatLoading } = useAppContext();
   const { currentPlan } = useSubscription();
   const {
@@ -117,55 +129,56 @@ const MainChat = ({ messages, chatId, messageReplacement }: MainChatProps) => {
   );
 
   const onSubmit = async (message: string) => {
-    if (!checkLimitsBeforeSearch()) {
-      return;
+    if (!checkLimitsBeforeSearch()) return;
+
+    _onSubmit?.(message);
+    if (chatId) {
+      setIsChatLoading(true);
+
+      mutate({ chatId, input: message });
     }
-
-    setIsChatLoading(true);
-    const stringChatId = typeof chatId === "string" ? chatId : await chatId();
-
-    mutate({ chatId: stringChatId, input: message });
   };
 
+  useEffect(() => {
+    if (initialQueryRefRun.current) return;
+
+    if (query && chatId) {
+      initialQueryRefRun.current = true;
+      onSubmit(query);
+      setQuery(null);
+    }
+  }, [query, mutate, chatId, setQuery]);
+
   return (
-    <MainChatProvider sendMessage={onSubmit}>
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel>
-          <StickToBottom
-            className="flex h-screen flex-col"
-            resize="smooth"
-            initial="smooth"
-          >
-            <StickToBottom.Content className="mx-auto flex h-full max-w-[655px] flex-col gap-6 p-4 pb-12">
-              {messageReplacement
-                ? messageReplacement
-                : messages.map((message) => (
-                    <ChatMessage key={message.id} message={message} />
-                  ))}
-              {isChatLoading && (
-                <Loader2 className="mt-2 h-4 w-4 animate-spin" />
-              )}
-            </StickToBottom.Content>
-
-            <ScrollToBottom />
-            <ChatInput
-              className="mx-auto mt-auto max-w-[655px] p-4"
-              onSubmit={onSubmit}
-              isLoading={isChatLoading}
-            />
-          </StickToBottom>
-        </ResizablePanel>
-        {/* <ResizableHandle /> */}
-        {/* <ResizablePanel defaultSize={30}></ResizablePanel> */}
-      </ResizablePanelGroup>
-
+    <>
       <UpgradeModal
         isOpen={isUpgradeModalOpen}
         onClose={() => setIsUpgradeModalOpen(false)}
         onUpgrade={handleUpgrade}
         currentMembership={currentPlan}
       />
-    </MainChatProvider>
+      <StickToBottom
+        className={cn("flex flex-col", !isHomepage && "h-screen")}
+        resize="smooth"
+        initial="smooth"
+      >
+        {!isHomepage && (
+          <StickToBottom.Content className="mx-auto flex max-w-[655px] flex-col gap-6 p-4">
+            {messages.map((message) => (
+              <ChatMessage key={message.id} message={message} />
+            ))}
+            {isChatLoading && <Loader2 className="mt-2 h-4 w-4 animate-spin" />}
+          </StickToBottom.Content>
+        )}
+
+        <ScrollToBottom />
+        <ChatInput
+          className="mx-auto mt-auto max-w-[655px] p-4"
+          onSubmit={onSubmit}
+          isLoading={isChatLoading}
+        />
+      </StickToBottom>
+    </>
   );
 };
 
