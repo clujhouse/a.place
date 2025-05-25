@@ -9,12 +9,7 @@ const users = [
   { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR", name: "Andrei Tudorache" },
   { id: "7nQIvxYySt6D1eToD4dV41QJfAzswu6j", name: "Andrew Dorobantu" },
   { id: "VyVByuQ2fKMDxQx9s3tVXmPEKcd0DngJ", name: "Andrew Cruceru" },
-  { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR", name: "Andrei Tudorache" },
-  { id: "7nQIvxYySt6D1eToD4dV41QJfAzswu6j", name: "Andrew Dorobantu" },
-  { id: "VyVByuQ2fKMDxQx9s3tVXmPEKcd0DngJ", name: "Andrew Cruceru" },
-  { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR", name: "Andrei Tudorache" },
-  { id: "7nQIvxYySt6D1eToD4dV41QJfAzswu6j", name: "Andrew Dorobantu" },
-  { id: "VyVByuQ2fKMDxQx9s3tVXmPEKcd0DngJ", name: "Andrew Cruceru" },
+  { id: "gQeDVeP7mtQJPM9ZCYzGMRVIHEkNC854", name: "Kevin" },
 ];
 
 const prompts = [
