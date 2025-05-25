@@ -25,8 +25,6 @@ import ClujhouseSimpleIcon from "~/components/clujhouse";
 import { SearchUsageIndicator } from "~/components/search-usage-indicator";
 import { useTRPC } from "~/trpc/react";
 import { AppSidebarChats } from "./app-sidebar-chats";
-import { AppSidebarPlanIndicator } from "./app-sidebar-plan-indicator";
-import { AppSidebarProfileCompletion } from "./app-sidebar-profile-completion";
 import { AppSidebarUser } from "./app-sidebar-user";
 import { CosmosLogo } from "./cosmos-logo";
 
@@ -110,9 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter>
         <SearchUsageIndicator />
 
-        <AppSidebarPlanIndicator />
-
-        <AppSidebarProfileCompletion />
+        {/* <AppSidebarPlanIndicator /> */}
 
         <AppSidebarUser />
       </SidebarFooter>

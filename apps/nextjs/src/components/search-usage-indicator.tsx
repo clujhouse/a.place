@@ -70,7 +70,7 @@ export function SearchUsageIndicator() {
 
   return (
     <>
-      <div className="border-b p-3">
+      <div className="border bg-background p-3">
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">Daily searches</span>
           <span className={isNearLimit ? "font-medium" : ""}>
