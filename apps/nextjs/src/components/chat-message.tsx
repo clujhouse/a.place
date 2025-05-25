@@ -23,9 +23,8 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
         {message.parts.map((part) => {
           return match(part)
             .with({ type: "text" }, (textPart) => {
-              return (
-                <ReactMarkdown key={part.id}>{textPart.text}</ReactMarkdown>
-              );
+              return textPart.text;
+              // <ReactMarkdown key={part.id}>{textPart.text}</ReactMarkdown>
             })
             .with({ type: "profile" }, (profilePart) => {
               return (

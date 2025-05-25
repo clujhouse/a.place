@@ -47,6 +47,7 @@
     "node-vibrant": "^4.0.3",
     "posthog-js": "^1.246.0",
     "posthog-node": "^4.17.2",
+    "nuqs": "^2.4.3",
     "react": "catalog:react19",
     "react-confetti": "^6.4.0",
     "react-dom": "catalog:react19",

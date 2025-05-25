@@ -7,21 +7,16 @@ import { ThemeProvider, ThemeToggle } from "@acme/ui/theme";
 import { Toaster } from "@acme/ui/toast";
 
 import { TRPCReactProvider } from "~/trpc/react";
-
 import { PostHogProvider } from "../components/PostHogProvider";
 
 import "~/app/globals.css";
 import "~/app/prosemirror.css";
 
-import { env } from "~/env";
-
-import "@vidstack/react/player/styles/default/theme.css";
-import "@vidstack/react/player/styles/default/layouts/audio.css";
-import "@vidstack/react/player/styles/default/layouts/video.css";
-
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
+import { env } from "~/env";
 import { AppProvider } from "../context/app-context";
 import { AppSidebar } from "./_components/app-sidebar";
 import { HamburgerMenu } from "./_components/hamburger-menu";
@@ -75,16 +70,18 @@ export default function RootLayout(props: { children: React.ReactNode }) {
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <ThemeToggle />
             <TRPCReactProvider>
-              <SidebarProvider className="md:flex md|min-h-svh">
-                <AppProvider>
-                  <AppSidebar />
-                  <HamburgerMenu />
-                  <main className="w-full">
-                    {/* <SidebarTrigger /> */}
-                    {props.children}
-                  </main>
-                </AppProvider>
-              </SidebarProvider>
+              <NuqsAdapter>
+                <SidebarProvider className="md:flex md:min-h-svh">
+                  <AppProvider>
+                    <AppSidebar />
+                    <HamburgerMenu />
+                    <main className="w-full">
+                      {/* <SidebarTrigger /> */}
+                      {props.children}
+                    </main>
+                  </AppProvider>
+                </SidebarProvider>
+              </NuqsAdapter>
             </TRPCReactProvider>
             <Toaster />
           </ThemeProvider>

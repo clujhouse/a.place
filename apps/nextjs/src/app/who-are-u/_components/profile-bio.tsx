@@ -259,12 +259,6 @@ export const ProfileBio = () => {
           })}
         </div>
       </div>
-
-      <div className="mt-auto flex flex-wrap gap-1">
-        <Badge variant="outline">developer</Badge>
-        <Badge variant="outline">brainrot</Badge>
-        <Badge variant="outline">part of the team</Badge>
-      </div>
     </div>
   );
 };
