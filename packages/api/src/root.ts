@@ -1,5 +1,6 @@
 import { chatRouter } from "./router/chat";
 import { conversationRouter } from "./router/conversation";
+import { houseRouter } from "./router/house";
 import { llmRouter } from "./router/llm";
 import { mainRouter } from "./router/main";
 import { onboardingRouter } from "./router/onboarding";
@@ -13,6 +14,7 @@ export const appRouter = createTRPCRouter({
   profile: profileRouter,
   main: mainRouter,
   chat: chatRouter,
+  house: houseRouter,
   similarProfiles: similarProfilesRouter,
   conversation: conversationRouter,
   profileNote: profileNoteRouter,

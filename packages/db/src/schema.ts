@@ -3,6 +3,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   customType,
+  decimal,
   index,
   int,
   json,
@@ -42,7 +43,7 @@ export const profile = mysqlTable("profile", {
 
   completionPercentage: int("completion_percentage").notNull().default(0),
   isOnboarded: boolean("is_onboarded").notNull().default(false),
-
+  houseId: varchar("house_id", { length: 36 }).references(() => house.id),
   text: text("text"),
   shortBio: text("short_bio"),
   embedding: vector("embedding", { length: 1024 }),
@@ -202,6 +203,25 @@ export const onboardingStateRelations = relations(
     }),
   }),
 );
+
+export const house = mysqlTable("house", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  name: varchar("name", { length: 255 }),
+  description: text("description").notNull(),
+  locationName: varchar("location_name", { length: 255 }),
+  latitude: decimal("latitude", { precision: 10, scale: 8 }),
+  longitude: decimal("longitude", { precision: 11, scale: 8 }),
+  color: varchar("color", { length: 36 }).notNull(),
+  logoImage: json("logo_image").$type<string>(),
+  images: json("images").$type<string[]>().default([]),
+  ownerId: varchar("owner_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
 
 export type DBMessage = InferSelectModel<typeof message>;
 export type DBProfileNote = InferSelectModel<typeof profileNote>;
