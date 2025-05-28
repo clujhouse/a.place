@@ -1,6 +1,6 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
-import { generateObject, smoothStream, streamText } from "ai";
+import { generateObject, generateText, smoothStream, streamText } from "ai";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import type { AMessage } from "@acme/validators/message";
 import { onboardingState, profile, user } from "@acme/db/schema";
 
 import { onboardingWithContext } from "../prompts/onboarding";
+import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
@@ -250,17 +251,80 @@ export const onboardingRouter = {
 
       // If we've reached the complete step, automatically complete onboarding
       if (nextStep === "complete") {
-        // Upsert profile: set isOnboarded: true
+        // Yield profile generation start
+        yield {
+          type: "profileGenerating" as const,
+          status: "generating" as const,
+        };
+
+        // Create a conversation context from the onboarding data for AI generation
+        const conversationContext = [];
+
+        if (updatedExtractedName) {
+          conversationContext.push(`user: My name is ${updatedExtractedName}`);
+        }
+
+        if (updatedExtractedLocation) {
+          conversationContext.push(
+            `user: I'm from ${updatedExtractedLocation}`,
+          );
+        }
+
+        if (updatedExtractedStory) {
+          conversationContext.push(`user: ${updatedExtractedStory}`);
+        }
+
+        // Generate profile content using AI if we have any onboarding data
+        let profileText = "";
+        let shortBio = "";
+
+        if (conversationContext.length > 0) {
+          // Generate full profile text and short bio in parallel using AI
+          const [generatedProfileText, generatedShortBio] = await Promise.all([
+            generateText({
+              model: google("gemini-2.5-flash-preview-04-17"),
+              experimental_telemetry: { isEnabled: true },
+              prompt: `${profilePrompt}\n\n## Conversation Context:\n${conversationContext.join("\n")}`,
+            }),
+            generateText({
+              model: google("gemini-2.5-flash-preview-04-17"),
+              experimental_telemetry: { isEnabled: true },
+              prompt: `${shortBioPrompt}\n\n## Conversation Context:\n${conversationContext.join("\n")}`,
+            }),
+          ]);
+
+          profileText = generatedProfileText.text;
+          shortBio = generatedShortBio.text;
+        } else {
+          // Fallback to default content if no onboarding data
+          profileText = `# ${updatedExtractedName || "Welcome"}\n\nI'm excited to be part of this community and looking forward to connecting with others!`;
+          shortBio = "New member excited to connect and share experiences.";
+        }
+
+        // Upsert profile with AI-generated content
         await ctx.db
           .insert(profile)
           .values({
             userId: ctx.session.user.id,
-            completionPercentage: 0,
+            completionPercentage: 100,
             isOnboarded: true,
+            text: profileText,
+            shortBio: shortBio,
           })
           .onDuplicateKeyUpdate({
-            set: { isOnboarded: true },
+            set: {
+              isOnboarded: true,
+              text: profileText,
+              shortBio: shortBio,
+              completionPercentage: 100,
+            },
           });
+
+        // Yield profile generation complete
+        yield {
+          type: "profileGenerating" as const,
+          status: "complete" as const,
+        };
       }
 
       yield {
@@ -277,26 +341,4 @@ export const onboardingRouter = {
         },
       };
     }),
-
-  completeOnboarding: protectedProcedure.mutation(async ({ ctx }) => {
-    // Upsert profile: set isOnboarded: true
-    await ctx.db
-      .insert(profile)
-      .values({
-        userId: ctx.session.user.id,
-        completionPercentage: 0,
-        isOnboarded: true,
-      })
-      .onDuplicateKeyUpdate({
-        set: { isOnboarded: true },
-      });
-
-    // Update onboarding state
-    await ctx.db
-      .update(onboardingState)
-      .set({ completedAt: new Date() })
-      .where(eq(onboardingState.userId, ctx.session.user.id));
-
-    return { success: true };
-  }),
 } satisfies TRPCRouterRecord;

@@ -16,6 +16,7 @@ import { ThemeToggle } from "@acme/ui/theme";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
+import ClujhouseIcon from "~/components/clujhouse-icon";
 import { useStreamingMessages } from "~/hooks/use-streaming-messages";
 import { useTRPC } from "~/trpc/react";
 import { OnboardingStepper } from "./onboarding-stepper";
@@ -37,6 +38,7 @@ function ScrollToBottom() {
 export const OnboardingChat = ({ open }: { open: boolean }) => {
   const [isOpen, setIsOpen] = useState(open);
   const [currentStep, setCurrentStep] = useState("");
+  const [isProfileGenerating, setIsProfileGenerating] = useState(false);
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
@@ -45,6 +47,13 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
     useStreamingMessages({
       onStep: (step) => setCurrentStep(step),
       onExtracted: (data) => console.log("Extracted data:", data),
+      onProfileGenerating: (status) => {
+        setIsProfileGenerating(status === "generating");
+        if (status === "complete") {
+          // Close dialog after a short delay to show completion
+          setTimeout(() => setIsOpen(false), 1000);
+        }
+      },
     });
 
   // Get onboarding state
@@ -176,12 +185,29 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
                 </div>
               )}
             </div>
+
+            {/* Show clubhouse loader when generating profile - positioned absolutely */}
+            {isProfileGenerating && (
+              <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+                <div className="flex flex-col items-center space-y-4">
+                  <ClujhouseIcon />
+                  <div className="text-center">
+                    <p className="text-lg font-medium">
+                      creating your profile...
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      building something awesome with buildspace vibes
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </StickToBottom.Content>
 
           <ScrollToBottom />
 
-          {/* Hide chat input when showing image upload */}
-          {currentStep !== "image" && (
+          {/* Hide chat input when showing image upload or generating profile */}
+          {currentStep !== "image" && !isProfileGenerating && (
             <ChatInput
               className="mx-auto max-w-xl"
               onSubmit={(message) =>

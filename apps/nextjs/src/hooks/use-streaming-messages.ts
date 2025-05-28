@@ -4,14 +4,16 @@ import { match } from "ts-pattern";
 import type { AMessage, TextPart } from "@acme/validators/message";
 
 type StreamPart =
-  | { type: "text"; text: string }
+  | { type: "text"; id: string; text: string }
   | { type: "messageId"; id: string }
   | { type: "step"; step?: string }
-  | { type: "extracted"; data: any };
+  | { type: "extracted"; data: any }
+  | { type: "profileGenerating"; status: "generating" | "complete" };
 
 interface UseStreamingMessagesOptions {
   onStep?: (step: string) => void;
   onExtracted?: (data: any) => void;
+  onProfileGenerating?: (status: "generating" | "complete") => void;
 }
 
 export function useStreamingMessages(options?: UseStreamingMessagesOptions) {
@@ -114,6 +116,11 @@ export function useStreamingMessages(options?: UseStreamingMessagesOptions) {
         .with({ type: "extracted" }, ({ data }) => {
           if (options?.onExtracted) {
             options.onExtracted(data);
+          }
+        })
+        .with({ type: "profileGenerating" }, ({ status }) => {
+          if (options?.onProfileGenerating) {
+            options.onProfileGenerating(status);
           }
         })
         .exhaustive();
