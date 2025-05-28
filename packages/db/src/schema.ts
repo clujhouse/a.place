@@ -208,7 +208,7 @@ export const house = mysqlTable("house", {
     .primaryKey()
     .notNull()
     .$defaultFn(() => nanoid()),
-  name: varchar("name", { length: 255 }),
+  name: varchar("name", { length: 255 }).notNull(),
   description: text("description").notNull(),
   locationName: varchar("location_name", { length: 255 }),
   latitude: decimal("latitude", { precision: 10, scale: 8 }),

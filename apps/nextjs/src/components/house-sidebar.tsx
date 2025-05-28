@@ -23,7 +23,6 @@ export function HouseSidebar({
   onOpenChange,
 }: HouseSidebarProps) {
   const trpc = useTRPC();
-  const { data: session } = authClient.useSession();
 
   const { data: house, isLoading } = useQuery(
     trpc.house.getById.queryOptions(houseId),
@@ -79,7 +78,7 @@ export function HouseSidebar({
                   </p>
                 )}
                 <p className="text-sm text-muted-foreground">
-                  {house?.latitude && house?.longitude
+                  {house?.latitude && house.longitude
                     ? `Coordinates: ${parseFloat(house.latitude).toFixed(4)}, ${parseFloat(house.longitude).toFixed(4)}`
                     : "Location coordinates not specified"}
                 </p>
