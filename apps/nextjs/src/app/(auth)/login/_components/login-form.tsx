@@ -68,70 +68,30 @@ export function LoginForm({
     setError("");
 
     try {
-      // Verify OTP and sign in
-      let success = false;
-      let errorMessage =
-        "Invalid verification code. Please try again or request a new code.";
+      // Verify OTP and sign in using Better Auth
+      const { data, error } = await authClient.signIn.emailOtp({
+        email,
+        otp,
+      });
 
-      try {
-        const response = await fetch("/api/auth/sign-in/email-otp", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            otp,
-          }),
-        });
-
-        // Check if the response was successful (status code 2xx)
-        if (response.ok) {
-          success = true;
-        } else {
-          // If response is not ok, try to get error message
-          try {
-            const errorData = await response.json();
-            if (errorData?.message) {
-              errorMessage = errorData.message;
-            }
-          } catch (jsonError) {
-            // If we can't parse the JSON, use the default error message
-            console.error("Error parsing JSON:", jsonError);
-          }
-
-          // Set the error message immediately
-          setError(errorMessage);
-
-          // Throw an error to prevent continuing
-          throw new Error(errorMessage);
-        }
-      } catch (fetchError) {
-        console.error("Fetch error:", fetchError);
-        // Set the error message
-        setError(errorMessage);
-        throw fetchError;
+      if (error) {
+        setError(
+          error.message ||
+            "Invalid verification code. Please try again or request a new code.",
+        );
+        return;
       }
 
-      // Only proceed if verification was successful
-      if (success) {
+      if (data) {
         // Redirect to the homepage after successful login
         router.push("/");
         router.refresh();
-      } else {
-        // This should not happen, but just in case
-        setError(errorMessage);
-        throw new Error("Verification failed");
       }
     } catch (err: any) {
       console.error("Verification error:", err);
-
-      // Make sure we have an error message set
-      if (!error) {
-        setError(
-          "Invalid verification code. Please try again or request a new code.",
-        );
-      }
+      setError(
+        "Invalid verification code. Please try again or request a new code.",
+      );
     } finally {
       setIsLoading(false);
     }
