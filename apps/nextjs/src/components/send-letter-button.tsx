@@ -28,12 +28,18 @@ export function SendLetterButton({
     // If authenticated, the MessageModal will handle the rest
   };
 
+  const handleMessageSent = () => {
+    // Redirect to letters page after sending message
+    router.push("/letters");
+  };
+
   // If user is authenticated, show the MessageModal
   if (session?.user) {
     return (
       <MessageModal
         receiverId={receiverId}
         receiverName={receiverName}
+        onMessageSent={handleMessageSent}
         trigger={
           <Button size="lg" className="w-full sm:w-auto">
             <Mail className="mr-2" />

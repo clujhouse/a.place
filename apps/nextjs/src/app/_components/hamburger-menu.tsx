@@ -1,26 +1,28 @@
 "use client";
 
-import { Button } from "@acme/ui/button";
+import { usePathname } from "next/navigation";
+import { Menu } from "lucide-react";
+
+import { Button } from "@acme/ui";
 import { useSidebar } from "@acme/ui/sidebar";
 
 export function HamburgerMenu() {
+  const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
 
+  // Hide hamburger menu on public profile pages - AFTER all hooks are called
+  if (pathname.startsWith("/profile/")) {
+    return null;
+  }
+
   return (
-    <div className="fixed left-4 top-4 z-50 block md:hidden">
-      <Button
-        variant="outline"
-        size="icon"
-        onClick={toggleSidebar}
-        className="h-10 w-10 rounded-lg bg-background shadow-md hover:bg-accent"
-      >
-        <div className="flex flex-col items-center justify-center space-y-1">
-          <div className="h-0.5 w-4 bg-current"></div>
-          <div className="h-0.5 w-4 bg-current"></div>
-          <div className="h-0.5 w-4 bg-current"></div>
-        </div>
-        <span className="sr-only">Toggle sidebar</span>
-      </Button>
-    </div>
+    <Button
+      variant="ghost"
+      size="icon"
+      className="fixed left-4 top-4 z-50 md:hidden"
+      onClick={toggleSidebar}
+    >
+      <Menu className="h-5 w-5" />
+    </Button>
   );
 }

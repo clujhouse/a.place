@@ -22,12 +22,14 @@ interface MessageModalProps {
   receiverId: string;
   receiverName: string;
   trigger?: React.ReactNode;
+  onMessageSent?: () => void;
 }
 
 export function MessageModal({
   receiverId,
   receiverName,
   trigger,
+  onMessageSent,
 }: MessageModalProps) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -44,6 +46,8 @@ export function MessageModal({
         void queryClient.invalidateQueries({
           queryKey: trpc.conversation.getConversations.queryKey(),
         });
+        // Call the callback if provided
+        onMessageSent?.();
       },
       onError: () => {
         toast.error("Failed to send letter");
@@ -70,7 +74,7 @@ export function MessageModal({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="mx-4 w-[calc(100vw-2rem)] max-w-md sm:mx-auto sm:w-full">
         <DialogHeader>
           <DialogTitle>Send Letter</DialogTitle>
           <DialogDescription>Send a letter to {receiverName}</DialogDescription>
@@ -83,7 +87,7 @@ export function MessageModal({
             rows={4}
             maxLength={1000}
           />
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-muted-foreground">
               {message.length}/1000
             </span>
@@ -92,12 +96,14 @@ export function MessageModal({
                 variant="outline"
                 onClick={() => setOpen(false)}
                 disabled={isPending}
+                className="flex-1 sm:flex-none"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSend}
                 disabled={!message.trim() || isPending}
+                className="flex-1 sm:flex-none"
               >
                 <Send className="mr-2 h-4 w-4" />
                 {isPending ? "Sending..." : "Send"}

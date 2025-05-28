@@ -15,9 +15,9 @@ export const contentType = "image/png";
 export default async function Image({
   params,
 }: {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }) {
-  const { userId } = params;
+  const { userId } = await params;
 
   try {
     // Create tRPC context and caller
@@ -43,6 +43,7 @@ export default async function Image({
               justifyContent: "center",
               color: "white",
               fontFamily: "Inter, sans-serif",
+              fontWeight: "bold",
             }}
           >
             Profile Not Found
@@ -56,57 +57,83 @@ export default async function Image({
 
     const userName = profile.user?.name || "Unknown User";
     const shortBio = profile.shortBio || "";
+    const profileImage = profile.user?.image;
 
     return new ImageResponse(
       (
         <div
           style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
             width: "100%",
             height: "100%",
             display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            position: "relative",
             fontFamily: "Inter, sans-serif",
           }}
         >
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.95)",
-              borderRadius: "24px",
-              padding: "60px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              textAlign: "center",
-              maxWidth: "900px",
-              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            }}
-          >
-            {/* Profile Avatar */}
-            {profile.user?.image && (
-              <img
-                src={profile.user.image}
-                alt={userName}
-                style={{
-                  width: "120px",
-                  height: "120px",
-                  borderRadius: "60px",
-                  objectFit: "cover",
-                  border: "4px solid #667eea",
-                  marginBottom: "20px",
-                }}
-              />
-            )}
-
-            {/* Name */}
+          {/* Background Image or Gradient */}
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt={userName}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
+            />
+          ) : (
             <div
               style={{
-                fontSize: "56px",
+                width: "100%",
+                height: "100%",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                position: "absolute",
+                top: 0,
+                left: 0,
+              }}
+            />
+          )}
+
+          {/* Dark overlay for better text readability */}
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              background: "rgba(0, 0, 0, 0.4)",
+              position: "absolute",
+              top: 0,
+              left: 0,
+            }}
+          />
+
+          {/* Text Content Overlay */}
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: "60px",
+              position: "relative",
+              zIndex: 1,
+              textAlign: "center",
+            }}
+          >
+            {/* User Name */}
+            <div
+              style={{
+                fontSize: "72px",
                 fontWeight: "bold",
-                color: "#1f2937",
-                marginBottom: "16px",
-                lineHeight: "1.2",
+                color: "white",
+                marginBottom: "20px",
+                lineHeight: "1.1",
+                textShadow: "0 4px 8px rgba(0, 0, 0, 0.8)",
+                maxWidth: "1000px",
               }}
             >
               {userName}
@@ -116,15 +143,15 @@ export default async function Image({
             {shortBio && (
               <div
                 style={{
-                  fontSize: "24px",
-                  color: "#6b7280",
-                  marginBottom: "24px",
+                  fontSize: "32px",
+                  color: "rgba(255, 255, 255, 0.9)",
                   lineHeight: "1.4",
-                  maxWidth: "600px",
+                  maxWidth: "800px",
+                  textShadow: "0 2px 4px rgba(0, 0, 0, 0.8)",
                 }}
               >
-                {shortBio.length > 100
-                  ? `${shortBio.slice(0, 100)}...`
+                {shortBio.length > 120
+                  ? `${shortBio.slice(0, 120)}...`
                   : shortBio}
               </div>
             )}
@@ -133,12 +160,14 @@ export default async function Image({
             {profile.houseId && (
               <div
                 style={{
-                  background: "#f3f4f6",
+                  background: "rgba(255, 255, 255, 0.9)",
                   color: "#374151",
-                  padding: "8px 16px",
-                  borderRadius: "20px",
-                  fontSize: "18px",
+                  padding: "12px 24px",
+                  borderRadius: "25px",
+                  fontSize: "24px",
                   fontWeight: "600",
+                  marginTop: "30px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.3)",
                 }}
               >
                 House Member
@@ -166,6 +195,7 @@ export default async function Image({
             justifyContent: "center",
             color: "white",
             fontFamily: "Inter, sans-serif",
+            fontWeight: "bold",
           }}
         >
           Profile

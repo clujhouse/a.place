@@ -30,6 +30,7 @@ import { AppSidebarUser } from "./app-sidebar-user";
 import { CosmosLogo } from "./cosmos-logo";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const pathname = usePathname();
   const trpc = useTRPC();
   const { isMobile, setOpenMobile } = useSidebar();
 
@@ -40,6 +41,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     enabled: !!session,
   });
 
+  // Hide sidebar on public profile pages - AFTER all hooks are called
+  if (pathname.startsWith("/profile/")) {
+    return null;
+  }
+
   // Calculate total unread count
   const totalUnreadCount =
     conversations?.reduce(
@@ -47,7 +53,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       0,
     ) || 0;
 
-  const pathname = usePathname();
   // Function to close sidebar on mobile when link is clicked
   const handleLinkClick = () => {
     if (isMobile) {

@@ -11,15 +11,15 @@ import { HouseBadge } from "~/components/house-badge";
 import { SendLetterButton } from "~/components/send-letter-button";
 
 interface PublicProfilePageProps {
-  params: {
+  params: Promise<{
     userId: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({
   params,
 }: PublicProfilePageProps): Promise<Metadata> {
-  const { userId } = params;
+  const { userId } = await params;
 
   try {
     const heads = new Headers(await headers());
@@ -73,7 +73,7 @@ export async function generateMetadata({
 export default async function PublicProfilePage({
   params,
 }: PublicProfilePageProps) {
-  const { userId } = params;
+  const { userId } = await params;
 
   // Create tRPC context and caller
   const heads = new Headers(await headers());
@@ -153,8 +153,10 @@ export default async function PublicProfilePage({
               </div>
             )}
 
-            <div className="flex justify-center border-t pt-6">
-              <SendLetterButton receiverId={userId} receiverName={userName} />
+            <div className="-mx-8 border-t px-8 pt-6">
+              <div className="flex justify-center">
+                <SendLetterButton receiverId={userId} receiverName={userName} />
+              </div>
             </div>
           </div>
         </div>
