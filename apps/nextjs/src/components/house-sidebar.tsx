@@ -125,9 +125,9 @@ export function HouseSidebar({
                 ) : ownerProfile ? (
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
-                      {ownerProfile.profileImage ? (
+                      {ownerProfile.user.image ? (
                         <AvatarImage
-                          src={ownerProfile.profileImage}
+                          src={ownerProfile.user.image}
                           alt="Owner"
                         />
                       ) : (
