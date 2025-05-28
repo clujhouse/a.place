@@ -3,6 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { HouseCard } from "~/components/house-card";
+import { NewHousePlaceholder } from "~/components/new-house-placeholder";
 import { useTRPC } from "~/trpc/react";
 
 export function HousesGrid() {
@@ -17,10 +18,7 @@ export function HousesGrid() {
 
   return (
     <div className="flex flex-col gap-4 border-r p-6">
-      <h1 className="text-3xl font-bold">
-        Global houses full of cracked people
-      </h1>
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {houses.map((house) => (
           <HouseCard
             key={house.id}
@@ -34,6 +32,7 @@ export function HousesGrid() {
             }}
           />
         ))}
+        <NewHousePlaceholder />
       </div>
     </div>
   );

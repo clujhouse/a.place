@@ -62,7 +62,10 @@ export const AppSidebarUser = () => {
       >
         <Avatar>
           {userClientData.user.image && (
-            <AvatarImage src={userClientData.user.image} />
+            <AvatarImage
+              src={userClientData.user.image}
+              className="grayscale hover:grayscale-0"
+            />
           )}
           <AvatarFallback>
             {userClientData.user.name.charAt(0).toUpperCase()}
