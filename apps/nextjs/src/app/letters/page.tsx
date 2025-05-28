@@ -24,7 +24,7 @@ function LettersPageContent() {
 
   const { data: conversations, isLoading } = useQuery({
     ...trpc.conversation.getConversations.queryOptions(),
-    refetchInterval: 2000, // Refetch every 2 seconds
+    refetchInterval: 30000, // Refetch every 2 seconds
   });
 
   const handleConversationClick = (partnerId: string) => {

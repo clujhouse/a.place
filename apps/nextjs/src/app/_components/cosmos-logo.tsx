@@ -83,7 +83,7 @@ export function CosmosLogo({ href = "/", onClick }: CosmosLogoProps) {
     <Link href={href} onClick={onClick}>
       <div
         className={cn(
-          "group relative flex h-9 w-full items-center justify-start overflow-hidden rounded-md border border-border bg-gradient-to-br from-muted/10 via-accent/10 to-primary/10 pl-3 transition-all duration-300 hover:border-primary/50 hover:from-muted/20 hover:via-accent/20 hover:to-primary/20",
+          "group relative flex h-9 w-full items-center justify-start overflow-hidden rounded-md border border-border bg-gradient-to-br from-muted/10 via-accent/10 to-primary/10 pl-2 transition-all duration-300 hover:border-primary/50 hover:from-muted/20 hover:via-accent/20 hover:to-primary/20",
           !isActive && "opacity-80",
         )}
       >

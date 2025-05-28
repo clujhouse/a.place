@@ -117,10 +117,10 @@ export const mainRouter = {
         client,
         userInput,
         profileItems,
-        { 
-          topK: 3, 
-          relevanceThreshold: 0.3,
-          model: "rerank-2"
+        {
+          topK: 3,
+          relevanceThreshold: 0.4,
+          model: "rerank-2",
         },
       );
 

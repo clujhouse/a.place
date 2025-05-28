@@ -36,7 +36,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = authClient.useSession();
   const { data: conversations } = useQuery({
     ...trpc.conversation.getConversations.queryOptions(),
-    refetchInterval: 2000, // Refetch every 2 seconds for real-time updates
+    refetchInterval: 30000, // Refetch every 2 seconds for real-time updates
     enabled: !!session,
   });
 

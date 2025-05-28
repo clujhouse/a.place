@@ -26,7 +26,7 @@ function ConversationPageContent({ params }: ConversationPageProps) {
   // Get conversations to find the partner name and image
   const { data: conversations } = useQuery({
     ...trpc.conversation.getConversations.queryOptions(),
-    refetchInterval: 2000,
+    refetchInterval: 30000,
   });
 
   // Get partner profile for additional details
