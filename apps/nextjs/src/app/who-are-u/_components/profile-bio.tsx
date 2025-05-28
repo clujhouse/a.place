@@ -5,8 +5,8 @@ import { Plus } from "lucide-react";
 
 import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
-import { Badge } from "@acme/ui/badge";
 import { MarkdownContent } from "@acme/ui/markdown-content";
+import { Progress } from "@acme/ui/progress";
 import { toast } from "@acme/ui/toast";
 
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
@@ -39,10 +39,10 @@ export const ProfileBio = () => {
 
   const { mutate: updateProfileImage } = useMutation(
     trpc.profile.updateProfileImage.mutationOptions({
-      onSuccess: () => {
+      onSuccess: (_data, url) => {
         toast.success("Profile image updated successfully");
-        void queryClient.invalidateQueries({
-          queryKey: trpc.profile.get.queryKey(),
+        void authClient.updateUser({
+          image: url,
         });
       },
       onError: () => {
@@ -149,7 +149,7 @@ export const ProfileBio = () => {
         >
           <Avatar className="h-24 w-24">
             <AvatarImage
-              src={profile?.profileImage ?? session.user.image ?? ""}
+              src={session.user.image ?? ""}
               alt={session.user.name}
             />
             <AvatarFallback>{session.user.name.charAt(0)}</AvatarFallback>
@@ -186,6 +186,21 @@ export const ProfileBio = () => {
         <h3 className="text-lg font-semibold">Your House</h3>
         <HouseSelector currentHouseId={profile?.houseId} />
       </div>
+      {/* Profile Completion Section */}
+      {(profile?.completionPercentage ?? 0) < 100 && (
+        <div className="space-y-2 bg-background">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium">Profile Completion</h3>
+            <span className="text-sm font-medium">
+              {profile?.completionPercentage ?? 0}%
+            </span>
+          </div>
+          <Progress
+            value={profile?.completionPercentage ?? 0}
+            className="h-2 w-full"
+          />
+        </div>
+      )}
 
       <div className="h-full min-h-0 overflow-y-auto">
         {isProfileCreating ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef, useState } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { generateReactHelpers } from "@uploadthing/react";
 import { Camera, User } from "lucide-react";
 
@@ -27,9 +27,7 @@ export const ProfileImageUpload = ({
   const [isUploading, setIsUploading] = useState(false);
 
   const trpc = useTRPC();
-  const queryClient = useQueryClient();
 
-  const { data: profile } = useQuery(trpc.profile.get.queryOptions());
   const { data: session } = authClient.useSession();
 
   const { startUpload } = useUploadThing("profileImages");
@@ -38,9 +36,7 @@ export const ProfileImageUpload = ({
     trpc.profile.updateProfileImage.mutationOptions({
       onSuccess: (_, imageUrl) => {
         toast.success("Profile image uploaded successfully!");
-        void queryClient.invalidateQueries({
-          queryKey: trpc.profile.get.queryKey(),
-        });
+
         onImageUploaded?.(imageUrl);
       },
       onError: () => {
@@ -71,7 +67,7 @@ export const ProfileImageUpload = ({
     }
   };
 
-  const currentImage = profile?.profileImage ?? session?.user.image;
+  const currentImage = session?.user.image;
 
   return (
     <div className="flex flex-col items-center space-y-6 p-6">
@@ -90,7 +86,7 @@ export const ProfileImageUpload = ({
           {currentImage ? (
             <AvatarImage
               src={currentImage}
-              alt={session?.user.name ?? "Profile"}
+              alt={session.user.name ?? "Profile"}
               className="object-cover"
             />
           ) : (

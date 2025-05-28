@@ -33,7 +33,7 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
               return (
                 <div key={part.id} className="grid grid-cols-3 gap-2">
                   {profilePart.profiles.map((profile) => (
-                    <ProfileCard key={profile.id} profile={profile} />
+                    <ProfileCard key={profile.id} profileId={profile.id} />
                   ))}
                 </div>
               );

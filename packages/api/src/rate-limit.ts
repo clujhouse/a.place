@@ -47,7 +47,7 @@ export const checkLimitsPublic = async (
 
 export const checkSearchLimits = async (ctx: TRPCContext) => {
   // If user is not logged in, they can't search
-  if (!ctx.session?.user?.id) {
+  if (!ctx.session?.user.id) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
       message: "You must be logged in to search",
@@ -81,7 +81,7 @@ export const checkSearchLimits = async (ctx: TRPCContext) => {
   // For free users, limit to 5 searches per day
   const ratelimit = new Ratelimit({
     redis: Redis.fromEnv(),
-    limiter: Ratelimit.slidingWindow(5, "1 d"), // 5 requests per day
+    limiter: Ratelimit.slidingWindow(7, "1 d"), // 5 requests per day
     analytics: true,
   });
 

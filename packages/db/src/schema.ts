@@ -47,7 +47,6 @@ export const profile = mysqlTable("profile", {
   text: text("text"),
   shortBio: text("short_bio"),
   embedding: vector("embedding", { length: 1024 }),
-  profileImage: json("profile_image").$type<string>(),
   images: json("images").$type<string[]>().default([]),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")

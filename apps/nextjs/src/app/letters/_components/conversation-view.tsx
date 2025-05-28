@@ -128,11 +128,8 @@ export function ConversationView({
           onClick={handleHeaderClick}
         >
           <Avatar className="h-10 w-10">
-            {partnerProfile?.profileImage ? (
-              <AvatarImage
-                src={partnerProfile.profileImage}
-                alt={partnerName}
-              />
+            {partnerProfile?.user.image ? (
+              <AvatarImage src={partnerProfile.user.image} alt={partnerName} />
             ) : (
               <AvatarFallback>
                 <User className="h-5 w-5" />

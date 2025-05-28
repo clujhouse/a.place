@@ -44,7 +44,7 @@ function ConversationPageContent({ params }: ConversationPageProps) {
   );
   const partnerName = currentConversation?.partnerName || "Unknown";
   const partnerImage =
-    currentConversation?.partnerImage || partnerProfile?.profileImage;
+    currentConversation?.partnerImage || partnerProfile?.user.image;
 
   return (
     <div className="flex h-screen flex-col">

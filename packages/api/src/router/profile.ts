@@ -3,7 +3,7 @@ import type { InferSelectModel } from "drizzle-orm";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { chat, profile } from "@acme/db/schema";
+import { chat, profile, user } from "@acme/db/schema";
 
 import { protectedProcedure, publicProcedure } from "../trpc";
 
@@ -18,20 +18,21 @@ export const profileRouter = {
     },
   ),
 
-  getById: publicProcedure
-    .input(z.string())
-    .query(
-      async ({
-        ctx,
-        input,
-      }): Promise<InferSelectModel<typeof profile> | null> => {
-        const userProfile = await ctx.db.query.profile.findFirst({
-          where: (profile, { eq }) => eq(profile.userId, input),
-        });
-
-        return userProfile ?? null;
+  getById: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    const userProfile = await ctx.db.query.profile.findFirst({
+      where: (profile, { eq }) => eq(profile.userId, input),
+      with: {
+        user: {
+          columns: {
+            image: true,
+            name: true,
+          },
+        },
       },
-    ),
+    });
+
+    return userProfile ?? null;
+  }),
 
   createCheckoutSession: protectedProcedure
     .input(
@@ -54,9 +55,9 @@ export const profileRouter = {
     .input(z.string().url())
     .mutation(async ({ ctx, input }) => {
       await ctx.db
-        .update(profile)
-        .set({ profileImage: input })
-        .where(eq(profile.userId, ctx.session.user.id));
+        .update(user)
+        .set({ image: input })
+        .where(eq(user.id, ctx.session.user.id));
 
       return { success: true };
     }),

@@ -14,16 +14,13 @@ import { HouseBadge } from "./house-badge";
 import { ProfileSidebar } from "./profile-sidebar";
 
 interface ProfileCardProps {
-  profile: {
-    id: string;
-    name: string;
-  };
+  profileId: string;
   profileImageDisplay?: "full" | "icon";
   containerClassName?: string;
 }
 
 export function ProfileCard({
-  profile,
+  profileId,
   containerClassName,
   profileImageDisplay = "icon",
 }: ProfileCardProps) {
@@ -31,10 +28,10 @@ export function ProfileCard({
   const [isHovering, setIsHovering] = useState(false);
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
-    trpc.profile.getById.queryOptions(profile.id),
+    trpc.profile.getById.queryOptions(profileId),
   );
 
-  if (isLoading) {
+  if (isLoading || !data) {
     return (
       <Card
         className={cn(
@@ -53,9 +50,10 @@ export function ProfileCard({
     );
   }
 
-  const displayName = profile.name;
-  const displayImage = data?.profileImage;
-  const displayText = data?.shortBio;
+  const displayName = data.user.name;
+  const displayImage = data.user.image;
+
+  const displayText = data.shortBio;
 
   return (
     <>
@@ -70,9 +68,7 @@ export function ProfileCard({
           <Avatar
             className={cn(
               "border border-secondary",
-              profileImageDisplay === "full"
-                ? "h-auto max-h-24 w-full"
-                : "h-12 w-12",
+              profileImageDisplay === "full" ? "h-24 w-full" : "h-12 w-12",
             )}
           >
             {displayImage ? (
@@ -110,8 +106,8 @@ export function ProfileCard({
       </Card>
 
       <ProfileSidebar
-        profileId={profile.id}
-        profileName={profile.name}
+        profileId={profileId}
+        profileName={data.user.name}
         open={isSidebarOpen}
         onOpenChange={setIsSidebarOpen}
       />

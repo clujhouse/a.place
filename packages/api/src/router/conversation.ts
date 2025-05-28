@@ -66,7 +66,6 @@ export const conversationRouter = {
         id: user.id,
         name: user.name,
         image: user.image,
-        profileImage: profile.profileImage,
       })
       .from(user)
       .leftJoin(profile, eq(user.id, profile.userId))
@@ -83,7 +82,6 @@ export const conversationRouter = {
           id: string;
           name: string | null;
           image: string | null;
-          profileImage: string | null;
         }
       >,
     );
@@ -101,7 +99,7 @@ export const conversationRouter = {
           acc[partnerId] = {
             partnerId,
             partnerName: partner?.name || "Unknown",
-            partnerImage: partner?.profileImage || partner?.image,
+            partnerImage: partner?.image,
             messages: [],
             lastMessage: message,
             unreadCount: 0,

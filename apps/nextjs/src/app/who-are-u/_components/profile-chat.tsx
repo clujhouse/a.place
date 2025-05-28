@@ -80,7 +80,6 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           userId: "",
           embedding: null,
           isOnboarded: false,
-          profileImage: null,
           images: [],
         };
 

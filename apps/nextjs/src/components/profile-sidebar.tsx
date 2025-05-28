@@ -97,8 +97,8 @@ export function ProfileSidebar({
           <div className="flex flex-col gap-6">
             <div className="flex justify-between gap-4">
               <Avatar className="h-20 w-20">
-                {profile?.profileImage ? (
-                  <AvatarImage src={profile.profileImage} alt={profileName} />
+                {profile?.user?.image ? (
+                  <AvatarImage src={profile.user.image} alt={profileName} />
                 ) : (
                   <AvatarFallback>
                     <User className="h-10 w-10 object-cover" />
@@ -256,7 +256,7 @@ export function ProfileSidebar({
                     <ProfileNote
                       key={note.id}
                       note={note}
-                      currentUser={session?.user}
+                      currentUser={session.user}
                       receivingUserId={profileId}
                       onNoteUpdated={() => void handleRefetchNotes()}
                     />

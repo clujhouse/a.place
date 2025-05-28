@@ -52,14 +52,14 @@ export const mainRouter = {
 
     const ratelimit = new Ratelimit({
       redis: Redis.fromEnv(),
-      limiter: Ratelimit.slidingWindow(50, "1 d"), // 50 requests per day
+      limiter: Ratelimit.slidingWindow(7, "1 d"), // 50 requests per day
       analytics: true,
     });
 
     const { remaining, reset } = await ratelimit.getRemaining(
       `search:${userId}`,
     );
-    const limit = 50; // We know the limit is 50 searches per day
+    const limit = 7;
 
     return {
       type: "free" as const,
@@ -81,7 +81,7 @@ export const mainRouter = {
       const { chatId, input: userInput } = input;
 
       // Check search limits for free users
-      // await checkSearchLimits(ctx);
+      await checkSearchLimits(ctx);
 
       // Create embedding for the user's message
       const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });

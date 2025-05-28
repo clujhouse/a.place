@@ -177,13 +177,11 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
               ))}
 
               {/* Show profile image upload component when we reach the image step */}
-              {currentStep === "image" && (
-                <div className="mt-6">
-                  <ProfileImageUpload
-                    onImageUploaded={handleImageStepComplete}
-                  />
-                </div>
-              )}
+              {/* {currentStep === "image" && ( */}
+              <div className="mt-6">
+                <ProfileImageUpload onImageUploaded={handleImageStepComplete} />
+              </div>
+              {/* )} */}
             </div>
 
             {/* Show clubhouse loader when generating profile - positioned absolutely */}
@@ -196,7 +194,7 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
                       creating your profile...
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      building something awesome with buildspace vibes
+                      going on the moon with a blue hair cat
                     </p>
                   </div>
                 </div>
