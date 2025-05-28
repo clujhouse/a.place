@@ -10,7 +10,7 @@ import {
   useSidebar,
 } from "@acme/ui/sidebar";
 
-import { ChatActionsDropdown } from "./chat-actions-dropdown";
+// import { ChatActionsDropdown } from "./chat-actions-dropdown";
 
 interface Chat {
   id: string;
@@ -72,7 +72,7 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
       <SidebarMenuButton asChild isActive={isSelected}>
         <Link href={`/talking-stage/${chat.id}`} onClick={handleLinkClick}>
           {/* <Icon as={MessageCircle} size="sm" /> */}
-          <span className="truncate pr-6">
+          <span className="truncate">
             {displayedTitle}
             {isStreaming && (
               <span className="ml-1 inline-block h-4 w-2 animate-pulse bg-current opacity-75" />
@@ -80,9 +80,9 @@ export const AppSidebarChatItem = ({ chat }: AppSidebarChatItemProps) => {
           </span>
         </Link>
       </SidebarMenuButton>
-      <div className="absolute right-0 top-1/2 -translate-y-1/2">
+      {/* <div className="absolute right-0 top-1/2 -translate-y-1/2">
         <ChatActionsDropdown chat={chat} isVisible={isHovering} />
-      </div>
+      </div> */}
     </SidebarMenuItem>
   );
 };
