@@ -1,5 +1,6 @@
 "use client";
 
+import type { GlobeMethods } from "react-globe.gl";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 
@@ -8,7 +9,7 @@ const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
 
-type House = {
+interface House {
   id: string;
   name: string | null;
   description: string;
@@ -20,9 +21,26 @@ type House = {
   images: string[] | null;
   ownerId: string;
   createdAt: Date;
-};
+}
 
-export type GlobeConfig = {
+// Add proper typing for country data
+interface CountryProperties {
+  ADMIN: string;
+  ISO_A2: string;
+  POP_EST: number;
+}
+
+interface CountryFeature {
+  properties: CountryProperties;
+  geometry: any;
+  type: string;
+}
+
+interface CountriesData {
+  features: CountryFeature[];
+}
+
+export interface GlobeConfig {
   pointSize?: number;
   globeColor?: string;
   showAtmosphere?: boolean;
@@ -46,7 +64,7 @@ export type GlobeConfig = {
   };
   autoRotate?: boolean;
   autoRotateSpeed?: number;
-};
+}
 
 interface WorldProps {
   globeConfig: GlobeConfig;
@@ -55,9 +73,40 @@ interface WorldProps {
   onHouseClick?: (house: House) => void;
 }
 
+// Color scale function for population-based coloring (grey scale)
+function getPopulationColor(
+  population: number,
+  minPop: number,
+  maxPop: number,
+): string {
+  // Handle edge cases
+  if (maxPop <= 0 || minPop < 0 || population <= 0) {
+    return "rgba(50, 50, 50, 0.3)";
+  }
+
+  // Normalize population to 0-1 range using logarithmic scale
+  const normalized = Math.min(
+    1,
+    Math.max(0, Math.log(population + 1) / Math.log(maxPop + 1)),
+  );
+
+  // Define grey scale gradient from light to dark based on population
+  // Lower population = lighter grey, higher population = darker grey
+  const minGrey = 200; // Light grey for low population
+  const maxGrey = 40; // Dark grey for high population
+
+  // Interpolate between min and max grey values
+  const greyValue = Math.round(minGrey - (minGrey - maxGrey) * normalized);
+
+  // Return rgba with consistent opacity
+  return `rgba(${greyValue}, ${greyValue}, ${greyValue}, 0.6)`;
+}
+
 export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
-  const globeEl = useRef<any>(undefined);
+  const globeEl = useRef<GlobeMethods>(undefined);
   const [globeReady, setGlobeReady] = useState(false);
+  const [countries, setCountries] = useState<CountriesData>({ features: [] });
+  const [populationRange, setPopulationRange] = useState({ min: 0, max: 0 });
 
   // Convert houses to points data for the globe
   const pointsData = houses
@@ -71,6 +120,25 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
       house: house,
     }));
 
+  // Load countries data and calculate population range
+  useEffect(() => {
+    void fetch("../datasets/countries.geojson")
+      .then((res) => res.json())
+      .then((data: CountriesData) => {
+        setCountries(data);
+
+        // Calculate min and max population for color scaling
+        const populations = data.features
+          .filter((d) => d.properties.ISO_A2 !== "AQ")
+          .map((d) => d.properties.POP_EST)
+          .filter((pop) => pop > 0);
+
+        const minPop = Math.min(...populations);
+        const maxPop = Math.max(...populations);
+        setPopulationRange({ min: minPop, max: maxPop });
+      });
+  }, []);
+
   // Initialize globe settings
   useEffect(() => {
     if (globeEl.current && globeReady) {
@@ -83,7 +151,7 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
 
       // Enable auto-rotation if specified
       if (globeConfig.autoRotate) {
-        globeEl.current.controls().autoRotate = true;
+        globeEl.current.controls().autoRotate = false;
         globeEl.current.controls().autoRotateSpeed =
           globeConfig.autoRotateSpeed || 0.5;
       }
@@ -97,26 +165,62 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
     }
   };
 
+  // Custom polygon cap color function
+  const getPolygonCapColor = (obj: any) => {
+    const country = obj as CountryFeature;
+    const population = country.properties.POP_EST;
+    if (!population || population <= 0) {
+      return "rgba(100, 100, 100, 0.3)"; // Default grey for countries with no population data
+    }
+    return getPopulationColor(
+      population,
+      populationRange.min,
+      populationRange.max,
+    );
+  };
+
+  const globeContainerRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const [height, setHeight] = useState(0);
+
+  useEffect(() => {
+    if (globeContainerRef.current) {
+      const { offsetWidth, offsetHeight } = globeContainerRef.current;
+      setWidth(offsetWidth);
+      setHeight(offsetHeight);
+    }
+  }, []);
+
+  console.log(width, height);
+
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
+    <div ref={globeContainerRef} className="w-full">
       <Globe
+        width={width}
+        height={height}
         ref={globeEl}
+        globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
         onGlobeReady={() => setGlobeReady(true)}
         // Globe appearance
-        globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
-        backgroundColor={globeConfig.globeColor || "#062056"}
-        // Atmosphere settings
+        // globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
+        backgroundColor="rgba(0,0,0,0)" // Atmosphere settings
         showAtmosphere={globeConfig.showAtmosphere !== false}
         atmosphereColor={globeConfig.atmosphereColor || "#FFFFFF"}
         atmosphereAltitude={globeConfig.atmosphereAltitude || 0.1}
+        hexPolygonsData={houses}
+        hexPolygonResolution={3}
+        hexPolygonMargin={0.3}
+        hexPolygonUseDots={true}
+        hexPolygonColor={() =>
+          `#${Math.round(Math.random() * Math.pow(2, 24))
+            .toString(16)
+            .padStart(6, "0")}`
+        }
+        polygonsData={countries.features.filter(
+          (d) => d.properties.ISO_A2 !== "AQ",
+        )}
+        polygonCapColor={getPolygonCapColor}
+        polygonSideColor={() => "rgba(40, 40, 40, 0.15)"}
         // Points (houses) configuration
         pointsData={pointsData}
         pointLat="lat"
@@ -126,20 +230,7 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
         pointRadius={(d: any) => d.size}
         onPointClick={handlePointClick}
         // Point labels on hover
-        pointLabel={(d: any) => `
-          <div style="
-            background: rgba(0,0,0,0.8); 
-            color: white; 
-            padding: 8px; 
-            border-radius: 4px;
-            border: 2px solid ${d.color};
-          ">
-            <strong>${d.house.name || "Unnamed House"}</strong><br/>
-            ${d.house.locationName ? `<small>${d.house.locationName}</small><br/>` : ""}
-            ${d.house.description.slice(0, 80)}${d.house.description.length > 80 ? "..." : ""}<br/>
-            <small>Click to view details</small>
-          </div>
-        `}
+
         // Rings around houses
         ringsData={pointsData}
         ringLat="lat"

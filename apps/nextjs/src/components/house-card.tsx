@@ -33,12 +33,7 @@ export function HouseCard({ house, containerClassName }: HouseCardProps) {
 
   if (isLoading) {
     return (
-      <Card
-        className={cn(
-          "flex w-full min-w-0 flex-col gap-2 p-3",
-          containerClassName,
-        )}
-      >
+      <Card className={cn("flex flex-col gap-2 p-3", containerClassName)}>
         <CardHeader className="flex flex-row items-center gap-4 p-0">
           <Skeleton className="h-12 w-12" />
         </CardHeader>
@@ -57,14 +52,10 @@ export function HouseCard({ house, containerClassName }: HouseCardProps) {
   return (
     <>
       <Card
-        className={cn(
-          "flex h-full min-h-0 w-full cursor-pointer flex-col gap-4 p-6 transition-all hover:border-primary hover:bg-accent",
-          containerClassName,
-        )}
+        className={cn(containerClassName)}
         onClick={() => setIsSidebarOpen(true)}
-        style={{ borderColor: displayColor }}
       >
-        <CardHeader className="flex flex-row items-center gap-6 p-0">
+        <CardHeader>
           <Avatar
             className="h-16 w-16 border border-secondary"
             style={{ borderColor: displayColor }}
@@ -82,7 +73,7 @@ export function HouseCard({ house, containerClassName }: HouseCardProps) {
             )}
           </Avatar>
         </CardHeader>
-        <CardContent className="p-0">
+        <CardContent>
           <div className="flex items-center gap-3">
             <div
               className="h-4 w-4 rounded-full"

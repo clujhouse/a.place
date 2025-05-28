@@ -20,8 +20,6 @@ export function SearchUsageIndicator() {
     enabled: !!session,
   });
 
-  console.log(searchUsage);
-
   const handleUpgrade = async (plan: "pro" | "pro_exclusive") => {
     try {
       // Use better-auth's subscription.upgrade method

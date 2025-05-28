@@ -2,7 +2,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import ClujhouseIcon from "~/components/clujhouse-icon";
 import { HouseCard } from "~/components/house-card";
 import { useTRPC } from "~/trpc/react";
 
@@ -13,37 +12,29 @@ export function HousesGrid() {
   );
 
   if (isLoading) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <ClujhouseIcon />
-      </div>
-    );
-  }
-
-  if (houses.length === 0) {
-    return (
-      <div className="flex h-full w-full items-center justify-center">
-        <p className="text-muted-foreground">No houses found</p>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-2">
-      {houses.map((house) => (
-        <HouseCard
-          key={house.id}
-          house={{
-            id: house.id,
-            name: house.name,
-            description: house.description,
-            locationName: house.locationName,
-            color: house.color,
-            logoImage: house.logoImage,
-          }}
-          containerClassName="min-h-[180px]"
-        />
-      ))}
+    <div className="flex flex-col gap-4 border-r p-6">
+      <h1 className="text-3xl font-bold">
+        Global houses full of cracked people
+      </h1>
+      <div className="flex flex-wrap gap-2">
+        {houses.map((house) => (
+          <HouseCard
+            key={house.id}
+            house={{
+              id: house.id,
+              name: house.name,
+              description: house.description,
+              locationName: house.locationName,
+              color: house.color,
+              logoImage: house.logoImage,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 }
