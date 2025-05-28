@@ -113,6 +113,17 @@ export const profileRouter = {
       return { success: true };
     }),
 
+  updateHouse: protectedProcedure
+    .input(z.string().nullable())
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(profile)
+        .set({ houseId: input })
+        .where(eq(profile.userId, ctx.session.user.id));
+
+      return { success: true };
+    }),
+
   getProfileChat: protectedProcedure.query(async ({ ctx }) => {
     const profileChat = await ctx.db.query.chat.findFirst({
       where: (chat, { eq, and }) =>

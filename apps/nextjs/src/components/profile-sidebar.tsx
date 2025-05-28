@@ -31,6 +31,7 @@ import {
   TooltipTrigger,
 } from "@acme/ui/tooltip";
 
+import { HouseBadge } from "~/components/house-badge";
 import { MessageModal } from "~/components/message-modal";
 import { ProfileNote } from "~/components/profile-note";
 import { useSubscription } from "~/hooks/use-subscription";
@@ -145,6 +146,11 @@ export function ProfileSidebar({
               <p className="text-sm text-muted-foreground">
                 {profile?.shortBio}
               </p>
+              {profile?.houseId && (
+                <div className="mt-2">
+                  <HouseBadge houseId={profile.houseId} size="md" />
+                </div>
+              )}
             </div>
 
             <div>

@@ -13,6 +13,7 @@ import type { OurFileRouter } from "~/app/api/uploadthing/core";
 import { useAppContext } from "~/context/app-context";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
+import { HouseSelector } from "./house-selector";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -178,6 +179,12 @@ export const ProfileBio = () => {
           <p className="text-3xl font-semibold">{session.user.name}</p>
           <p className="text-muted-foreground">{session.user.email}</p>
         </div>
+      </div>
+
+      {/* House Selector */}
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">Your House</h3>
+        <HouseSelector currentHouseId={profile?.houseId} />
       </div>
 
       <div className="h-full min-h-0 overflow-y-auto">

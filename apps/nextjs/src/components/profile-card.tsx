@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
 
 import { useTRPC } from "~/trpc/react";
+import { HouseBadge } from "./house-badge";
 import { ProfileSidebar } from "./profile-sidebar";
 
 interface ProfileCardProps {
@@ -91,12 +92,17 @@ export function ProfileCard({
           <p className="truncate text-lg font-semibold" title={displayName}>
             {displayName}
           </p>
+          {data?.houseId && (
+            <div className="mt-1">
+              <HouseBadge houseId={data.houseId} size="sm" />
+            </div>
+          )}
           {displayText ? (
-            <p className="line-clamp-2 text-sm text-muted-foreground">
+            <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
               {displayText.slice(0, 100)}
             </p>
           ) : (
-            <p className="text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               No profile description available
             </p>
           )}
