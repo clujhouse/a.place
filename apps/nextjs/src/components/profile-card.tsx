@@ -11,6 +11,7 @@ import { Skeleton } from "@acme/ui/skeleton";
 
 import { useTRPC } from "~/trpc/react";
 import { HouseBadge } from "./house-badge";
+import { ProfileCardHouse } from "./profile-card-house";
 import { ProfileSidebar } from "./profile-sidebar";
 
 interface ProfileCardProps {
@@ -25,7 +26,6 @@ export function ProfileCard({
   profileImageDisplay = "icon",
 }: ProfileCardProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const trpc = useTRPC();
   const { data, isLoading } = useQuery(
     trpc.profile.getById.queryOptions(profileId),
@@ -59,7 +59,7 @@ export function ProfileCard({
     <>
       <Card
         className={cn(
-          "flex h-full min-h-0 w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent",
+          "relative flex h-full min-h-0 w-full cursor-pointer flex-col gap-2 p-3 transition-all hover:border-primary hover:bg-accent",
           containerClassName,
         )}
         onClick={() => setIsSidebarOpen(true)}
@@ -88,11 +88,7 @@ export function ProfileCard({
           <p className="truncate text-lg font-semibold" title={displayName}>
             {displayName}
           </p>
-          {data?.houseId && (
-            <div className="mt-1">
-              <HouseBadge houseId={data.houseId} size="sm" />
-            </div>
-          )}
+          {data.houseId && <ProfileCardHouse houseId={data.houseId} />}
           {displayText ? (
             <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
               {displayText.slice(0, 100)}

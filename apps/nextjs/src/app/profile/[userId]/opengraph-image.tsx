@@ -55,9 +55,9 @@ export default async function Image({
       );
     }
 
-    const userName = profile.user?.name || "Unknown User";
+    const userName = profile.user.name || "Unknown User";
     const shortBio = profile.shortBio || "";
-    const profileImage = profile.user?.image;
+    const profileImage = profile.user.image;
 
     return new ImageResponse(
       (

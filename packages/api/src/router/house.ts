@@ -24,7 +24,7 @@ export const houseRouter = {
   create: protectedProcedure
     .input(
       z.object({
-        name: z.string().optional(),
+        name: z.string(),
         description: z.string().min(1),
         locationName: z.string().optional(),
         latitude: z.string().optional(),
@@ -38,7 +38,7 @@ export const houseRouter = {
       const newHouse = await ctx.db
         .insert(house)
         .values({
-          name: input.name || null,
+          name: input.name,
           description: input.description,
           locationName: input.locationName || null,
           latitude: input.latitude || null,

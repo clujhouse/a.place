@@ -1,18 +1,16 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Home } from "lucide-react";
 
 import { Badge } from "@acme/ui/badge";
 
 import { useTRPC } from "~/trpc/react";
 
-interface HouseBadgeProps {
+interface ProfileCardHouseProps {
   houseId?: string | null;
-  size?: "sm" | "md" | "lg";
 }
 
-export function HouseBadge({ houseId, size = "sm" }: HouseBadgeProps) {
+export function ProfileCardHouse({ houseId }: ProfileCardHouseProps) {
   const trpc = useTRPC();
 
   const { data: house } = useQuery({
@@ -42,19 +40,18 @@ export function HouseBadge({ houseId, size = "sm" }: HouseBadgeProps) {
     },
   };
 
-  const classes = sizeClasses[size];
-
   return (
     <Badge
+      className="absolute right-0 top-0"
       variant="outline"
-      className={`flex items-center gap-1.5 ${classes.badge}`}
       style={{
         borderColor: house.color,
         backgroundColor: house.color + "15",
         color: house.color,
       }}
     >
-      <span className="font-medium">{house.name}</span>
+      <div style={{ backgroundColor: house.color }} />
+      <span className="font-medium">{house.name || "Unnamed House"}</span>
     </Badge>
   );
 }
