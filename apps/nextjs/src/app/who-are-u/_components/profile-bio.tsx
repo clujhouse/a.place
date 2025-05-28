@@ -10,6 +10,7 @@ import { Progress } from "@acme/ui/progress";
 import { toast } from "@acme/ui/toast";
 
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
+import { ShareProfileButton } from "~/components/share-profile-button";
 import { useAppContext } from "~/context/app-context";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
@@ -175,9 +176,15 @@ export const ProfileBio = () => {
             disabled={isUploading || isProfileCreating}
           />
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-3xl font-semibold">{session.user.name}</p>
           <p className="text-muted-foreground">{session.user.email}</p>
+          <div className="mt-2">
+            <ShareProfileButton
+              userId={session.user.id}
+              userName={session.user.name}
+            />
+          </div>
         </div>
       </div>
 
