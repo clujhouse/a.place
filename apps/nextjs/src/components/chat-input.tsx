@@ -72,12 +72,11 @@ export const ChatInput = ({
                       }
                     }}
                     placeholder={placeholder}
-                    className="w-full !text-lg pr-16 resize-none"
+                    className="w-full resize-none pr-16 !text-lg"
                     {...field}
                     disabled={disabled || isLoading}
                   />
                 </FormControl>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -85,6 +84,7 @@ export const ChatInput = ({
             type="submit"
             disabled={disabled || isLoading}
             size="icon"
+            variant="ghost"
             className="absolute right-4 top-1/2 h-9 w-9 -translate-y-1/2"
           >
             <PaperPlaneIcon className="h-4 w-4" />

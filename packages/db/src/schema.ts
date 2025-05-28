@@ -186,6 +186,7 @@ export const onboardingState = mysqlTable("onboarding_state", {
   extractedLocation: varchar("extracted_location", { length: 255 }),
   extractedOneLiner: text("extracted_one_liner"),
   completedAt: timestamp("completed_at"),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

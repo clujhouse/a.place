@@ -41,7 +41,7 @@ export function UpgradeModal({
   const plans = [
     {
       id: "pro" as const,
-      name: "Pro",
+      name: "we give you something",
       price: "$20",
       period: "/month",
       description:
@@ -59,20 +59,12 @@ export function UpgradeModal({
     },
     {
       id: "pro_exclusive" as const,
-      name: "69 plan",
+      name: "69 plan (if you really trust the vision)",
       price: "$69",
       period: "/month",
       description: "69 plan",
       icon: <Sparkles className="h-5 w-5" />,
-      features: [
-        "Unlimited searches",
-        "More visibility",
-        "Advanced analytics",
-        "Priority support",
-        "White-label options",
-        "Dedicated account manager",
-        "Notebook",
-      ],
+      features: ["you are power", "you can note other people"],
       popular: false,
       disabled: currentMembership === "pro_exclusive",
     },
@@ -83,10 +75,10 @@ export function UpgradeModal({
       <DialogContent className="max-h-[85vh] w-[95vw] max-w-2xl overflow-y-auto sm:w-auto sm:max-w-4xl">
         <DialogHeader className="space-y-2 pb-4 text-center sm:text-left">
           <DialogTitle className="text-lg font-semibold sm:text-xl">
-            Upgrade Your Plan
+            help us
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Choose the plan that fits your needs
+            keep this magic, no bullshit
           </DialogDescription>
         </DialogHeader>
 
@@ -168,12 +160,6 @@ export function UpgradeModal({
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="mt-6 rounded-lg bg-muted/50 p-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            30-day money-back guarantee • Cancel anytime • Secure payment
-          </p>
         </div>
       </DialogContent>
     </Dialog>

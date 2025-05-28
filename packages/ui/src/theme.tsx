@@ -4,6 +4,7 @@ import * as React from "react";
 import { MoonIcon, SunIcon } from "@radix-ui/react-icons";
 import { ThemeProvider, useTheme } from "next-themes";
 
+import { cn } from ".";
 import { Button } from "./button";
 import {
   DropdownMenu,
@@ -12,7 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "./dropdown-menu";
 
-function ThemeToggle() {
+interface ThemeToggleProps {
+  className?: string;
+}
+
+function ThemeToggle({ className }: ThemeToggleProps) {
   const { setTheme } = useTheme();
 
   return (
@@ -21,7 +26,7 @@ function ThemeToggle() {
         <Button
           variant="outline"
           size="icon"
-          className="fixed right-4 top-4 z-10"
+          className={cn("fixed right-4 top-4 z-10", className)}
         >
           <SunIcon className="size-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <MoonIcon className="absolute size-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

@@ -58,7 +58,12 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         )}
       >
         <PostHogProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ThemeProvider
+            disableTransitionOnChange
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+          >
             <ThemeToggle />
             <TRPCReactProvider>
               <NuqsAdapter>

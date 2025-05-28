@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
@@ -12,11 +12,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@acme/ui";
+import { ThemeToggle } from "@acme/ui/theme";
 
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
 import { useStreamingMessages } from "~/hooks/use-streaming-messages";
 import { useTRPC } from "~/trpc/react";
+import { OnboardingStepper } from "./onboarding-stepper";
 import { ProfileImageUpload } from "./profile-image-upload";
 
 function ScrollToBottom() {
@@ -113,9 +115,16 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
   );
 
   // Send initial message when dialog opens for the first time
+  const refInitialMessage = useRef(false);
   useEffect(() => {
-    if (isOpen && messages.length === 0 && !onboardingState) {
+    if (
+      isOpen &&
+      messages.length === 0 &&
+      !onboardingState &&
+      !refInitialMessage.current
+    ) {
       getInitialMessage.mutate();
+      refInitialMessage.current = true;
     }
   }, [isOpen, messages.length, onboardingState]);
 
@@ -142,8 +151,13 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
         <DialogHeader className="sr-only">
           <DialogTitle> a.place</DialogTitle>
         </DialogHeader>
+        <ThemeToggle />
+
+        {/* Onboarding Stepper */}
+        <OnboardingStepper currentStep={currentStep} />
+
         <StickToBottom
-          className="flex h-full w-full flex-col"
+          className="flex h-full min-h-0 w-full flex-col"
           resize="smooth"
           initial="smooth"
         >

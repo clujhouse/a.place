@@ -24,11 +24,9 @@ export const ChatMessage = ({ message }: ChatMessageProps) => {
           return match(part)
             .with({ type: "text" }, (textPart) => {
               return (
-                <MarkdownContent
-                  id={part.id}
-                  key={part.id}
-                  content={textPart.text}
-                />
+                <div key={part.id}>
+                  <MarkdownContent id={part.id} content={textPart.text} />
+                </div>
               );
             })
             .with({ type: "profile" }, (profilePart) => {

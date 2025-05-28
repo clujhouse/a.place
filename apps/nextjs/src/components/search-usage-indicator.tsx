@@ -5,7 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 
 import { authClient } from "@acme/auth/client";
 import { UpgradeModal } from "@acme/ui";
-import { Button } from "@acme/ui/button";
 import { Progress } from "@acme/ui/progress";
 
 import { useTRPC } from "~/trpc/react";
@@ -72,35 +71,17 @@ export function SearchUsageIndicator() {
 
   return (
     <>
-      <div className="border bg-background p-3">
+      <div
+        className="cursor-pointer border bg-background p-3 hover:bg-accent"
+        onClick={() => setIsUpgradeModalOpen(true)}
+      >
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Daily searches</span>
+          <span>Daily searches</span>
           <span className={isNearLimit ? "font-medium" : ""}>
             {searchUsage.used}/{searchUsage.limit}
           </span>
         </div>
         <Progress value={progressPercentage} className="mt-2 h-1" />
-        {searchUsage.remaining === 0 ? (
-          <p className="mt-2 text-xs">
-            You've reached your daily limit! Upgrade for unlimited searches.
-          </p>
-        ) : isNearLimit ? (
-          <p className="mt-2 text-xs">
-            You're almost out of searches! Upgrade for unlimited access.
-          </p>
-        ) : (
-          <p className="mt-2 text-xs">
-            {searchUsage.remaining} searches remaining today
-          </p>
-        )}
-        <Button
-          variant="ghost"
-          size="sm"
-          className="mt-2 h-auto w-full justify-start p-0 text-xs text-muted-foreground hover:text-foreground"
-          onClick={() => setIsUpgradeModalOpen(true)}
-        >
-          Upgrade for unlimited searches →
-        </Button>
       </div>
 
       <UpgradeModal

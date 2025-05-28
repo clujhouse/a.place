@@ -154,8 +154,8 @@ const MainChat = ({
 
     if (query && chatId) {
       initialQueryRefRun.current = true;
-      onSubmit(query);
-      setQuery(null);
+      void onSubmit(query);
+      void setQuery(null);
     }
   }, [query, mutate, chatId, setQuery]);
 
@@ -170,7 +170,7 @@ const MainChat = ({
       <StickToBottom
         className={cn("flex flex-col", !isHomepage && "h-full")}
         resize="smooth"
-        initial="smooth"
+        initial="instant"
       >
         {!isHomepage && (
           <StickToBottom.Content className="mx-auto flex max-w-[655px] flex-col gap-6 p-4">
