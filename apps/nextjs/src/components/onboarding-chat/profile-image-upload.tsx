@@ -76,6 +76,8 @@ export const ProfileImageUpload = ({
 
   const currentImage = session?.user.image;
 
+  if (hideImage) return null;
+
   return (
     <div className="flex flex-col items-center space-y-6 p-6">
       <div className="space-y-2 text-center">
@@ -89,14 +91,9 @@ export const ProfileImageUpload = ({
         className="group relative cursor-pointer"
         onClick={() => !isUploading && profileImageInputRef.current?.click()}
       >
-        <Avatar className="h-32 w-32 border-4 border-dashed border-muted-foreground/25 transition-all group-hover:border-primary">
-          {!hideImage && currentImage && (
-            <AvatarImage src={currentImage} alt="Profile" />
-          )}
-          <AvatarFallback className="bg-muted">
-            <User className="h-12 w-12 text-muted-foreground" />
-          </AvatarFallback>
-        </Avatar>
+        <div className="flex h-32 w-32 items-center justify-center border-4 border-dashed border-muted-foreground/25 transition-all group-hover:border-primary">
+          <User className="h-12 w-12 text-muted-foreground" />
+        </div>
 
         <div
           className={cn(
