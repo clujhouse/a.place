@@ -12,7 +12,11 @@ import { useCreateChat } from "~/hooks/use-create-chat";
 const users = [
   { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR" },
   { id: "7nQIvxYySt6D1eToD4dV41QJfAzswu6j" },
+  { id: "gikUGiW6PhsjlWBFQVhVV81VdvxWhlpj" },
+
   { id: "VyVByuQ2fKMDxQx9s3tVXmPEKcd0DngJ" },
+  { id: "pohbBNnAq8ek4OsLXUuyDlW6AJiOeXi6" },
+
   { id: "gQeDVeP7mtQJPM9ZCYzGMRVIHEkNC854" },
 ];
 

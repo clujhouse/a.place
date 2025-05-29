@@ -95,9 +95,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
-              isActive={pathname === "/similar-profiles"}
+              isActive={pathname === "/babels-tower"}
             >
-              <Link href="/similar-profiles" onClick={handleLinkClick}>
+              <Link href="/babels-tower" onClick={handleLinkClick}>
                 babel's tower{" "}
               </Link>
             </SidebarMenuButton>

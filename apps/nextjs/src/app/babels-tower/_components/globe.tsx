@@ -168,6 +168,8 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
   // Custom polygon cap color function
   const getPolygonCapColor = (obj: any) => {
     const country = obj as CountryFeature;
+
+    console.log(country);
     const population = country.properties.POP_EST;
     if (!population || population <= 0) {
       return "rgba(100, 100, 100, 0.3)"; // Default grey for countries with no population data

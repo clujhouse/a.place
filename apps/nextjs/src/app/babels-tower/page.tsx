@@ -55,7 +55,7 @@ export default function SimilarProfilesPage() {
   };
 
   return (
-    <div className="grid h-full grid-cols-2">
+    <div className="grid h-full grid-cols-1 md:grid-cols-2">
       {/* Globe and Grid Side by Side */}
       <HousesGrid />
 
