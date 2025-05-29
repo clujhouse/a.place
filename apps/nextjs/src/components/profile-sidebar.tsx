@@ -97,7 +97,7 @@ export function ProfileSidebar({
           <div className="flex flex-col gap-6">
             <div className="flex justify-between gap-4">
               <Avatar className="h-20 w-20">
-                {profile?.user?.image ? (
+                {profile?.user.image ? (
                   <AvatarImage src={profile.user.image} alt={profileName} />
                 ) : (
                   <AvatarFallback>
@@ -146,11 +146,11 @@ export function ProfileSidebar({
               <p className="text-sm text-muted-foreground">
                 {profile?.shortBio}
               </p>
-              {profile?.houseId && (
+              {/* {profile?.houseId && (
                 <div className="mt-2">
                   <HouseBadge houseId={profile.houseId} size="md" />
                 </div>
-              )}
+              )} */}
             </div>
 
             <div>
