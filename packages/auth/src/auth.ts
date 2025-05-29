@@ -76,7 +76,7 @@ export const config = {
 
           // Send the email using Resend to the verified email, but include the intended recipient in the subject
           const { data, error } = await resend.emails.send({
-            from: "auth@email.comment.video",
+            from: "auth@email.a.place",
             to: verifiedEmail,
             subject: `${getSubject(type)} [For: ${email}]`, // Include the intended recipient in the subject
             html: `
