@@ -40,11 +40,11 @@ export const houseRouter = {
         .values({
           name: input.name,
           description: input.description,
-          locationName: input.locationName || null,
-          latitude: input.latitude || null,
-          longitude: input.longitude || null,
+          locationName: input.locationName ?? null,
+          latitude: input.latitude ?? null,
+          longitude: input.longitude ?? null,
           color: input.color,
-          logoImage: input.logoImage || null,
+          logoImage: input.logoImage ?? null,
           images: input.images,
           ownerId: ctx.session.user.id,
         })

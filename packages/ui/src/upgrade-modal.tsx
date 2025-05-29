@@ -89,8 +89,8 @@ export function UpgradeModal({
       description: "if you really trust the vision",
       icon: <Sparkles className="h-5 w-5" />,
       features: [
-        "you are power",
-        "you can note other people",
+        "unlimited searches",
+        "you support the project",
         "you can add notes to other people",
       ],
       popular: false,

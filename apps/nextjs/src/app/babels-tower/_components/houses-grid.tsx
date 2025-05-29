@@ -8,17 +8,16 @@ import { useTRPC } from "~/trpc/react";
 
 export function HousesGrid() {
   const trpc = useTRPC();
-  const { data: houses = [], isLoading } = useQuery(
-    trpc.house.getAll.queryOptions(),
-  );
-
-  if (isLoading) {
-    return null;
-  }
+  const { data: houses = [] } = useQuery(trpc.house.getAll.queryOptions());
 
   return (
-    <div className="flex flex-col gap-4 border-r p-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className="flex flex-col border-r">
+      <div className="flex items-center justify-between border-b p-4">
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          houses of the world
+        </h1>
+      </div>
+      <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
         {houses.map((house) => (
           <HouseCard
             key={house.id}

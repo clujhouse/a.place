@@ -82,6 +82,13 @@ export function NewHousePlaceholder() {
                 andrew@kairoskraft.so
               </a>{" "}
               to add a new house.
+              <br />
+              Please include:
+              <ul className="mt-2 list-inside list-disc space-y-1 text-sm">
+                <li>house svg logo</li>
+                <li>name, location city</li>
+                <li>social link</li>
+              </ul>
             </DialogDescription>
           </DialogHeader>
         </DialogContent>

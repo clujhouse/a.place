@@ -231,11 +231,13 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
               ))}
 
               {/* Show profile image upload component when we reach the image step */}
-              {/* {currentStep === "image" && ( */}
-              <div className="mt-6">
-                <ProfileImageUpload onImageUploaded={handleImageStepComplete} />
-              </div>
-              {/* )} */}
+              {currentStep === "image" && (
+                <div className="mt-6">
+                  <ProfileImageUpload
+                    onImageUploaded={handleImageStepComplete}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Show clubhouse loader when generating profile - positioned absolutely */}

@@ -40,9 +40,7 @@ export default function SimilarProfilesPage() {
   const [selectedHouseId, setSelectedHouseId] = useState<string | null>(null);
   const [isGlobeSidebarOpen, setIsGlobeSidebarOpen] = useState(false);
 
-  const { data: houses = [], isLoading: housesLoading } = useQuery(
-    trpc.house.getAll.queryOptions(),
-  );
+  const { data: houses = [] } = useQuery(trpc.house.getAll.queryOptions());
 
   const handleHouseClick = (house: any) => {
     setSelectedHouseId(house.id);

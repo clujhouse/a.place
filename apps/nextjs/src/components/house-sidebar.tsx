@@ -3,7 +3,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Home, User } from "lucide-react";
 
-import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Badge } from "@acme/ui/badge";
 import { MarkdownContent } from "@acme/ui/markdown-content";
@@ -69,7 +68,7 @@ export function HouseSidebar({
                     style={{ backgroundColor: house?.color }}
                   />
                   <h2 className="text-xl font-semibold">
-                    {house?.name || "Unnamed House"}
+                    {house?.name ?? "Unnamed House"}
                   </h2>
                 </div>
                 {house?.locationName && (

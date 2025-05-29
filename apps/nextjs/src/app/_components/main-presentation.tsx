@@ -121,7 +121,7 @@ const MainPresentation = () => {
       <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
         find and be found.
       </h1>
-      <Marquee className="w-full [--duration:80s]">
+      <Marquee className="w-full [--duration:100s]">
         {users.map((user) => (
           <ProfileCard
             key={user.id}
@@ -132,7 +132,10 @@ const MainPresentation = () => {
         ))}
       </Marquee>
       <div className="flex w-full flex-col gap-2">
-        <Marquee className="w-full p-0 [--duration:80s] [--gap:0.5rem]" reverse>
+        <Marquee
+          className="w-full p-0 [--duration:100s] [--gap:0.5rem]"
+          reverse
+        >
           {prompts.slice(0, Math.ceil(prompts.length / 2)).map((prompt) => (
             <PromptBox
               key={prompt}
@@ -142,7 +145,7 @@ const MainPresentation = () => {
             />
           ))}
         </Marquee>
-        <Marquee className="w-full p-0 [--duration:80s] [--gap:0.5rem]">
+        <Marquee className="w-full p-0 [--duration:100s] [--gap:0.5rem]">
           {prompts.slice(Math.ceil(prompts.length / 2)).map((prompt) => (
             <PromptBox
               key={prompt}
