@@ -26,7 +26,6 @@ export default {
         fourth: "moveHorizontal 40s ease infinite",
         fifth: "moveInCircle 20s ease infinite",
         marquee: "marquee var(--duration) linear infinite",
-        "marquee-reverse": "marquee var(--duration) linear infinite reverse",
         "marquee-vertical": "marquee-vertical var(--duration) linear infinite",
       },
       keyframes: {
@@ -74,51 +73,5 @@ export default {
       },
     },
   },
-  plugins: [
-    tailwindTypography,
-    function ({ addUtilities }: { addUtilities: any }) {
-      addUtilities({
-        ".scrollbar-hide": {
-          /* Hide scrollbar for Chrome, Safari and Opera */
-          "&::-webkit-scrollbar": {
-            display: "none",
-          },
-          /* Hide scrollbar for IE, Edge and Firefox */
-          "-ms-overflow-style": "none",
-          "scrollbar-width": "none",
-        },
-        ".scrollbar-thin": {
-          "&::-webkit-scrollbar": {
-            height: "6px",
-            width: "6px",
-          },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "transparent",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "rgba(0, 0, 0, 0.1)",
-            borderRadius: "3px",
-          },
-          "&::-webkit-scrollbar-thumb:hover": {
-            backgroundColor: "rgba(0, 0, 0, 0.2)",
-          },
-        },
-        ".scrollbar-track-transparent": {
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: "transparent",
-          },
-        },
-        ".scrollbar-thumb-muted-foreground\\/20": {
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "hsl(var(--muted-foreground) / 0.2)",
-          },
-        },
-        ".hover\\:scrollbar-thumb-muted-foreground\\/40:hover": {
-          "&::-webkit-scrollbar-thumb": {
-            backgroundColor: "hsl(var(--muted-foreground) / 0.4)",
-          },
-        },
-      });
-    },
-  ],
+  plugins: [tailwindTypography],
 } satisfies Config;

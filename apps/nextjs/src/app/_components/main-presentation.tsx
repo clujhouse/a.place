@@ -81,109 +81,6 @@ const PromptBox = ({
   );
 };
 
-// Custom Scrollable Marquee Component
-const ScrollableMarquee = ({
-  children,
-  className = "",
-  reverse = false,
-  speed = "100s",
-}: {
-  children: React.ReactNode;
-  className?: string;
-  reverse?: boolean;
-  speed?: string;
-}) => {
-  const [isDragging, setIsDragging] = React.useState(false);
-  const [isAnimationPaused, setIsAnimationPaused] = React.useState(false);
-  const [startX, setStartX] = React.useState(0);
-  const [scrollLeft, setScrollLeft] = React.useState(0);
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const animationRef = React.useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true);
-    setIsAnimationPaused(true);
-    setStartX(e.pageX - (containerRef.current?.offsetLeft || 0));
-    setScrollLeft(containerRef.current?.scrollLeft || 0);
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return;
-    e.preventDefault();
-    const x = e.pageX - (containerRef.current?.offsetLeft || 0);
-    const walk = (x - startX) * 2;
-    if (containerRef.current) {
-      containerRef.current.scrollLeft = scrollLeft - walk;
-    }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-    // Resume animation after a short delay
-    if (animationRef.current) clearTimeout(animationRef.current);
-    animationRef.current = setTimeout(() => setIsAnimationPaused(false), 1000);
-  };
-
-  const handleWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
-    setIsAnimationPaused(true);
-    if (containerRef.current) {
-      containerRef.current.scrollLeft += e.deltaY;
-    }
-    // Resume animation after a short delay
-    if (animationRef.current) clearTimeout(animationRef.current);
-    animationRef.current = setTimeout(() => setIsAnimationPaused(false), 1000);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (animationRef.current) clearTimeout(animationRef.current);
-    };
-  }, []);
-
-  return (
-    <div className={`relative w-full overflow-hidden ${className}`}>
-      <div
-        ref={containerRef}
-        className="scrollbar-hide flex cursor-grab overflow-x-auto active:cursor-grabbing"
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onWheel={handleWheel}
-        style={{
-          ["--duration" as any]: speed,
-          ["--gap" as any]: "1rem",
-        }}
-      >
-        <div
-          className={`flex shrink-0 gap-4 ${
-            isAnimationPaused ? "" : "animate-marquee"
-          } ${reverse ? "[animation-direction:reverse]" : ""}`}
-          style={{
-            animationPlayState: isAnimationPaused ? "paused" : "running",
-          }}
-        >
-          {children}
-        </div>
-        {/* Duplicate for seamless loop */}
-        <div
-          className={`flex shrink-0 gap-4 ${
-            isAnimationPaused ? "" : "animate-marquee"
-          } ${reverse ? "[animation-direction:reverse]" : ""}`}
-          style={{
-            animationPlayState: isAnimationPaused ? "paused" : "running",
-          }}
-        >
-          {children}
-        </div>
-      </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent"></div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent"></div>
-    </div>
-  );
-};
-
 const MainPresentation = () => {
   const router = useRouter();
   const { createChat } = useCreateChat();
@@ -226,7 +123,7 @@ const MainPresentation = () => {
       <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
         find and be found.
       </h1>
-      <ScrollableMarquee>
+      <Marquee className="w-full [--duration:100s]">
         {users.map((user) => (
           <ProfileCard
             key={user.id}
@@ -235,9 +132,12 @@ const MainPresentation = () => {
             containerClassName="!w-40"
           />
         ))}
-      </ScrollableMarquee>
+      </Marquee>
       <div className="flex w-full flex-col gap-2">
-        <ScrollableMarquee reverse>
+        <Marquee
+          className="w-full p-0 [--duration:100s] [--gap:0.5rem]"
+          reverse
+        >
           {prompts.slice(0, Math.ceil(prompts.length / 2)).map((prompt) => (
             <PromptBox
               key={prompt}
@@ -246,8 +146,8 @@ const MainPresentation = () => {
               isAuthenticated={!!session?.user}
             />
           ))}
-        </ScrollableMarquee>
-        <ScrollableMarquee>
+        </Marquee>
+        <Marquee className="w-full p-0 [--duration:100s] [--gap:0.5rem]">
           {prompts.slice(Math.ceil(prompts.length / 2)).map((prompt) => (
             <PromptBox
               key={prompt}
@@ -256,8 +156,10 @@ const MainPresentation = () => {
               isAuthenticated={!!session?.user}
             />
           ))}
-        </ScrollableMarquee>
+        </Marquee>
       </div>
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background"></div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background"></div>
     </div>
   );
 };
