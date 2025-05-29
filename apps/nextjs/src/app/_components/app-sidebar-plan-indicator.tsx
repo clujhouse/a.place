@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { CircleFadingArrowUp } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 import { UpgradeModal } from "@acme/ui";
@@ -25,6 +26,7 @@ const planConfig = {
 export function AppSidebarPlanIndicator() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { currentPlan, isLoading } = useSubscription();
+  const posthog = usePostHog();
 
   const handleUpgrade = async (plan: "pro" | "pro_exclusive") => {
     try {
@@ -49,6 +51,14 @@ export function AppSidebarPlanIndicator() {
     }
   };
 
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+    posthog.capture("upgrade_modal_opened", {
+      source: "plan_indicator",
+      current_plan: currentPlan,
+    });
+  };
+
   if (isLoading) {
     return (
       <Button variant="outline" size="sm" disabled className="w-full">
@@ -62,7 +72,7 @@ export function AppSidebarPlanIndicator() {
   return (
     <>
       <Button
-        onClick={() => setIsModalOpen(true)}
+        onClick={handleOpenModal}
         variant="outline"
         size="sm"
         className="w-full justify-between text-xs"

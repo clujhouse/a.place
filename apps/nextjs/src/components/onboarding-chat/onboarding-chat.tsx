@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { usePostHog } from "posthog-js/react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
 import {
@@ -42,14 +43,46 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const posthog = usePostHog();
 
   const { messages, isLoading, setIsLoading, addUserMessage, processStream } =
     useStreamingMessages({
-      onStep: (step) => setCurrentStep(step),
-      onExtracted: (data) => console.log("Extracted data:", data),
+      onStep: (step) => {
+        const previousStep = currentStep;
+        setCurrentStep(step);
+
+        // Track onboarding step progression
+        if (step !== previousStep) {
+          posthog.capture("onboarding_step_reached", {
+            step: step,
+            previous_step: previousStep,
+            total_messages: messages.length,
+            time_in_previous_step: Date.now(), // You could track actual time if needed
+          });
+        }
+      },
+      onExtracted: (data) => {
+        console.log("Extracted data:", data);
+        // Track data extraction
+        posthog.capture("onboarding_data_extracted", {
+          extracted_name: data.name,
+          extracted_location: data.location,
+          extracted_story: data.story ? "present" : "not_present",
+          current_step: currentStep,
+        });
+      },
       onProfileGenerating: (status) => {
         setIsProfileGenerating(status === "generating");
-        if (status === "complete") {
+        if (status === "generating") {
+          posthog.capture("onboarding_profile_generation_started", {
+            final_step: currentStep,
+            total_messages: messages.length,
+          });
+        } else if (status === "complete") {
+          posthog.capture("onboarding_completed", {
+            total_messages: messages.length,
+            completion_time: Date.now(), // You could track actual duration
+          });
           // Close dialog after a short delay to show completion
           setTimeout(() => setIsOpen(false), 1000);
         }
@@ -90,14 +123,26 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
   useEffect(() => {
     if (profile && !profile.isOnboarded && !isOpen) {
       setIsOpen(true);
+      // Track onboarding start
+      posthog.capture("onboarding_started", {
+        trigger: "auto_open",
+        user_has_profile: !!profile,
+      });
     }
-  }, [profile, isOpen]);
+  }, [profile, isOpen, posthog]);
 
   const { mutate } = useMutation(
     trpc.onboarding.chat.mutationOptions({
       onMutate: ({ input }) => {
         setIsLoading(true);
         addUserMessage(input);
+
+        // Track user message in onboarding
+        posthog.capture("onboarding_user_message", {
+          current_step: currentStep,
+          message_length: input.length,
+          message_number: messages.length + 1,
+        });
       },
       onSuccess: async (data) => {
         const messageState = await processStream(data);
@@ -119,6 +164,10 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
       },
       onError: () => {
         setIsLoading(false);
+        posthog.capture("onboarding_error", {
+          current_step: currentStep,
+          error_type: "chat_mutation_failed",
+        });
       },
     }),
   );
@@ -139,6 +188,11 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
 
   // Handle moving to next step after image upload
   const handleImageStepComplete = () => {
+    posthog.capture("onboarding_image_uploaded", {
+      current_step: currentStep,
+      total_messages: messages.length,
+    });
+
     mutate({
       input: "I've uploaded my profile picture",
       messages: messages.map((msg) => ({

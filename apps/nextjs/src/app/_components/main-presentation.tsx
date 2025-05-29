@@ -1,7 +1,9 @@
 "use client";
 
+import React from "react";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 import { Marquee } from "@acme/ui/marquee";
@@ -49,13 +51,27 @@ const PromptBox = ({
   onClick: ((message: string) => void) | null;
   isAuthenticated: boolean;
 }) => {
+  const posthog = usePostHog();
+
+  const handleClick = () => {
+    // Track prompt click
+    posthog.capture("homepage_prompt_clicked", {
+      prompt_text: prompt,
+      prompt_length: prompt.length,
+      is_authenticated: isAuthenticated,
+      source: "homepage_marquee",
+    });
+
+    onClick?.(prompt);
+  };
+
   return (
     <button
       key={prompt}
       className={`text-md max-w-80 border px-3 py-1 text-center transition-all hover:border-primary hover:bg-accent ${
         isAuthenticated ? "cursor-pointer" : "cursor-pointer opacity-90"
       }`}
-      onClick={() => onClick?.(prompt)}
+      onClick={handleClick}
       title={!isAuthenticated ? "Login required to search" : undefined}
     >
       {prompt}
@@ -67,18 +83,38 @@ const MainPresentation = () => {
   const router = useRouter();
   const { createChat } = useCreateChat();
   const { data: session } = authClient.useSession();
+  const posthog = usePostHog();
 
   const handleClick = async (prompt: string) => {
     // Check if user is logged in
     if (!session?.user) {
+      posthog.capture("homepage_redirect_to_login", {
+        prompt_text: prompt,
+        source: "unauthenticated_prompt_click",
+      });
+
       router.push("/login");
       return;
     }
+
+    posthog.capture("homepage_chat_creation_started", {
+      prompt_text: prompt,
+      prompt_length: prompt.length,
+      source: "homepage_prompt",
+    });
 
     const chatId = nanoid();
     await createChat(chatId);
     router.push(`/talking-stage/${chatId}?query=${prompt}`);
   };
+
+  // Track homepage view
+  React.useEffect(() => {
+    posthog.capture("homepage_viewed", {
+      is_authenticated: !!session?.user,
+      source: "main_presentation",
+    });
+  }, [session, posthog]);
 
   return (
     <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pb-12">

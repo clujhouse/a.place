@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Crown, Sparkles, X } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { Button } from "./button";
 import {
@@ -33,13 +34,35 @@ export function UpgradeModal({
   currentMembership = "standard",
 }: UpgradeModalProps) {
   const [isLoading, setIsLoading] = useState<string | null>(null);
+  const posthog = usePostHog();
 
   const handleUpgrade = async (plan: "pro" | "pro_exclusive") => {
     setIsLoading(plan);
+
+    // Track plan selection
+    posthog.capture("upgrade_plan_selected", {
+      selected_plan: plan,
+      current_membership: currentMembership,
+      plan_price: plan === "pro" ? "$20" : "$69",
+    });
+
     try {
       await onUpgrade(plan);
+
+      // Track successful upgrade initiation
+      posthog.capture("upgrade_initiated", {
+        plan: plan,
+        current_membership: currentMembership,
+      });
     } catch (error) {
       console.error("Upgrade failed:", error);
+
+      // Track upgrade failure
+      posthog.capture("upgrade_failed", {
+        plan: plan,
+        current_membership: currentMembership,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       setIsLoading(null);
     }

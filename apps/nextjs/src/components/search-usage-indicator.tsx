@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 import { UpgradeModal } from "@acme/ui";
@@ -13,6 +14,7 @@ export function SearchUsageIndicator() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const trpc = useTRPC();
   const { data: session } = authClient.useSession();
+  const posthog = usePostHog();
 
   const { data: searchUsage, isLoading } = useQuery({
     ...trpc.main.getSearchUsage.queryOptions(),
@@ -41,6 +43,16 @@ export function SearchUsageIndicator() {
       console.error("Upgrade failed:", error);
       // Handle error (show toast, etc.)
     }
+  };
+
+  const handleOpenUpgradeModal = () => {
+    setIsUpgradeModalOpen(true);
+    posthog.capture("upgrade_modal_opened", {
+      source: "search_usage_indicator",
+      remaining_searches: searchUsage?.remaining,
+      used_searches: searchUsage?.used,
+      limit: searchUsage?.limit,
+    });
   };
 
   if (isLoading || !searchUsage) {
@@ -73,7 +85,7 @@ export function SearchUsageIndicator() {
     <>
       <div
         className="cursor-pointer border bg-background p-3 hover:bg-accent"
-        onClick={() => setIsUpgradeModalOpen(true)}
+        onClick={handleOpenUpgradeModal}
       >
         <div className="flex items-center justify-between text-sm">
           <span>Daily searches</span>

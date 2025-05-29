@@ -3,6 +3,7 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 import { Button } from "@acme/ui/button";
@@ -22,6 +23,7 @@ export function LoginForm({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const posthog = usePostHog();
 
   async function handleSendOTP(e: FormEvent) {
     e.preventDefault();
@@ -33,6 +35,11 @@ export function LoginForm({
     setIsLoading(true);
     setError("");
 
+    posthog.capture("auth_otp_request_attempted", {
+      auth_method: "email_otp",
+      email_domain: email.split("@")[1] || "unknown",
+    });
+
     try {
       // Send OTP to the user's email
       await authClient.emailOtp.sendVerificationOtp({
@@ -40,10 +47,21 @@ export function LoginForm({
         type: "sign-in",
       });
 
+      posthog.capture("auth_otp_sent", {
+        auth_method: "email_otp",
+        email_domain: email.split("@")[1] || "unknown",
+      });
+
       setOtpSent(true);
     } catch (err) {
       console.error(err);
       setError("Failed to send verification code");
+
+      posthog.capture("auth_otp_send_failed", {
+        auth_method: "email_otp",
+        email_domain: email.split("@")[1] || "unknown",
+        error_type: "otp_send_failed",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -67,6 +85,11 @@ export function LoginForm({
     setIsLoading(true);
     setError("");
 
+    posthog.capture("auth_login_attempted", {
+      auth_method: "email_otp",
+      email_domain: email.split("@")[1] || "unknown",
+    });
+
     try {
       // Verify OTP and sign in using Better Auth
       const { data, error } = await authClient.signIn.emailOtp({
@@ -79,10 +102,23 @@ export function LoginForm({
           error.message ||
             "Invalid verification code. Please try again or request a new code.",
         );
+
+        posthog.capture("auth_login_failed", {
+          auth_method: "email_otp",
+          email_domain: email.split("@")[1] || "unknown",
+          error_type: "invalid_otp",
+          error_message: error.message,
+        });
         return;
       }
 
       if (data) {
+        posthog.capture("auth_login_success", {
+          auth_method: "email_otp",
+          email_domain: email.split("@")[1] || "unknown",
+          user_id: data.user?.id,
+        });
+
         // Redirect to the homepage after successful login
         router.push("/");
         router.refresh();
@@ -92,6 +128,13 @@ export function LoginForm({
       setError(
         "Invalid verification code. Please try again or request a new code.",
       );
+
+      posthog.capture("auth_login_failed", {
+        auth_method: "email_otp",
+        email_domain: email.split("@")[1] || "unknown",
+        error_type: "verification_error",
+        error_message: err.message,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -101,13 +144,30 @@ export function LoginForm({
     try {
       setIsLoading(true);
 
+      posthog.capture("auth_login_attempted", {
+        auth_method: "google_oauth",
+      });
+
       await authClient.signIn.social({
         provider: "google",
         callbackURL: "/login",
       });
+
+      // Note: Success tracking for OAuth will happen after redirect
+      posthog.capture("auth_oauth_redirect_initiated", {
+        auth_method: "google_oauth",
+        provider: "google",
+      });
     } catch (err) {
       console.error(err);
       setError("Failed to sign in with Google");
+
+      posthog.capture("auth_login_failed", {
+        auth_method: "google_oauth",
+        error_type: "oauth_error",
+        provider: "google",
+      });
+
       setIsLoading(false);
     }
   }

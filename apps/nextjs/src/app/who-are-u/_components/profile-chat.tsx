@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { User } from "lucide-react";
 import { nanoid } from "nanoid";
+import { usePostHog } from "posthog-js/react";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
@@ -55,6 +56,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const posthog = usePostHog();
 
   const { updateChat } = useUpdateChat();
 
@@ -81,6 +83,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
           embedding: null,
           isOnboarded: false,
           images: [],
+          houseId: null,
         };
 
       return { ...old, text: newProfile };
@@ -88,6 +91,35 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
   };
 
   const updateProfileCompletion = (completionPercentage: number) => {
+    const oldProfile = queryClient.getQueryData(trpc.profile.get.queryKey());
+    const previousCompletion = oldProfile?.completionPercentage || 0;
+
+    // Track completion milestones
+    if (completionPercentage > previousCompletion) {
+      posthog.capture("profile_completion_increased", {
+        previous_completion: previousCompletion,
+        new_completion: completionPercentage,
+        completion_increase: completionPercentage - previousCompletion,
+        total_messages: messages.length,
+        source: "profile_chat",
+      });
+
+      // Track milestone achievements
+      const milestones = [25, 50, 75, 100];
+      const achievedMilestone = milestones.find(
+        (milestone) =>
+          previousCompletion < milestone && completionPercentage >= milestone,
+      );
+
+      if (achievedMilestone) {
+        posthog.capture("profile_completion_milestone", {
+          milestone: achievedMilestone,
+          total_messages: messages.length,
+          source: "profile_chat",
+        });
+      }
+    }
+
     queryClient.setQueryData(trpc.profile.get.queryKey(), (old) => {
       if (!old) return null;
 
@@ -100,6 +132,16 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
     trpc.llm.learnAboutYou.mutationOptions({
       onMutate: ({ input, chatId }) => {
         setIsProfileCreating(true);
+
+        // Track profile chat message
+        posthog.capture("profile_chat_message_sent", {
+          message_length: input.length,
+          message_word_count: input.split(/\s+/).length,
+          total_messages: messages.length,
+          chat_id: chatId,
+          source: "profile_chat",
+        });
+
         const message: AMessage = {
           role: "user",
           parts: [{ id: nanoid(), type: "text", text: input }],
@@ -116,6 +158,12 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
         });
       },
       onSuccess: async (data) => {
+        posthog.capture("profile_generation_started", {
+          total_messages: messages.length,
+          chat_id: chatId,
+          source: "profile_chat",
+        });
+
         let messageId = "";
         let newProfileText = "";
         for await (const part of data)
@@ -137,12 +185,30 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
             })
             .with({ type: "confetti" }, () => {
               setShowConfetti(true);
+              posthog.capture("profile_confetti_triggered", {
+                total_messages: messages.length,
+                chat_id: chatId,
+                source: "profile_chat",
+              });
             })
             .exhaustive();
+
+        posthog.capture("profile_generation_completed", {
+          total_messages: messages.length,
+          profile_text_length: newProfileText.length,
+          chat_id: chatId,
+          source: "profile_chat",
+        });
       },
 
       onError: () => {
         setIsProfileCreating(false);
+        posthog.capture("profile_generation_failed", {
+          total_messages: messages.length,
+          chat_id: chatId,
+          error_type: "generation_failed",
+          source: "profile_chat",
+        });
       },
     }),
   );
@@ -151,6 +217,13 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
   useEffect(() => {
     if (messages.length === 0 && isInitialMessage.current) {
       isInitialMessage.current = false;
+
+      posthog.capture("profile_chat_started", {
+        chat_id: chatId,
+        source: "profile_chat",
+        trigger: "initial_message",
+      });
+
       mutate({
         chatId,
         input:

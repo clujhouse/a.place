@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Mail, Send } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { Button } from "@acme/ui/button";
 import {
@@ -35,11 +36,22 @@ export function MessageModal({
   const [message, setMessage] = useState("");
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const posthog = usePostHog();
 
   const { mutate: sendMessage, isPending } = useMutation(
     trpc.conversation.sendMessage.mutationOptions({
       onSuccess: () => {
         toast.success("Letter sent successfully!");
+
+        // Track successful message send
+        posthog.capture("letter_sent", {
+          receiver_id: receiverId,
+          receiver_name: receiverName,
+          message_length: message.trim().length,
+          message_word_count: message.trim().split(/\s+/).length,
+          source: "message_modal",
+        });
+
         setMessage("");
         setOpen(false);
         // Invalidate conversations to update the list
@@ -51,12 +63,40 @@ export function MessageModal({
       },
       onError: () => {
         toast.error("Failed to send letter");
+
+        // Track failed message send
+        posthog.capture("letter_send_failed", {
+          receiver_id: receiverId,
+          receiver_name: receiverName,
+          message_length: message.trim().length,
+          error_type: "api_error",
+          source: "message_modal",
+        });
       },
     }),
   );
 
+  const handleOpenModal = () => {
+    setOpen(true);
+
+    // Track message modal opened
+    posthog.capture("letter_modal_opened", {
+      receiver_id: receiverId,
+      receiver_name: receiverName,
+      source: "message_modal",
+    });
+  };
+
   const handleSend = () => {
     if (!message.trim()) return;
+
+    posthog.capture("letter_send_attempted", {
+      receiver_id: receiverId,
+      receiver_name: receiverName,
+      message_length: message.trim().length,
+      message_word_count: message.trim().split(/\s+/).length,
+      source: "message_modal",
+    });
 
     sendMessage({
       receiverId,
@@ -66,7 +106,7 @@ export function MessageModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger asChild onClick={handleOpenModal}>
         {trigger || (
           <Button variant="outline" size="sm">
             <Mail className="mr-2 h-4 w-4" />

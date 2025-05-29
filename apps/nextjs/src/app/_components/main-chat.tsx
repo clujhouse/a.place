@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowDown, Loader2 } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
+import { usePostHog } from "posthog-js/react";
 import { match } from "ts-pattern";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";
 
@@ -52,6 +53,7 @@ const MainChat = ({
 }: MainChatProps) => {
   const [query, setQuery] = useQueryState("query", parseAsString);
   const router = useRouter();
+  const posthog = usePostHog();
 
   const initialQueryRefRun = useRef<boolean>(false);
 
@@ -75,6 +77,16 @@ const MainChat = ({
       onMutate: ({ input, chatId }) => {
         const userMessage = createUserMessage(input, chatId);
 
+        // Track search attempt
+        posthog.capture("search_attempted", {
+          query: input,
+          query_length: input.length,
+          query_word_count: input.split(/\s+/).length,
+          chat_id: chatId,
+          is_homepage: isHomepage,
+          source: "main_chat",
+        });
+
         queryClient.setQueryData(trpc.chat.get.queryKey(chatId), (old) => {
           if (!old) return [userMessage];
 
@@ -83,6 +95,9 @@ const MainChat = ({
       },
       onSuccess: async (data, vars) => {
         let messageId: string | null = null;
+        let profilesFound = 0;
+        let aiResponseLength = 0;
+
         for await (const part of data)
           match(part)
             .with({ type: "messageId" }, (data) => {
@@ -90,11 +105,13 @@ const MainChat = ({
             })
             .with({ type: "text" }, (part) => {
               setIsChatLoading(false);
+              aiResponseLength += part.text.length;
               if (messageId) updateChat(messageId, part, vars.chatId);
             })
             .with({ type: "profile" }, (part) => {
               if (messageId) {
                 updateChat(messageId, part, vars.chatId);
+                profilesFound = part.profiles.length;
               }
             })
             .with({ type: "chatTitle" }, (part) => {
@@ -113,14 +130,38 @@ const MainChat = ({
               );
             });
 
+        // Track successful search completion
+        posthog.capture("search_completed", {
+          query: vars.input,
+          query_length: vars.input.length,
+          query_word_count: vars.input.split(/\s+/).length,
+          profiles_found: profilesFound,
+          ai_response_length: aiResponseLength,
+          chat_id: vars.chatId,
+          is_homepage: isHomepage,
+          source: "main_chat",
+        });
+
         // Invalidate search usage to update the indicator
         void queryClient.invalidateQueries({
           queryKey: trpc.main.getSearchUsage.queryKey(),
         });
       },
 
-      onError: (error) => {
+      onError: (error, vars) => {
         setIsChatLoading(false);
+
+        // Track search failure
+        posthog.capture("search_failed", {
+          query: vars.input,
+          query_length: vars.input.length,
+          query_word_count: vars.input.split(/\s+/).length,
+          error_code: error.data?.code,
+          error_message: error.message,
+          chat_id: vars.chatId,
+          is_homepage: isHomepage,
+          source: "main_chat",
+        });
 
         // Show specific error message for rate limiting
         if (error.data?.code === "TOO_MANY_REQUESTS") {
@@ -154,10 +195,20 @@ const MainChat = ({
 
     if (query && chatId) {
       initialQueryRefRun.current = true;
+
+      // Track query parameter search
+      posthog.capture("search_from_query_param", {
+        query,
+        query_length: query.length,
+        query_word_count: query.split(/\s+/).length,
+        chat_id: chatId,
+        source: "query_parameter",
+      });
+
       void onSubmit(query);
       void setQuery(null);
     }
-  }, [query, mutate, chatId, setQuery]);
+  }, [query, mutate, chatId, setQuery, posthog]);
 
   return (
     <>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { Send, User } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Button } from "@acme/ui/button";
@@ -29,8 +30,10 @@ export function ConversationView({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const previousMessageCount = useRef(0);
+  const conversationOpenTime = useRef<number>(Date.now());
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const posthog = usePostHog();
 
   const { data: messages, isLoading } = useQuery({
     ...trpc.conversation.getMessagesWithUser.queryOptions(partnerId),
@@ -41,9 +44,30 @@ export function ConversationView({
     trpc.profile.getById.queryOptions(partnerId),
   );
 
+  // Track conversation view
+  useEffect(() => {
+    if (messages && !isLoading) {
+      posthog.capture("conversation_viewed", {
+        partner_id: partnerId,
+        partner_name: partnerName,
+        total_messages: messages.length,
+        conversation_exists: messages.length > 0,
+      });
+    }
+  }, [partnerId, partnerName, messages, isLoading, posthog]);
+
   const { mutate: sendMessage, isPending } = useMutation(
     trpc.conversation.sendMessage.mutationOptions({
       onSuccess: () => {
+        posthog.capture("letter_sent", {
+          receiver_id: partnerId,
+          receiver_name: partnerName,
+          message_length: newMessage.trim().length,
+          message_word_count: newMessage.trim().split(/\s+/).length,
+          source: "conversation_view",
+          conversation_duration: Date.now() - conversationOpenTime.current,
+        });
+
         setNewMessage("");
         // Invalidate both the messages and conversations queries
         void queryClient.invalidateQueries({
@@ -55,6 +79,14 @@ export function ConversationView({
       },
       onError: () => {
         toast.error("Failed to send letter");
+
+        posthog.capture("letter_send_failed", {
+          receiver_id: partnerId,
+          receiver_name: partnerName,
+          message_length: newMessage.trim().length,
+          error_type: "api_error",
+          source: "conversation_view",
+        });
       },
     }),
   );
@@ -91,6 +123,15 @@ export function ConversationView({
   const handleSendMessage = () => {
     if (!newMessage.trim()) return;
 
+    posthog.capture("letter_send_attempted", {
+      receiver_id: partnerId,
+      receiver_name: partnerName,
+      message_length: newMessage.trim().length,
+      message_word_count: newMessage.trim().split(/\s+/).length,
+      source: "conversation_view",
+      conversation_duration: Date.now() - conversationOpenTime.current,
+    });
+
     sendMessage({
       receiverId: partnerId,
       text: newMessage.trim(),
@@ -106,7 +147,18 @@ export function ConversationView({
 
   const handleHeaderClick = () => {
     setProfileOpen(true);
+
+    posthog.capture("conversation_profile_opened", {
+      partner_id: partnerId,
+      partner_name: partnerName,
+      source: "conversation_header",
+    });
   };
+
+  // Reset conversation open time when switching conversations
+  useEffect(() => {
+    conversationOpenTime.current = Date.now();
+  }, [partnerId]);
 
   if (isLoading) {
     return (

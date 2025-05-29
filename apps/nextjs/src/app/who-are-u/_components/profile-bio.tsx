@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { generateReactHelpers } from "@uploadthing/react";
 import { Plus } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
@@ -23,6 +24,8 @@ export const ProfileBio = () => {
 
   const trpc = useTRPC();
   const queryClient = useQueryClient();
+  const posthog = usePostHog();
+
   const { data: profile, isLoading: isProfileLoading } = useQuery(
     trpc.profile.get.queryOptions(),
   );
@@ -37,16 +40,43 @@ export const ProfileBio = () => {
 
   const { isProfileCreating } = useAppContext();
 
+  // Track profile view
+  React.useEffect(() => {
+    if (profile && session?.user) {
+      posthog.capture("profile_viewed", {
+        profile_completion: profile.completionPercentage,
+        is_onboarded: profile.isOnboarded,
+        has_house: !!profile.houseId,
+        has_additional_images: (profile.images?.length || 0) > 0,
+        profile_text_length: profile.text?.length || 0,
+        source: "profile_page",
+      });
+    }
+  }, [profile, session, posthog]);
+
   const { mutate: updateProfileImage } = useMutation(
     trpc.profile.updateProfileImage.mutationOptions({
       onSuccess: (_data, url) => {
         toast.success("Profile image updated successfully");
+
+        posthog.capture("profile_image_updated", {
+          image_type: "profile_picture",
+          profile_completion: profile?.completionPercentage || 0,
+          source: "profile_page",
+        });
+
         void authClient.updateUser({
           image: url,
         });
       },
       onError: () => {
         toast.error("Failed to update profile image");
+
+        posthog.capture("profile_image_update_failed", {
+          image_type: "profile_picture",
+          error_type: "upload_failed",
+          source: "profile_page",
+        });
       },
       onSettled: () => {
         setLoadingImageIndex(null);
@@ -58,12 +88,26 @@ export const ProfileBio = () => {
     trpc.profile.updateAdditionalImages.mutationOptions({
       onSuccess: () => {
         toast.success("Additional images updated successfully");
+
+        posthog.capture("profile_image_updated", {
+          image_type: "additional_image",
+          profile_completion: profile?.completionPercentage || 0,
+          total_additional_images: (profile?.images?.length || 0) + 1,
+          source: "profile_page",
+        });
+
         void queryClient.invalidateQueries({
           queryKey: trpc.profile.get.queryKey(),
         });
       },
       onError: () => {
         toast.error("Failed to update additional images");
+
+        posthog.capture("profile_image_update_failed", {
+          image_type: "additional_image",
+          error_type: "upload_failed",
+          source: "profile_page",
+        });
       },
       onSettled: () => {
         setLoadingImageIndex(null);
@@ -75,12 +119,26 @@ export const ProfileBio = () => {
     trpc.profile.updateAdditionalImageAtIndex.mutationOptions({
       onSuccess: () => {
         toast.success("Image updated successfully");
+
+        posthog.capture("profile_image_updated", {
+          image_type: "additional_image_replacement",
+          profile_completion: profile?.completionPercentage || 0,
+          total_additional_images: profile?.images?.length || 0,
+          source: "profile_page",
+        });
+
         void queryClient.invalidateQueries({
           queryKey: trpc.profile.get.queryKey(),
         });
       },
       onError: () => {
         toast.error("Failed to update image");
+
+        posthog.capture("profile_image_update_failed", {
+          image_type: "additional_image_replacement",
+          error_type: "upload_failed",
+          source: "profile_page",
+        });
       },
       onSettled: () => {
         setLoadingImageIndex(null);
@@ -93,15 +151,30 @@ export const ProfileBio = () => {
   ) => {
     if (!e.target.files?.[0]) return;
 
+    const file = e.target.files[0];
+
+    posthog.capture("profile_image_upload_attempted", {
+      image_type: "profile_picture",
+      file_size: file.size,
+      file_type: file.type,
+      source: "profile_page",
+    });
+
     try {
       setLoadingImageIndex(-1); // -1 for profile image
-      const uploadedFiles = await startUpload([e.target.files[0]]);
+      const uploadedFiles = await startUpload([file]);
       if (!uploadedFiles?.[0]) return;
 
       updateProfileImage(uploadedFiles[0].url);
     } catch (err) {
       toast.error("Failed to upload profile image");
       setLoadingImageIndex(null);
+
+      posthog.capture("profile_image_upload_failed", {
+        image_type: "profile_picture",
+        error_type: "upload_error",
+        source: "profile_page",
+      });
     }
   };
 
@@ -111,9 +184,19 @@ export const ProfileBio = () => {
   ) => {
     if (!e.target.files?.[0]) return;
 
+    const file = e.target.files[0];
+
+    posthog.capture("profile_image_upload_attempted", {
+      image_type: "additional_image",
+      file_size: file.size,
+      file_type: file.type,
+      image_index: index,
+      source: "profile_page",
+    });
+
     try {
       setLoadingImageIndex(index);
-      const uploadedFiles = await startUpload([e.target.files[0]]);
+      const uploadedFiles = await startUpload([file]);
       if (!uploadedFiles?.[0]) return;
 
       if (!profile?.images?.[index]) {
@@ -129,6 +212,13 @@ export const ProfileBio = () => {
     } catch (err) {
       toast.error("Failed to update image");
       setLoadingImageIndex(null);
+
+      posthog.capture("profile_image_upload_failed", {
+        image_type: "additional_image",
+        error_type: "upload_error",
+        image_index: index,
+        source: "profile_page",
+      });
     }
   };
 

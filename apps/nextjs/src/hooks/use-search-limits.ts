@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { usePostHog } from "posthog-js/react";
 
 import { authClient } from "@acme/auth/client";
 
@@ -11,6 +12,7 @@ export function useSearchLimits() {
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const trpc = useTRPC();
   const { data: session } = authClient.useSession();
+  const posthog = usePostHog();
 
   const { data: searchUsage, isLoading } = useQuery({
     ...trpc.main.getSearchUsage.queryOptions(),
@@ -53,6 +55,12 @@ export function useSearchLimits() {
     // If user has reached their limit, show upgrade modal
     if (searchUsage.type === "free" && searchUsage.remaining === 0) {
       setIsUpgradeModalOpen(true);
+      posthog.capture("upgrade_modal_opened", {
+        source: "search_limit_reached",
+        remaining_searches: searchUsage.remaining,
+        used_searches: searchUsage.used,
+        limit: searchUsage.limit,
+      });
       return false;
     }
 
