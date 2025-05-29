@@ -31,7 +31,6 @@ export const onboardingWithContext = (
   currentStep: string,
   contextInfo?: OnboardingContext,
 ) => {
-  console.log(currentStep);
   const stepPrompts = {
     initial: `you've just explained what a.place is about. now ask for their name in a friendly way.`,
     name: `great! you got their name. now ask where they're from - could be a city, country, or just "the internet" if they prefer.`,

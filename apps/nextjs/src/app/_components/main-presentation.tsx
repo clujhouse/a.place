@@ -20,6 +20,8 @@ const users = [
   { id: "pohbBNnAq8ek4OsLXUuyDlW6AJiOeXi6" },
 
   { id: "gQeDVeP7mtQJPM9ZCYzGMRVIHEkNC854" },
+  { id: "F6Et1JibzgsWQQsHguYnWHteOHD1lxVz" },
+  { id: "KAXEBjYtI0yuuHultSWHPSw6xOXJRh9h" },
 ];
 
 const prompts = [

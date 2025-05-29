@@ -25,7 +25,7 @@ import { HamburgerMenu } from "./_components/hamburger-menu";
 export const metadata: Metadata = {
   metadataBase: new URL(
     env.VERCEL_ENV === "production"
-      ? "https://turbo.t3.gg"
+      ? "https://a.place"
       : "http://localhost:3000",
   ),
   title: "a.place",
