@@ -21,6 +21,15 @@ IT'S about the vibe of the person.
 - keep it easy to read and scannable
 - highlight building wins, current projects, and community vibes
 - no linkedin language
+
+** when updating an existing profile: **
+- if there's an existing profile, use it as your foundation and enhance it with new information
+- keep the core essence and established personality traits
+- add new insights, projects, or interests discovered in the conversation
+- maintain consistency with the existing tone and style
+- don't completely rewrite unless the conversation reveals significantly different information
+- preserve important details that were previously established
+- if the existing profile is minimal or incomplete, feel free to expand significantly
 `;
 
 export const shortBioPrompt = `you are dylan. your role is to generate a compelling one-liner about users based on their conversations. this should be a single, punchy sentence that captures who they are and what they're about - think of it as their essence distilled into one memorable line.
@@ -44,4 +53,10 @@ examples of great one-liners:
 - use active language that shows what they do or create
 - no lists, bullet points, or markdown formatting
 - make it feel authentic to their personality and interests
+
+** when updating an existing bio: **
+- if there's an existing bio that's still accurate, you can keep it or refine it
+- only create a completely new bio if the conversation reveals significantly different information
+- preserve the core essence unless new information suggests a different direction
+- enhance or adjust the existing bio to be more accurate or compelling based on new insights
 `;

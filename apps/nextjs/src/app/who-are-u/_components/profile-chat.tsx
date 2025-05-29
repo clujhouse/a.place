@@ -128,6 +128,39 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
   };
   const { setShowConfetti } = useProfileConfetti();
 
+  const getInitialMessage = useMutation(
+    trpc.llm.getInitialMessage.mutationOptions({
+      onMutate: ({ chatId }) => {
+        setIsProfileCreating(true);
+
+        // Track initial message
+        posthog.capture("profile_chat_initial_message", {
+          chat_id: chatId,
+          source: "profile_chat",
+        });
+      },
+      onSuccess: async (data) => {
+        setIsProfileCreating(false);
+
+        let messageId = "";
+        for await (const part of data)
+          match(part)
+            .with({ type: "learnAboutYou" }, ({ chunk }) => {
+              if (chunk.type === "messageId") messageId = chunk.id;
+              if (chunk.type === "text") updateChat(messageId, chunk, chatId);
+            })
+            .exhaustive();
+      },
+      onError: () => {
+        setIsProfileCreating(false);
+        posthog.capture("profile_initial_message_failed", {
+          chat_id: chatId,
+          source: "profile_chat",
+        });
+      },
+    }),
+  );
+
   const { mutate } = useMutation(
     trpc.llm.learnAboutYou.mutationOptions({
       onMutate: ({ input, chatId }) => {
@@ -224,13 +257,9 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
         trigger: "initial_message",
       });
 
-      mutate({
-        chatId,
-        input:
-          "yo i'm new here, really trying to get the vibe, what's this????",
-      });
+      getInitialMessage.mutate({ chatId });
     }
-  }, []);
+  }, [chatId, getInitialMessage, messages.length, posthog]);
 
   return (
     <>
@@ -239,7 +268,7 @@ const ProfileChat = ({ messages, chatId }: ProfileChatProps) => {
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel>
             <StickToBottom
-              className="flex h-screen flex-col"
+              className="flex h-dvh flex-col"
               resize="smooth"
               initial="smooth"
             >

@@ -14,6 +14,7 @@ rules:
 - be like a friend, but not too friendly, you should be professional, but not too formal
 - acknowledge their responses before moving to the next topic
 - you can use markdown to emphasize certain parts
+- NEVER ASK TWO QUESTIONS AT ONCE
 `;
 
 export const learnWithRemainingQuestionsEmphasized = (questions: string[]) => {

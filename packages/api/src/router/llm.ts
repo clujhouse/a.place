@@ -9,6 +9,7 @@ import type { AMessage } from "@acme/validators/message";
 import { message, profile } from "@acme/db/schema";
 
 import type { TRPCContext } from "../trpc";
+import { initialGreetingPrompt } from "../prompts/initial-greeting";
 import { judgePrompt } from "../prompts/judge-prompt";
 import { learnWithRemainingQuestionsEmphasized } from "../prompts/learn-about-you";
 import { profilePrompt, shortBioPrompt } from "../prompts/profile";
@@ -119,11 +120,18 @@ async function* generateAIResponse(
   return responseText;
 }
 
-async function* streamProfileContent(allMessages: AMessage[]) {
+async function* streamProfileContent(
+  allMessages: AMessage[],
+  existingProfile?: string | null,
+) {
+  const existingProfileContext = existingProfile
+    ? `\n\n## Existing Profile:\n${existingProfile}\n\n## Short Bio:\n${existingProfile || "none yet"}`
+    : "\n\n## Existing Profile:\nnone yet - this is their first profile";
+
   const profileStream = streamText({
     model: google("gemini-2.5-flash-preview-04-17"),
     experimental_telemetry: { isEnabled: true },
-    prompt: `${profilePrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
+    prompt: `${profilePrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
       allMessages,
     )
       .map((msg) => `${msg.role}: ${msg.content}`)
@@ -146,11 +154,18 @@ async function* streamProfileContent(allMessages: AMessage[]) {
   return await profileStream.text;
 }
 
-async function generateProfileText(allMessages: AMessage[]) {
+async function generateProfileText(
+  allMessages: AMessage[],
+  existingProfile?: string | null,
+) {
+  const existingProfileContext = existingProfile
+    ? `\n\n## Existing Profile:\n${existingProfile}\n\n## Short Bio:\n${existingProfile || "none yet"}`
+    : "\n\n## Existing Profile:\nnone yet - this is their first profile";
+
   const { text } = await generateText({
     model: google("gemini-2.5-flash-preview-04-17"),
     experimental_telemetry: { isEnabled: true },
-    prompt: `${profilePrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
+    prompt: `${profilePrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
       allMessages,
     )
       .map((msg) => `${msg.role}: ${msg.content}`)
@@ -160,11 +175,18 @@ async function generateProfileText(allMessages: AMessage[]) {
   return text;
 }
 
-async function generateShortBio(allMessages: AMessage[]) {
+async function generateShortBio(
+  allMessages: AMessage[],
+  existingProfile?: string | null,
+) {
+  const existingProfileContext = existingProfile
+    ? `\n\n## Existing Short Bio:\n${existingProfile}`
+    : "\n\n## Existing Short Bio:\nnone yet - this is their first bio";
+
   const { text: shortBioText } = await generateText({
     model: google("gemini-2.0-flash"),
     experimental_telemetry: { isEnabled: true },
-    prompt: `${shortBioPrompt}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
+    prompt: `${shortBioPrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
       allMessages,
     )
       .map((msg) => `${msg.role}: ${msg.content}`)
@@ -215,6 +237,62 @@ async function updateProfile(
 }
 
 export const llmRouter = {
+  getInitialMessage: protectedProcedure
+    .input(z.object({ chatId: z.string() }))
+    .mutation(async function* ({ ctx, input: { chatId } }) {
+      // Generate AI greeting without creating any messages or updating profile
+      const aiMessageId = nanoid();
+
+      const profileData = await ctx.db.query.profile.findFirst({
+        where: (profile, { eq }) => eq(profile.userId, ctx.session.user.id),
+      });
+
+      const existingProfileContext = profileData?.text
+        ? `\n\n## Existing Profile:\n${profileData.text}\n\n## Short Bio:\n${profileData.shortBio}`
+        : "\n\n## Existing Profile:\nnone yet - this is their first profile";
+
+      yield {
+        type: "learnAboutYou" as const,
+        chunk: { type: "messageId" as const, id: aiMessageId },
+      };
+
+      const textPartId = nanoid();
+      let assistantText = "";
+
+      const result = streamText({
+        model: google("gemini-2.0-flash"),
+        experimental_telemetry: { isEnabled: true },
+        prompt: `${initialGreetingPrompt}
+
+${existingProfileContext}`,
+        experimental_transform: smoothStream({
+          delayInMs: 20,
+          chunking: "word",
+        }),
+      });
+
+      for await (const chunk of result.textStream) {
+        assistantText += chunk;
+        yield {
+          type: "learnAboutYou" as const,
+          chunk: {
+            id: textPartId,
+            type: "text" as const,
+            text: chunk,
+          },
+        };
+      }
+
+      // Save the assistant message to the database
+      await ctx.db.insert(message).values({
+        id: aiMessageId,
+        role: "assistant",
+        parts: [{ id: textPartId, type: "text", text: assistantText }],
+        chatId: chatId,
+        attachments: [],
+      });
+    }),
+
   learnAboutYou: protectedProcedure
     .input(
       z.object({
@@ -253,7 +331,10 @@ export const llmRouter = {
       }
 
       // Stream profile content
-      for await (const chunk of streamProfileContent(allMessages)) {
+      for await (const chunk of streamProfileContent(
+        allMessages,
+        profileData?.text,
+      )) {
         yield chunk;
       }
 
@@ -281,8 +362,14 @@ export const llmRouter = {
       };
 
       // Generate profile content for saving
-      const profileText = await generateProfileText(allMessages);
-      const shortBioText = await generateShortBio(allMessages);
+      const profileText = await generateProfileText(
+        allMessages,
+        profileData?.text,
+      );
+      const shortBioText = await generateShortBio(
+        allMessages,
+        profileData?.text,
+      );
 
       const embeddedProfileText = `
 name: ${ctx.session.user.name}

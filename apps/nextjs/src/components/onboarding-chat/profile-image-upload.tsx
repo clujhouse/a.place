@@ -25,6 +25,7 @@ export const ProfileImageUpload = ({
 }: ProfileImageUploadProps) => {
   const profileImageInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [hideImage, setHideImage] = useState(false);
 
   const trpc = useTRPC();
 
@@ -38,6 +39,12 @@ export const ProfileImageUpload = ({
         toast.success("Profile image uploaded successfully!");
 
         onImageUploaded?.(imageUrl);
+
+        void authClient.updateUser({
+          image: imageUrl,
+        });
+        setIsUploading(false);
+        setHideImage(true);
       },
       onError: () => {
         toast.error("Failed to update profile image");
@@ -60,7 +67,7 @@ export const ProfileImageUpload = ({
         return;
       }
 
-      updateProfileImage(uploadedFiles[0].url);
+      updateProfileImage(uploadedFiles[0].ufsUrl);
     } catch (err) {
       toast.error("Failed to upload profile image");
       setIsUploading(false);
@@ -83,17 +90,12 @@ export const ProfileImageUpload = ({
         onClick={() => !isUploading && profileImageInputRef.current?.click()}
       >
         <Avatar className="h-32 w-32 border-4 border-dashed border-muted-foreground/25 transition-all group-hover:border-primary">
-          {currentImage ? (
-            <AvatarImage
-              src={currentImage}
-              alt={session.user.name ?? "Profile"}
-              className="object-cover"
-            />
-          ) : (
-            <AvatarFallback className="bg-muted">
-              <User className="h-12 w-12 text-muted-foreground" />
-            </AvatarFallback>
+          {!hideImage && currentImage && (
+            <AvatarImage src={currentImage} alt="Profile" />
           )}
+          <AvatarFallback className="bg-muted">
+            <User className="h-12 w-12 text-muted-foreground" />
+          </AvatarFallback>
         </Avatar>
 
         <div

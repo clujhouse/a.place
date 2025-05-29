@@ -11,7 +11,7 @@ export function HamburgerMenu() {
   const { toggleSidebar } = useSidebar();
 
   // Hide hamburger menu on public profile pages - AFTER all hooks are called
-  if (pathname.startsWith("/profile/")) {
+  if (pathname.startsWith("/profile/") || pathname.startsWith("/letters/")) {
     return null;
   }
 

@@ -39,7 +39,7 @@ const Homepage = () => {
 
   if (!message) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center">
         <ClujhouseIcon />
       </div>
     );

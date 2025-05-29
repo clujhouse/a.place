@@ -231,7 +231,7 @@ export const ProfileBio = () => {
   }
 
   return (
-    <div className="flex h-screen flex-col gap-4 p-6">
+    <div className="flex h-dvh flex-col gap-4 p-6">
       <div className="flex items-center gap-4">
         <div
           className="group relative cursor-pointer"

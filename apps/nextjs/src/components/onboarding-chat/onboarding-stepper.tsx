@@ -23,7 +23,7 @@ export function OnboardingStepper({ currentStep }: OnboardingStepperProps) {
 
   // Calculate completed steps (including initial step)
   const completedSteps = activeStepIndex + 1;
-  const totalSteps = 5; // Including the initial step that was removed from display
+  const totalSteps = 4; // Including the initial step that was removed from display
 
   return (
     <div className="mx-auto w-full max-w-xl px-6 py-4">
