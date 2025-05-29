@@ -14,7 +14,6 @@ import { ShareProfileButton } from "~/components/share-profile-button";
 import { useAppContext } from "~/context/app-context";
 import { cn } from "~/lib/utils";
 import { useTRPC } from "~/trpc/react";
-import { HouseSelector } from "./house-selector";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
@@ -179,20 +178,20 @@ export const ProfileBio = () => {
         <div className="flex-1">
           <p className="text-3xl font-semibold">{session.user.name}</p>
           <p className="text-muted-foreground">{session.user.email}</p>
-          <div className="mt-2">
+          {/* <div className="mt-2">
             <ShareProfileButton
               userId={session.user.id}
               userName={session.user.name}
             />
-          </div>
+          </div> */}
         </div>
       </div>
 
       {/* House Selector */}
-      <div className="space-y-2">
+      {/* <div className="space-y-2">
         <h3 className="text-lg font-semibold">Your House</h3>
         <HouseSelector currentHouseId={profile?.houseId} />
-      </div>
+      </div> */}
       {/* Profile Completion Section */}
       {(profile?.completionPercentage ?? 0) < 100 && (
         <div className="space-y-2 bg-background">
