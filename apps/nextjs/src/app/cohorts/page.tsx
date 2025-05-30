@@ -12,12 +12,6 @@ import { Skeleton } from "@acme/ui/skeleton";
 
 import { useTRPC } from "~/trpc/react";
 
-const statusColors = {
-  active: "bg-green-100 text-green-800 border-green-200",
-  "in progress": "bg-blue-100 text-blue-800 border-blue-200",
-  archived: "bg-gray-100 text-gray-800 border-gray-200",
-} as const;
-
 interface CohortData {
   id: string;
   name: string;
@@ -51,9 +45,7 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
               {cohort.house?.name || "No house assigned"}
             </p>
           </div>
-          <Badge variant="outline" className={statusColors[cohort.status]}>
-            {cohort.status}
-          </Badge>
+          <Badge variant="outline">{cohort.status}</Badge>
         </div>
       </CardHeader>
       <CardContent>

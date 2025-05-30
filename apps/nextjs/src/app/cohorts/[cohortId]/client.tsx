@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { generateReactHelpers } from "@uploadthing/react";
 import { formatDistanceToNow } from "date-fns";
@@ -23,9 +23,11 @@ import { useTRPC } from "~/trpc/react";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-export default function CohortPage() {
-  const params = useParams();
-  const cohortId = params.cohortId as string;
+interface CohortPageClientProps {
+  cohortId: string;
+}
+
+export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
   const router = useRouter();
   const trpc = useTRPC();
   const { data: session } = authClient.useSession();
@@ -82,6 +84,7 @@ export default function CohortPage() {
         isLocal: "",
         canAttendAllDays: "",
       });
+      // Refresh the cohort data to update application status
       void refetchCohort();
     },
     onError: (error: Error) => {
@@ -101,6 +104,7 @@ export default function CohortPage() {
       return;
     }
 
+    // Validation
     if (
       !formData.name ||
       !formData.email ||
@@ -118,6 +122,7 @@ export default function CohortPage() {
     try {
       let imageUrl = null;
 
+      // Upload image if provided
       if (formData.image) {
         setIsUploading(true);
         const uploadedFiles = await startUpload([formData.image]);
@@ -130,6 +135,7 @@ export default function CohortPage() {
         imageUrl = uploadedFiles[0].url;
       }
 
+      // Submit application
       await submitApplicationMutation.mutateAsync({
         cohortId: cohortId,
         name: formData.name,
@@ -170,7 +176,7 @@ export default function CohortPage() {
       <div className="container mx-auto p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold">Cohort Not Found</h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-600">
             {error?.message || "The cohort you're looking for doesn't exist."}
           </p>
           <Button onClick={() => router.push("/cohorts")} className="mt-4">
@@ -189,6 +195,7 @@ export default function CohortPage() {
   const isActive = startDate <= now && endDate >= now;
   const isPast = endDate < now;
 
+  // Check if user has already applied or is a member
   const userMembership = cohort.members?.find(
     (member) => member.userId === session?.user?.id,
   );
@@ -200,6 +207,7 @@ export default function CohortPage() {
   const canApply =
     !userMembership && !userApplication && !isPast && session?.user;
 
+  // Check if current user is the house owner
   const isHouseOwner = session?.user?.id === cohort.house?.ownerId;
 
   return (
@@ -474,6 +482,7 @@ export default function CohortPage() {
                       "Your application was not accepted this time."}
                   </p>
 
+                  {/* Show application details */}
                   <div className="mt-4 space-y-2 text-sm">
                     <p>
                       <strong>Project:</strong>{" "}

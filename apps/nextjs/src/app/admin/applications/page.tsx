@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import { AlertTriangle, Calendar, Check, Eye, Users, X } from "lucide-react";
 
@@ -21,11 +21,21 @@ import { toast } from "@acme/ui/toast";
 
 import { useTRPC } from "~/trpc/react";
 
-const statusColors = {
-  pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  approved: "bg-green-100 text-green-800 border-green-200",
-  rejected: "bg-red-100 text-red-800 border-red-200",
-} as const;
+interface Application {
+  id: string;
+  name: string;
+  email: string;
+  social: string;
+  storyDescription: string;
+  projectMetrics: string;
+  isLocal: "yes" | "no";
+  canAttendAllDays: "yes" | "no";
+  image?: string;
+  status: "pending" | "approved" | "rejected";
+  createdAt: string | Date;
+  cohortId: string;
+  userId: string;
+}
 
 export default function ApplicationsAdminPage() {
   const trpc = useTRPC();
@@ -45,52 +55,26 @@ export default function ApplicationsAdminPage() {
     }
   }, [searchParams, cohorts]);
 
-  // Check if new endpoints are available
-  const hasApplicationEndpoints = true; // Use direct API instead of TRPC for now
-
-  // Get applications for selected cohort using direct API
-  const [applications, setApplications] = useState<any[]>([]);
-  const [applicationsLoading, setApplicationsLoading] = useState(false);
-  const [applicationsError, setApplicationsError] = useState<string | null>(
-    null,
-  );
-
-  // Fetch applications when cohort is selected
-  useEffect(() => {
-    if (!selectedCohort) {
-      setApplications([]);
-      return;
-    }
-
-    setApplicationsLoading(true);
-    setApplicationsError(null);
-
-    fetch(`/api/test-applications?cohortId=${selectedCohort}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setApplications(data.applications || []);
-        } else {
-          setApplicationsError(data.error || "Failed to fetch applications");
-        }
-      })
-      .catch((error) => {
-        setApplicationsError(error.message || "Network error");
-      })
-      .finally(() => {
-        setApplicationsLoading(false);
-      });
-  }, [selectedCohort]);
+  // Get applications for selected cohort using TRPC
+  const {
+    data: applications = [],
+    isLoading: applicationsLoading,
+    error: applicationsError,
+    refetch: refetchApplications,
+  } = useQuery({
+    ...trpc.cohort.getApplications.queryOptions(selectedCohort),
+    enabled: !!selectedCohort,
+  }) as {
+    data: Application[];
+    isLoading: boolean;
+    error: Error | null;
+    refetch: () => void;
+  };
 
   const handleStatusUpdate = (
     applicationId: string,
     status: "approved" | "rejected",
   ) => {
-    if (!hasApplicationEndpoints) {
-      toast.error("Service not available");
-      return;
-    }
-
     // Update the application status
     fetch("/api/update-application-status", {
       method: "POST",
@@ -106,19 +90,7 @@ export default function ApplicationsAdminPage() {
             `Application ${status === "approved" ? "approved" : "rejected"} successfully!`,
           );
           // Refresh the applications list
-          if (selectedCohort) {
-            setApplicationsLoading(true);
-            fetch(`/api/test-applications?cohortId=${selectedCohort}`)
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.success) {
-                  setApplications(data.applications || []);
-                }
-              })
-              .finally(() => {
-                setApplicationsLoading(false);
-              });
-          }
+          void refetchApplications();
         } else {
           toast.error(data.error || "Failed to update application status");
         }
@@ -185,26 +157,16 @@ export default function ApplicationsAdminPage() {
           <CardHeader>
             <CardTitle>Applications</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {!hasApplicationEndpoints
-                ? "Database setup required to view applications"
-                : applicationsLoading
-                  ? "Loading applications..."
-                  : `${applications.length} applications found`}
+              {applicationsLoading
+                ? "Loading applications..."
+                : `${applications.length} applications found`}
             </p>
           </CardHeader>
           <CardContent>
-            {!hasApplicationEndpoints ? (
-              <div className="py-8 text-center text-muted-foreground">
-                <AlertTriangle className="mx-auto mb-4 h-12 w-12 opacity-50" />
-                <p>Database migration required to view applications.</p>
-                <p className="mt-2 text-sm">
-                  Run the database commands shown above to enable this feature.
-                </p>
-              </div>
-            ) : applicationsError ? (
+            {applicationsError ? (
               <div className="py-8 text-center text-red-600">
                 <AlertTriangle className="mx-auto mb-4 h-12 w-12 opacity-50" />
-                <p>Error loading applications: {applicationsError}</p>
+                <p>Error loading applications: {applicationsError.message}</p>
               </div>
             ) : applicationsLoading ? (
               <div className="space-y-4">
@@ -214,7 +176,7 @@ export default function ApplicationsAdminPage() {
               </div>
             ) : applications.length > 0 ? (
               <div className="space-y-4">
-                {applications.map((application: any) => (
+                {applications.map((application: Application) => (
                   <div
                     key={application.id}
                     className="space-y-3 rounded-lg border p-4"
@@ -232,16 +194,7 @@ export default function ApplicationsAdminPage() {
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge
-                          variant="outline"
-                          className={
-                            statusColors[
-                              application.status as keyof typeof statusColors
-                            ]
-                          }
-                        >
-                          {application.status}
-                        </Badge>
+                        <Badge variant="outline">{application.status}</Badge>
 
                         {/* Application Details Dialog */}
                         <Dialog>
@@ -370,14 +323,12 @@ export default function ApplicationsAdminPage() {
                           onClick={() =>
                             handleStatusUpdate(application.id, "approved")
                           }
-                          className="bg-green-600 hover:bg-green-700"
                         >
                           <Check className="mr-1 h-4 w-4" />
                           Approve
                         </Button>
                         <Button
                           size="sm"
-                          variant="destructive"
                           onClick={() =>
                             handleStatusUpdate(application.id, "rejected")
                           }
