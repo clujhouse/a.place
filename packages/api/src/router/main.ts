@@ -7,9 +7,9 @@ import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
 
 import type { AMessage, ProfilePart } from "@acme/validators/message";
+import { createSystemPromptWithProfiles } from "@acme/ai";
 import { chat, message, profile, user } from "@acme/db/schema";
 
-import { createSystemPromptWithProfiles } from "../prompts/main";
 import { checkSearchLimits } from "../rate-limit";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";

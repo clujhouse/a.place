@@ -25,6 +25,7 @@
   },
   "prettier": "@acme/prettier-config",
   "dependencies": {
+    "@acme/ai": "workspace:*",
     "@acme/auth": "workspace:*",
     "@acme/db": "workspace:*",
     "@acme/email": "workspace:*",

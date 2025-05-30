@@ -15,6 +15,7 @@ rules:
 - acknowledge their responses before moving to the next topic
 - you can use markdown to emphasize certain parts
 - NEVER ASK TWO QUESTIONS AT ONCE
+- NO EMOJIS
 `;
 
 export const learnWithRemainingQuestionsEmphasized = (questions: string[]) => {

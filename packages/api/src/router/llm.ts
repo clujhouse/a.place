@@ -1,28 +1,26 @@
 import type { TRPCRouterRecord } from "@trpc/server";
-import { google } from "@ai-sdk/google";
-import { generateObject, generateText, smoothStream, streamText } from "ai";
 import { nanoid } from "nanoid";
-import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
 
 import type { AMessage } from "@acme/validators/message";
+import {
+  createProfileEmbedding,
+  generateTextResponse,
+  generateValidatedObject,
+  initialGreetingPrompt,
+  judgePrompt,
+  learnWithRemainingQuestionsEmphasized,
+  profilePrompt,
+  shortBioPrompt,
+  streamSmoothText,
+  streamTextResponse,
+  validationResponseSchema,
+} from "@acme/ai";
 import { message, profile } from "@acme/db/schema";
 
 import type { TRPCContext } from "../trpc";
-import { initialGreetingPrompt } from "../prompts/initial-greeting";
-import { judgePrompt } from "../prompts/judge-prompt";
-import { learnWithRemainingQuestionsEmphasized } from "../prompts/learn-about-you";
-import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
-
-const validationResponseSchema = z.object({
-  covered: z.boolean(),
-  thoroughness: z.enum(["minimal", "adequate", "detailed"]),
-  completionPercentage: z.number().min(0).max(100),
-  missingTopics: z.array(z.string()),
-  suggestedFollowUpQuestions: z.array(z.string()),
-});
 
 async function createUserMessage(
   ctx: TRPCContext & { session: { user: { id: string } } },
@@ -65,11 +63,9 @@ async function runValidationIfNeeded(
     )
     .join("\n");
 
-  return await generateObject({
-    model: google("gemini-2.0-flash"),
-    mode: "json",
-    schema: validationResponseSchema,
+  return await generateValidatedObject({
     prompt: `${judgePrompt}\n\n## Conversation to Analyze:\n${conversationForValidation}`,
+    schema: validationResponseSchema,
   });
 }
 
@@ -83,10 +79,8 @@ async function* generateAIResponse(
     suggestedFollowUpQuestions,
   );
   const aiMessageId = nanoid();
-  const result = streamText({
-    model: google("gemini-2.0-flash"),
+  const result = await streamTextResponse({
     messages: convertMessageToCoreMessage(allMessages),
-    experimental_telemetry: { isEnabled: true },
     system: customPrompt,
   });
 
@@ -128,18 +122,15 @@ async function* streamProfileContent(
     ? `\n\n## Existing Profile:\n${existingProfile}\n\n## Short Bio:\n${existingProfile || "none yet"}`
     : "\n\n## Existing Profile:\nnone yet - this is their first profile";
 
-  const profileStream = streamText({
-    model: google("gemini-2.5-flash-preview-04-17"),
-    experimental_telemetry: { isEnabled: true },
-    prompt: `${profilePrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
-      allMessages,
-    )
-      .map((msg) => `${msg.role}: ${msg.content}`)
-      .join("\n")}`,
-    experimental_transform: smoothStream({
-      delayInMs: 20,
-      chunking: "word",
-    }),
+  const conversationContext = convertMessageToCoreMessage(allMessages)
+    .map((msg) => `${msg.role}: ${msg.content}`)
+    .join("\n");
+
+  const prompt = `${profilePrompt}${existingProfileContext}\n\n## Conversation Context:\n${conversationContext}`;
+
+  const profileStream = await streamTextResponse({
+    prompt,
+    model: "gemini-2.5-flash-preview-04-17",
   });
 
   for await (const chunk of profileStream.fullStream) {
@@ -162,14 +153,13 @@ async function generateProfileText(
     ? `\n\n## Existing Profile:\n${existingProfile}\n\n## Short Bio:\n${existingProfile || "none yet"}`
     : "\n\n## Existing Profile:\nnone yet - this is their first profile";
 
-  const { text } = await generateText({
-    model: google("gemini-2.5-flash-preview-04-17"),
-    experimental_telemetry: { isEnabled: true },
+  const { text } = await generateTextResponse({
     prompt: `${profilePrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
       allMessages,
     )
       .map((msg) => `${msg.role}: ${msg.content}`)
       .join("\n")}`,
+    model: "gemini-2.5-flash-preview-04-17",
   });
 
   return text;
@@ -183,32 +173,16 @@ async function generateShortBio(
     ? `\n\n## Existing Short Bio:\n${existingProfile}`
     : "\n\n## Existing Short Bio:\nnone yet - this is their first bio";
 
-  const { text: shortBioText } = await generateText({
-    model: google("gemini-2.0-flash"),
-    experimental_telemetry: { isEnabled: true },
+  const { text: shortBioText } = await generateTextResponse({
     prompt: `${shortBioPrompt}${existingProfileContext}\n\n## Conversation Context:\n${convertMessageToCoreMessage(
       allMessages,
     )
       .map((msg) => `${msg.role}: ${msg.content}`)
       .join("\n")}`,
+    model: "gemini-2.0-flash",
   });
 
   return shortBioText;
-}
-
-async function createProfileEmbedding(profileText: string) {
-  const client = new VoyageAIClient({ apiKey: process.env.VOYAGE_API_KEY });
-  const embedding = await client.embed({
-    input: [profileText],
-    model: "voyage-3-large",
-  });
-
-  const embeddingData = embedding.data?.[0]?.embedding;
-  if (!embeddingData) {
-    throw new Error("Failed to embed profile text");
-  }
-
-  return Buffer.from(new Float32Array(embeddingData).buffer);
 }
 
 async function updateProfile(
@@ -259,16 +233,10 @@ export const llmRouter = {
       const textPartId = nanoid();
       let assistantText = "";
 
-      const result = streamText({
-        model: google("gemini-2.0-flash"),
-        experimental_telemetry: { isEnabled: true },
-        prompt: `${initialGreetingPrompt}
+      const result = await streamSmoothText({
+        system: `${initialGreetingPrompt}
 
 ${existingProfileContext}`,
-        experimental_transform: smoothStream({
-          delayInMs: 20,
-          chunking: "word",
-        }),
       });
 
       for await (const chunk of result.textStream) {

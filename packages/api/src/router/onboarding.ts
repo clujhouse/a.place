@@ -1,15 +1,20 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
-import { generateObject, generateText, smoothStream, streamText } from "ai";
+import { generateObject } from "ai";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
 import type { AMessage } from "@acme/validators/message";
+import {
+  generateTextResponse,
+  onboardingWithContext,
+  profilePrompt,
+  shortBioPrompt,
+  streamSmoothText,
+} from "@acme/ai";
 import { onboardingState, profile, user } from "@acme/db/schema";
 
-import { onboardingWithContext } from "../prompts/onboarding";
-import { profilePrompt, shortBioPrompt } from "../prompts/profile";
 import { protectedProcedure } from "../trpc";
 import { convertMessageToCoreMessage } from "../utils/message";
 
@@ -64,14 +69,8 @@ export const onboardingRouter = {
       extractedOneLiner: state.extractedOneLiner,
     };
 
-    const result = streamText({
-      model: google("gemini-2.0-flash"),
-      experimental_telemetry: { isEnabled: true },
-      prompt: onboardingWithContext(state.currentStep, contextInfo),
-      experimental_transform: smoothStream({
-        delayInMs: 20,
-        chunking: "word",
-      }),
+    const result = await streamSmoothText({
+      system: onboardingWithContext(state.currentStep, contextInfo),
     });
 
     for await (const chunk of result.textStream) {
@@ -169,15 +168,9 @@ export const onboardingRouter = {
         extractedOneLiner: state.extractedOneLiner,
       };
 
-      const result = streamText({
-        model: google("gemini-2.0-flash"),
+      const result = await streamSmoothText({
         messages: convertMessageToCoreMessage(allMessages),
-        experimental_telemetry: { isEnabled: true },
         system: onboardingWithContext(state.currentStep, contextInfo),
-        experimental_transform: smoothStream({
-          delayInMs: 20,
-          chunking: "word",
-        }),
       });
 
       for await (const chunk of result.textStream) {
@@ -322,15 +315,13 @@ export const onboardingRouter = {
         if (conversationContext.length > 0) {
           // Generate full profile text and short bio in parallel using AI
           const [generatedProfileText, generatedShortBio] = await Promise.all([
-            generateText({
-              model: google("gemini-2.5-flash-preview-04-17"),
-              experimental_telemetry: { isEnabled: true },
+            generateTextResponse({
               prompt: `${profilePrompt}\n\n## Conversation Context:\n${conversationContext.join("\n")}`,
+              model: "gemini-2.5-flash-preview-04-17",
             }),
-            generateText({
-              model: google("gemini-2.5-flash-preview-04-17"),
-              experimental_telemetry: { isEnabled: true },
+            generateTextResponse({
               prompt: `${shortBioPrompt}\n\n## Conversation Context:\n${conversationContext.join("\n")}`,
+              model: "gemini-2.5-flash-preview-04-17",
             }),
           ]);
 
