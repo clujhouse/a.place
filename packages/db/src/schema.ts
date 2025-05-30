@@ -43,7 +43,9 @@ export const profile = mysqlTable("profile", {
 
   completionPercentage: int("completion_percentage").notNull().default(0),
   isOnboarded: boolean("is_onboarded").notNull().default(false),
+
   houseId: varchar("house_id", { length: 36 }).references(() => house.id),
+
   text: text("text"),
   shortBio: text("short_bio"),
   embedding: vector("embedding", { length: 1024 }),
@@ -185,6 +187,15 @@ export const onboardingState = mysqlTable("onboarding_state", {
   extractedName: varchar("extracted_name", { length: 255 }),
   extractedLocation: varchar("extracted_location", { length: 255 }),
   extractedOneLiner: text("extracted_one_liner"),
+  conversationHistory: json("conversation_history")
+    .$type<
+      {
+        role: "user" | "assistant";
+        content: string;
+        timestamp: string;
+      }[]
+    >()
+    .default([]),
   completedAt: timestamp("completed_at"),
 
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -216,6 +227,15 @@ export const house = mysqlTable("house", {
   color: varchar("color", { length: 36 }).notNull(),
   logoImage: json("logo_image").$type<string>(),
   images: json("images").$type<string[]>().default([]),
+
+  socialLinks: json("social_links")
+    .$type<
+      {
+        type: "twitter" | "instagram" | "linkedin" | "website";
+        url: string;
+      }[]
+    >()
+    .default([]),
   ownerId: varchar("owner_id", { length: 36 })
     .notNull()
     .references(() => user.id),

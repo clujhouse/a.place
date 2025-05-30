@@ -87,6 +87,20 @@ export const onboardingRouter = {
       type: "step" as const,
       step: state.currentStep,
     };
+
+    // Save the initial greeting to conversation history
+    await ctx.db
+      .update(onboardingState)
+      .set({
+        conversationHistory: [
+          {
+            role: "assistant" as const,
+            content: assistantText,
+            timestamp: new Date().toISOString(),
+          },
+        ],
+      })
+      .where(eq(onboardingState.userId, ctx.session.user.id));
   }),
 
   chat: protectedProcedure
@@ -229,6 +243,22 @@ export const onboardingRouter = {
       const updatedExtractedStory =
         state.extractedOneLiner || extractionResult.object.story;
 
+      // Prepare updated conversation history
+      const existingHistory = state.conversationHistory || [];
+      const updatedHistory = [
+        ...existingHistory,
+        {
+          role: "user" as const,
+          content: input,
+          timestamp: new Date().toISOString(),
+        },
+        {
+          role: "assistant" as const,
+          content: assistantText,
+          timestamp: new Date().toISOString(),
+        },
+      ];
+
       // Update user's name in the database if extracted and not already set
       if (extractionResult.object.name && !state.extractedName) {
         await ctx.db
@@ -245,6 +275,7 @@ export const onboardingRouter = {
           extractedName: updatedExtractedName,
           extractedLocation: updatedExtractedLocation,
           extractedOneLiner: updatedExtractedStory,
+          conversationHistory: updatedHistory,
           completedAt: nextStep === "complete" ? new Date() : null,
         })
         .where(eq(onboardingState.userId, ctx.session.user.id));
@@ -260,18 +291,28 @@ export const onboardingRouter = {
         // Create a conversation context from the onboarding data for AI generation
         const conversationContext = [];
 
-        if (updatedExtractedName) {
-          conversationContext.push(`user: My name is ${updatedExtractedName}`);
-        }
-
-        if (updatedExtractedLocation) {
+        // First, add the conversation history from the database
+        if (updatedHistory.length > 0) {
           conversationContext.push(
-            `user: I'm from ${updatedExtractedLocation}`,
+            ...updatedHistory.map((msg) => `${msg.role}: ${msg.content}`),
           );
-        }
+        } else {
+          // Fallback to extracted data if no conversation history
+          if (updatedExtractedName) {
+            conversationContext.push(
+              `user: My name is ${updatedExtractedName}`,
+            );
+          }
 
-        if (updatedExtractedStory) {
-          conversationContext.push(`user: ${updatedExtractedStory}`);
+          if (updatedExtractedLocation) {
+            conversationContext.push(
+              `user: I'm from ${updatedExtractedLocation}`,
+            );
+          }
+
+          if (updatedExtractedStory) {
+            conversationContext.push(`user: ${updatedExtractedStory}`);
+          }
         }
 
         // Generate profile content using AI if we have any onboarding data

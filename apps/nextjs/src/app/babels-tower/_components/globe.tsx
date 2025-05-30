@@ -3,6 +3,7 @@
 import type { GlobeMethods } from "react-globe.gl";
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTheme } from "next-themes";
 
 // Dynamically import Globe to prevent SSR issues
 const Globe = dynamic(() => import("react-globe.gl"), {
@@ -78,10 +79,11 @@ function getPopulationColor(
   population: number,
   minPop: number,
   maxPop: number,
+  isLightMode = false,
 ): string {
   // Handle edge cases
   if (maxPop <= 0 || minPop < 0 || population <= 0) {
-    return "rgba(50, 50, 50, 0.3)";
+    return isLightMode ? "rgba(200, 200, 200, 0.3)" : "rgba(50, 50, 50, 0.3)";
   }
 
   // Normalize population to 0-1 range using logarithmic scale
@@ -90,10 +92,18 @@ function getPopulationColor(
     Math.max(0, Math.log(population + 1) / Math.log(maxPop + 1)),
   );
 
-  // Define grey scale gradient from light to dark based on population
-  // Lower population = lighter grey, higher population = darker grey
-  const minGrey = 200; // Light grey for low population
-  const maxGrey = 40; // Dark grey for high population
+  // Define grey scale gradient based on theme
+  let minGrey: number, maxGrey: number;
+
+  if (isLightMode) {
+    // Light mode: lighter colors overall
+    minGrey = 240; // Very light grey for low population
+    maxGrey = 120; // Medium grey for high population
+  } else {
+    // Dark mode: darker colors overall
+    minGrey = 200; // Light grey for low population
+    maxGrey = 40; // Dark grey for high population
+  }
 
   // Interpolate between min and max grey values
   const greyValue = Math.round(minGrey - (minGrey - maxGrey) * normalized);
@@ -104,6 +114,8 @@ function getPopulationColor(
 
 export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
   const globeEl = useRef<GlobeMethods>(undefined);
+
+  const { theme } = useTheme();
   const [globeReady, setGlobeReady] = useState(false);
   const [countries, setCountries] = useState<CountriesData>({ features: [] });
   const [populationRange, setPopulationRange] = useState({ min: 0, max: 0 });
@@ -172,12 +184,15 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
     console.log(country);
     const population = country.properties.POP_EST;
     if (!population || population <= 0) {
-      return "rgba(100, 100, 100, 0.3)"; // Default grey for countries with no population data
+      return theme === "light"
+        ? "rgba(180, 180, 180, 0.3)"
+        : "rgba(100, 100, 100, 0.3)"; // Default grey for countries with no population data
     }
     return getPopulationColor(
       population,
       populationRange.min,
       populationRange.max,
+      theme === "light",
     );
   };
 
@@ -201,13 +216,20 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
         width={width}
         height={height}
         ref={globeEl}
-        globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+        globeImageUrl={
+          theme === "light"
+            ? "./globe/earth-light.jpg"
+            : "//cdn.jsdelivr.net/npm/three-globe/example/img/earth-dark.jpg"
+        }
         onGlobeReady={() => setGlobeReady(true)}
         // Globe appearance
-        // globeImageUrl="//cdn.jsdelivr.net/npm/three-globe/example/img/earth-blue-marble.jpg"
         backgroundColor="rgba(0,0,0,0)" // Atmosphere settings
         showAtmosphere={globeConfig.showAtmosphere !== false}
-        atmosphereColor={globeConfig.atmosphereColor || "#FFFFFF"}
+        atmosphereColor={
+          theme === "light"
+            ? "#87CEEB"
+            : globeConfig.atmosphereColor || "#FFFFFF"
+        }
         atmosphereAltitude={globeConfig.atmosphereAltitude || 0.1}
         hexPolygonsData={houses}
         hexPolygonResolution={3}
@@ -222,7 +244,11 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
           (d) => d.properties.ISO_A2 !== "AQ",
         )}
         polygonCapColor={getPolygonCapColor}
-        polygonSideColor={() => "rgba(40, 40, 40, 0.15)"}
+        polygonSideColor={() =>
+          theme === "light"
+            ? "rgba(140, 140, 140, 0.15)"
+            : "rgba(40, 40, 40, 0.15)"
+        }
         // Points (houses) configuration
         pointsData={pointsData}
         pointLat="lat"

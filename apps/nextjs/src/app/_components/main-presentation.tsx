@@ -13,6 +13,8 @@ import { useCreateChat } from "~/hooks/use-create-chat";
 
 const users = [
   { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR" },
+  { id: "8cJmipL9Wvsg0GSVHKWPkFZx1Y2qJA4y" },
+
   { id: "7nQIvxYySt6D1eToD4dV41QJfAzswu6j" },
   { id: "gikUGiW6PhsjlWBFQVhVV81VdvxWhlpj" },
 
