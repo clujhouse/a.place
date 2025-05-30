@@ -23,6 +23,7 @@ interface CohortData {
   house?: {
     id: string;
     name: string;
+    color?: string;
   } | null;
 }
 
@@ -41,9 +42,19 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
         <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-xl">{cohort.name}</CardTitle>
-            <p className="text-sm text-muted-foreground">
+            <p
+              className="text-sm text-muted-foreground"
+              style={{ color: cohort.house?.color || "inherit" }}
+            >
               {cohort.house?.name || "No house assigned"}
             </p>
+            <div className="mt-4">
+              <Link href={`/cohorts/${cohort.id}`}>
+                <Button variant="outline" size="sm">
+                  Apply
+                </Button>
+              </Link>
+            </div>
           </div>
           <Badge variant="outline">{cohort.status}</Badge>
         </div>
@@ -56,11 +67,21 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Start Date:</span>
-            <span>{startDate.toLocaleDateString()}</span>
+            <span>
+              {startDate.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+              })}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">End Date:</span>
-            <span>{endDate.toLocaleDateString()}</span>
+            <span>
+              {endDate.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "long",
+              })}
+            </span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Duration:</span>
@@ -72,36 +93,6 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
               days
             </span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Created:</span>
-            <span>{formatDistanceToNow(cohort.createdAt)} ago</span>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            {isUpcoming && (
-              <Badge variant="secondary" className="text-xs">
-                Upcoming
-              </Badge>
-            )}
-            {isActive && (
-              <Badge variant="default" className="text-xs">
-                Active Now
-              </Badge>
-            )}
-            {isPast && (
-              <Badge variant="outline" className="text-xs">
-                Completed
-              </Badge>
-            )}
-          </div>
-
-          <Link href={`/cohorts/${cohort.id}`}>
-            <Button variant="outline" size="sm">
-              Apply
-            </Button>
-          </Link>
         </div>
       </CardContent>
     </Card>
@@ -165,30 +156,22 @@ export default function CohortsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Cohorts</h1>
-            <p className="text-gray-600">
-              Discover and join learning cohorts in various houses
-            </p>
-          </div>
-        </div>
+    <div>
+      <div className="border-b p-4">
+        <h1 className="flex items-center gap-2 text-xl font-semibold">
+          Cohorts
+        </h1>
       </div>
 
       {isLoading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 6 }).map((_, i) => (
             <CohortSkeleton key={i} />
           ))}
         </div>
       ) : cohorts && cohorts.length > 0 ? (
         <>
-          <div className="mb-6 text-sm text-gray-600">
-            Found {cohorts.length} cohort{cohorts.length !== 1 ? "s" : ""}
-          </div>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
             {cohorts.map((cohort) => (
               <CohortCard key={cohort.id} cohort={cohort} />
             ))}
