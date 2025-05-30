@@ -114,6 +114,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <Button variant="ghost">
+          <Link href="/cohorts">cohorts</Link>
+        </Button>
         <SearchUsageIndicator />
 
         {/* <AppSidebarPlanIndicator /> */}

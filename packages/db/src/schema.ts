@@ -242,6 +242,115 @@ export const house = mysqlTable("house", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const cohort = mysqlTable("cohort", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+  houseId: varchar("house_id", { length: 36 })
+    .notNull()
+    .references(() => house.id),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date").notNull(),
+  status: varchar("status", {
+    length: 255,
+    enum: ["active", "in progress", "archived"],
+  }).notNull(),
+});
+
+export const cohortMember = mysqlTable("cohort_member", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  cohortId: varchar("cohort_id", { length: 36 })
+    .notNull()
+    .references(() => cohort.id),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+  status: varchar("status", {
+    length: 20,
+    enum: ["accepted", "pending", "rejected"],
+  }).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const application = mysqlTable("application", {
+  id: varchar("id", { length: 36 })
+    .primaryKey()
+    .notNull()
+    .$defaultFn(() => nanoid()),
+  cohortId: varchar("cohort_id", { length: 36 })
+    .notNull()
+    .references(() => cohort.id),
+  userId: varchar("user_id", { length: 36 })
+    .notNull()
+    .references(() => user.id),
+
+  // Application form fields
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  social: text("social").notNull(),
+  storyDescription: text("story_description").notNull(),
+  projectMetrics: text("project_metrics").notNull(),
+  isLocal: varchar("is_local", { length: 10, enum: ["yes", "no"] }).notNull(),
+  canAttendAllDays: varchar("can_attend_all_days", {
+    length: 10,
+    enum: ["yes", "no"],
+  }).notNull(),
+  image: text("image"), // Store image URL/path
+
+  status: varchar("status", {
+    length: 20,
+    enum: ["pending", "approved", "rejected"],
+  })
+    .notNull()
+    .default("pending"),
+
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export const cohortRelations = relations(cohort, ({ one, many }) => ({
+  house: one(house, {
+    fields: [cohort.houseId],
+    references: [house.id],
+  }),
+  members: many(cohortMember),
+  applications: many(application),
+}));
+
+export const cohortMemberRelations = relations(cohortMember, ({ one }) => ({
+  cohort: one(cohort, {
+    fields: [cohortMember.cohortId],
+    references: [cohort.id],
+  }),
+  user: one(user, {
+    fields: [cohortMember.userId],
+    references: [user.id],
+  }),
+}));
+
+export const applicationRelations = relations(application, ({ one }) => ({
+  cohort: one(cohort, {
+    fields: [application.cohortId],
+    references: [cohort.id],
+  }),
+  user: one(user, {
+    fields: [application.userId],
+    references: [user.id],
+  }),
+}));
+
 export type DBMessage = InferSelectModel<typeof message>;
 export type DBProfileNote = InferSelectModel<typeof profileNote>;
 
