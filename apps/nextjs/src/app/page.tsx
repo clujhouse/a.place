@@ -7,12 +7,14 @@ import { nanoid } from "nanoid";
 import { authClient } from "@acme/auth/client";
 
 import { useCreateChat } from "~/hooks/use-create-chat";
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 import MainChat from "./_components/main-chat";
 import MainPresentation from "./_components/main-presentation";
 
 const Homepage = () => {
   const router = useRouter();
   const { createChat } = useCreateChat();
+  const { openLoginDialog } = useLoginDialog();
   const { data: session } = authClient.useSession();
 
   return (
@@ -25,7 +27,7 @@ const Homepage = () => {
           onSubmit={async (message) => {
             // Check if user is logged in
             if (!session?.user) {
-              router.push("/login");
+              openLoginDialog("homepage_chat_submit");
               return;
             }
 

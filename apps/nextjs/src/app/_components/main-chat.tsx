@@ -18,6 +18,7 @@ import { toast } from "@acme/ui/toast";
 import { ChatInput } from "~/components/chat-input";
 import { ChatMessage } from "~/components/chat-message";
 import { useAppContext } from "~/context/app-context";
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 import { useSearchLimits } from "~/hooks/use-search-limits";
 import { useSubscription } from "~/hooks/use-subscription";
 import { createUserMessage, useUpdateChat } from "~/hooks/useUpdateChat";
@@ -71,6 +72,7 @@ const MainChat = ({
   const queryClient = useQueryClient();
 
   const { updateChat } = useUpdateChat();
+  const { openLoginDialog } = useLoginDialog();
 
   const { mutate } = useMutation(
     trpc.main.chat.mutationOptions({
@@ -176,7 +178,7 @@ const MainChat = ({
   const onSubmit = async (message: string) => {
     // Check if user is logged in
     if (!session?.user) {
-      router.push("/login");
+      openLoginDialog();
       return;
     }
 

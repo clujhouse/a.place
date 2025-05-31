@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@acme/ui/avatar";
 import { Button } from "@acme/ui/button";
 import { useSidebar } from "@acme/ui/sidebar";
 
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 import { useSubscription } from "~/hooks/use-subscription";
 
 const planConfig = {
@@ -25,6 +26,7 @@ export const AppSidebarUser = () => {
   const { currentPlan } = useSubscription();
 
   const { isMobile, setOpenMobile } = useSidebar();
+  const { openLoginDialog } = useLoginDialog();
 
   // Function to close sidebar on mobile when link is clicked
   const handleLinkClick = () => {
@@ -47,9 +49,15 @@ export const AppSidebarUser = () => {
   if (isPending || !userClientData)
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <Link href="/login" className="w-full" onClick={handleLinkClick}>
-          <Button className="w-full">log in</Button>
-        </Link>
+        <Button
+          onClick={() => {
+            handleLinkClick();
+            openLoginDialog();
+          }}
+          className="w-full"
+        >
+          Login
+        </Button>
       </div>
     );
 

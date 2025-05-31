@@ -19,6 +19,7 @@ import { Textarea } from "@acme/ui/textarea";
 import { toast } from "@acme/ui/toast";
 
 import type { OurFileRouter } from "~/app/api/uploadthing/core";
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 import { useTRPC } from "~/trpc/react";
 
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
@@ -31,6 +32,7 @@ export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
   const router = useRouter();
   const trpc = useTRPC();
   const { data: session } = authClient.useSession();
+  const { openLoginDialog } = useLoginDialog();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -196,19 +198,19 @@ export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
   const isPast = endDate < now;
 
   // Check if user has already applied or is a member
-  const userMembership = cohort.members?.find(
-    (member) => member.userId === session?.user?.id,
+  const userMembership = cohort.members.find(
+    (member) => member.userId === session?.user.id,
   );
 
   const userApplication = (cohort as any).applications?.find(
-    (app: any) => app.userId === session?.user?.id,
+    (app: any) => app.userId === session?.user.id,
   );
 
   const canApply =
     !userMembership && !userApplication && !isPast && session?.user;
 
   // Check if current user is the house owner
-  const isHouseOwner = session?.user?.id === cohort.house?.ownerId;
+  const isHouseOwner = session?.user.id === cohort.house.ownerId;
 
   return (
     <div className="container mx-auto p-6">
@@ -230,7 +232,7 @@ export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
             <div>
               <h1 className="text-3xl font-bold">{cohort.name}</h1>
               <p className="text-lg text-muted-foreground">
-                {cohort.house?.name || "No house assigned"}
+                {cohort.house.name || "No house assigned"}
               </p>
             </div>
             <Badge variant="outline">{cohort.status}</Badge>
@@ -609,7 +611,7 @@ export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
                   <div>
                     <p className="text-sm font-medium">Members</p>
                     <p className="text-sm text-muted-foreground">
-                      {cohort.members?.filter((m) => m.status === "accepted")
+                      {cohort.members.filter((m) => m.status === "accepted")
                         .length || 0}{" "}
                       accepted
                     </p>
@@ -684,7 +686,7 @@ export default function CohortPageClient({ cohortId }: CohortPageClientProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => router.push("/login")}
+                        onClick={() => openLoginDialog()}
                         className="w-full"
                       >
                         Login

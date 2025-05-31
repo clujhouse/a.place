@@ -38,12 +38,6 @@ export function ProfileCohort() {
               </Badge>
             )}
           </div>
-          {activeCohortsCount > 0 && (
-            <div className="absolute -right-1 -top-1 flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary"></span>
-            </div>
-          )}
         </div>
         <p className="mt-1 text-xs text-muted-foreground">
           {activeCohortsCount === 0

@@ -17,6 +17,8 @@ import { GeistSans } from "geist/font/sans";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { env } from "~/env";
+import { JotaiProvider } from "../components/jotai-provider";
+import { LoginDialog } from "../components/login-dialog";
 import { OnboardingWrapper } from "../components/onboarding-wrapper";
 import { AppProvider } from "../context/app-context";
 import { AppSidebar } from "./_components/app-sidebar";
@@ -67,18 +69,21 @@ export default function RootLayout(props: { children: React.ReactNode }) {
             <ThemeToggle />
             <TRPCReactProvider>
               <NuqsAdapter>
-                <SidebarProvider>
-                  <AppProvider>
-                    <OnboardingWrapper>
-                      <AppSidebar />
-                      <HamburgerMenu />
-                      <main className="h-dvh w-full pt-12 md:pt-0">
-                        {/* <SidebarTrigger /> */}
-                        {props.children}
-                      </main>
-                    </OnboardingWrapper>
-                  </AppProvider>
-                </SidebarProvider>
+                <JotaiProvider>
+                  <SidebarProvider>
+                    <AppProvider>
+                      <OnboardingWrapper>
+                        <AppSidebar />
+                        <HamburgerMenu />
+                        <main className="h-dvh w-full pt-12 md:pt-0">
+                          {/* <SidebarTrigger /> */}
+                          {props.children}
+                        </main>
+                        <LoginDialog />
+                      </OnboardingWrapper>
+                    </AppProvider>
+                  </SidebarProvider>
+                </JotaiProvider>
               </NuqsAdapter>
             </TRPCReactProvider>
             <Toaster />

@@ -10,6 +10,7 @@ import { Marquee } from "@acme/ui/marquee";
 
 import { ProfileCard } from "~/components/profile-card";
 import { useCreateChat } from "~/hooks/use-create-chat";
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 
 const users = [
   { id: "2sbyS7C0Ne0LMilv4zbKzpBZ1KaPI3WR" },
@@ -88,16 +89,15 @@ const MainPresentation = () => {
   const { createChat } = useCreateChat();
   const { data: session } = authClient.useSession();
   const posthog = usePostHog();
+  const { openLoginDialog } = useLoginDialog();
 
   const handleClick = async (prompt: string) => {
     // Check if user is logged in
     if (!session?.user) {
-      posthog.capture("homepage_redirect_to_login", {
+      openLoginDialog("homepage_prompt_click", {
         prompt_text: prompt,
-        source: "unauthenticated_prompt_click",
+        prompt_length: prompt.length,
       });
-
-      router.push("/login");
       return;
     }
 

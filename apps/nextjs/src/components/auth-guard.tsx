@@ -1,29 +1,25 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { authClient } from "@acme/auth/client";
+
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 
 interface AuthGuardProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
-  redirectTo?: string;
 }
 
-export function AuthGuard({
-  children,
-  fallback,
-  redirectTo = "/login",
-}: AuthGuardProps) {
-  const router = useRouter();
+export function AuthGuard({ children, fallback }: AuthGuardProps) {
+  const { openLoginDialog } = useLoginDialog();
   const { data: session, isPending } = authClient.useSession();
 
   useEffect(() => {
     if (!isPending && !session?.user) {
-      router.push(redirectTo);
+      openLoginDialog("auth_guard");
     }
-  }, [session, isPending, router, redirectTo]);
+  }, [session, isPending, openLoginDialog]);
 
   if (isPending) {
     return (
@@ -36,7 +32,7 @@ export function AuthGuard({
   }
 
   if (!session?.user) {
-    return null; // Will redirect
+    return null; // Will show login dialog
   }
 
   return <>{children}</>;

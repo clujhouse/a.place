@@ -6,6 +6,7 @@ import { Mail } from "lucide-react";
 import { authClient } from "@acme/auth/client";
 import { Button } from "@acme/ui/button";
 
+import { useLoginDialog } from "~/hooks/use-login-dialog";
 import { MessageModal } from "./message-modal";
 
 interface SendLetterButtonProps {
@@ -19,10 +20,11 @@ export function SendLetterButton({
 }: SendLetterButtonProps) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
+  const { openLoginDialog } = useLoginDialog();
 
   const handleSendLetter = () => {
     if (!session?.user) {
-      router.push("/login");
+      openLoginDialog();
       return;
     }
     // If authenticated, the MessageModal will handle the rest

@@ -108,6 +108,14 @@ export const ANALYTICS_EVENTS = {
      * - provider: OAuth provider
      */
     OAUTH_REDIRECT_INITIATED: "auth_oauth_redirect_initiated",
+
+    /**
+     * Fired when unauthenticated user triggers login dialog
+     * Properties:
+     * - prompt_text: Text of the prompt that triggered dialog (if applicable)
+     * - source: "unauthenticated_prompt_click" | "auth_guard" | "feature_access"
+     */
+    LOGIN_DIALOG_OPENED: "login_dialog_opened",
   },
 
   // ===== SEARCH EVENTS =====
