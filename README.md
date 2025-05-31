@@ -5,9 +5,11 @@ This is a fork of `create-t3-app` modified to use [Better Auth](https://better-a
 Better Auth is a framework-agnostic authentication and authorization library for TypeScript. It offers a comprehensive set of built-in features and a plugin ecosystem.
 
 **Advantages of Better Auth:**
+
 - Native Expo support without any extra setup (including OAuth)
 - Preview deployments without the need for a separate proxy server
 - A lot more features available out of the box and through plugins
+- Push text
 
 ## Installation
 
