@@ -156,8 +156,8 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
     if (globeEl.current && globeReady) {
       // Set initial camera position
       globeEl.current.pointOfView({
-        lat: globeConfig.initialPosition?.lat || 22.3193,
-        lng: globeConfig.initialPosition?.lng || 114.1694,
+        lat: globeConfig.initialPosition?.lat || 46.7712,
+        lng: globeConfig.initialPosition?.lng || 23.6236,
         altitude: 2.5,
       });
 

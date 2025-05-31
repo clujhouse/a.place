@@ -37,7 +37,7 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
   const isPast = endDate < now;
 
   return (
-    <Card className="transition-all hover:shadow-lg">
+    <Card>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div>
