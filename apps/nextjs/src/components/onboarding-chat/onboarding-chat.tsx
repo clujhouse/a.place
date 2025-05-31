@@ -210,7 +210,7 @@ export const OnboardingChat = ({ open }: { open: boolean }) => {
       <DialogTrigger asChild>
         <Button>Get Started</Button>
       </DialogTrigger>
-      <DialogContent className="flex h-screen !max-h-none w-screen max-w-none flex-col overflow-hidden p-0">
+      <DialogContent className="flex h-dvh w-screen max-w-none flex-col overflow-hidden p-0">
         <DialogHeader className="sr-only">
           <DialogTitle> a.place</DialogTitle>
         </DialogHeader>
