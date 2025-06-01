@@ -44,8 +44,6 @@ export function useSubscription(): UseSubscriptionReturn {
         (sub: any) => sub.status === "active" || sub.status === "trialing",
       );
 
-      console.log("Active subscription:", activeSubscription);
-
       if (activeSubscription?.plan) {
         console.log("Plan from subscription:", activeSubscription.plan);
         setCurrentPlan(activeSubscription.plan as "pro" | "pro_exclusive");

@@ -66,7 +66,7 @@ export const ChatInput = ({
                       }
                     }}
                     placeholder={placeholder}
-                    className="w-full resize-none pr-16 !text-lg"
+                    className="w-full resize-none bg-background pr-16 !text-lg"
                     {...field}
                     disabled={disabled || isLoading}
                   />

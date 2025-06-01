@@ -1,12 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
 
 import { Badge } from "@acme/ui/badge";
-import { Button } from "@acme/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@acme/ui/card";
 import { Skeleton } from "@acme/ui/skeleton";
 
@@ -39,28 +36,19 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-start justify-between">
-          <div>
-            <CardTitle className="text-xl">{cohort.name}</CardTitle>
-            <p
-              className="text-sm text-muted-foreground"
-              style={{ color: cohort.house?.color || "inherit" }}
-            >
-              {cohort.house?.name || "No house assigned"}
-            </p>
-            <div className="mt-4">
-              <Link href={`/cohorts/${cohort.id}`}>
-                <Button variant="outline" size="sm">
-                  Apply
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <Badge variant="outline">{cohort.status}</Badge>
-        </div>
+        <CardTitle className="text-xl">{cohort.name}</CardTitle>
+        <p
+          className="text-sm text-muted-foreground"
+          style={{ color: cohort.house?.color || "inherit" }}
+        >
+          {cohort.house?.name || "No house assigned"}
+        </p>
+
+        <Badge variant="outline">{cohort.status}</Badge>
       </CardHeader>
       <CardContent>
-        <p className="mb-4 line-clamp-3 text-sm text-gray-600">
+        <p>{cohort.description}</p>
+        {/* <p className="mb-4 line-clamp-3 text-sm text-gray-600">
           {cohort.description}
         </p>
 
@@ -93,7 +81,7 @@ const CohortCard = ({ cohort }: { cohort: CohortData }) => {
               days
             </span>
           </div>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
@@ -169,25 +157,17 @@ export default function CohortsPage() {
             <CohortSkeleton key={i} />
           ))}
         </div>
-      ) : cohorts && cohorts.length > 0 ? (
-        <>
-          <div className="grid gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
-            {cohorts.map((cohort) => (
-              <CohortCard key={cohort.id} cohort={cohort} />
-            ))}
-          </div>
-        </>
       ) : (
-        <div className="py-12 text-center">
-          <div className="mx-auto max-w-md">
-            <h2 className="text-xl font-semibold text-gray-900">
-              No cohorts found
-            </h2>
-            <p className="mt-2 text-gray-600">
-              Get started by creating your first cohort.
-            </p>
-          </div>
-        </div>
+        cohorts &&
+        cohorts.length > 0 && (
+          <>
+            <div className="grid gap-6 p-4 md:grid-cols-2 lg:grid-cols-3">
+              {cohorts.map((cohort) => (
+                <CohortCard key={cohort.id} cohort={cohort} />
+              ))}
+            </div>
+          </>
+        )
       )}
     </div>
   );

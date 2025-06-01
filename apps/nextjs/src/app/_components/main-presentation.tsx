@@ -73,7 +73,7 @@ const PromptBox = ({
   return (
     <button
       key={prompt}
-      className={`text-md max-w-80 border px-3 py-1 text-center transition-all hover:border-primary hover:bg-accent ${
+      className={`text-md max-w-80 border bg-background px-3 py-1 text-center transition-all hover:border-primary hover:bg-accent ${
         isAuthenticated ? "cursor-pointer" : "cursor-pointer opacity-90"
       }`}
       onClick={handleClick}
@@ -121,47 +121,54 @@ const MainPresentation = () => {
   }, [session, posthog]);
 
   return (
-    <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pb-12">
-      <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
-        find and be found.
-      </h1>
-      <Marquee className="w-full [--duration:100s]">
-        {users.map((user) => (
-          <ProfileCard
-            key={user.id}
-            profileId={user.id}
-            profileImageDisplay="full"
-            containerClassName="!w-40"
-          />
-        ))}
-      </Marquee>
-      <div className="flex w-full flex-col gap-2">
-        <Marquee
-          className="w-full p-0 [--duration:100s] [--gap:0.5rem]"
-          reverse
-        >
-          {prompts.slice(0, Math.ceil(prompts.length / 2)).map((prompt) => (
-            <PromptBox
-              key={prompt}
-              prompt={prompt}
-              onClick={() => handleClick(prompt)}
-              isAuthenticated={!!session?.user}
+    <div
+      className="h-full w-full"
+      style={{
+        mask: "radial-gradient(ellipse 30% 30% at center, black 80%, transparent 100%)",
+        WebkitMask:
+          "radial-gradient(ellipse 25% 50% at center, black 80%, transparent 100%)",
+      }}
+    >
+      <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pb-12">
+        <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
+          find and be found.
+        </h1>
+        <Marquee className="w-full [--duration:100s]">
+          {users.map((user) => (
+            <ProfileCard
+              key={user.id}
+              profileId={user.id}
+              profileImageDisplay="full"
+              containerClassName="!w-40"
             />
           ))}
         </Marquee>
-        <Marquee className="w-full p-0 [--duration:100s] [--gap:0.5rem]">
-          {prompts.slice(Math.ceil(prompts.length / 2)).map((prompt) => (
-            <PromptBox
-              key={prompt}
-              prompt={prompt}
-              onClick={() => handleClick(prompt)}
-              isAuthenticated={!!session?.user}
-            />
-          ))}
-        </Marquee>
+        <div className="flex w-full flex-col gap-2">
+          <Marquee
+            className="w-full p-0 [--duration:100s] [--gap:0.5rem]"
+            reverse
+          >
+            {prompts.slice(0, Math.ceil(prompts.length / 2)).map((prompt) => (
+              <PromptBox
+                key={prompt}
+                prompt={prompt}
+                onClick={() => handleClick(prompt)}
+                isAuthenticated={!!session?.user}
+              />
+            ))}
+          </Marquee>
+          <Marquee className="w-full p-0 [--duration:100s] [--gap:0.5rem]">
+            {prompts.slice(Math.ceil(prompts.length / 2)).map((prompt) => (
+              <PromptBox
+                key={prompt}
+                prompt={prompt}
+                onClick={() => handleClick(prompt)}
+                isAuthenticated={!!session?.user}
+              />
+            ))}
+          </Marquee>
+        </div>
       </div>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-1/4 bg-gradient-to-r from-background"></div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-1/4 bg-gradient-to-l from-background"></div>
     </div>
   );
 };

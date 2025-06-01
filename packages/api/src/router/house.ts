@@ -10,6 +10,9 @@ export const houseRouter = {
   getAll: publicProcedure.query(async ({ ctx }) => {
     const houses = await ctx.db.query.house.findMany({
       orderBy: (house, { desc }) => [desc(house.createdAt)],
+      with: {
+        cohorts: true,
+      },
     });
     return houses;
   }),
@@ -21,16 +24,38 @@ export const houseRouter = {
     return houseData;
   }),
 
+  getBySlug: publicProcedure.input(z.string()).query(async ({ ctx, input }) => {
+    const houseData = await ctx.db.query.house.findFirst({
+      where: eq(house.slug, input),
+      with: {
+        owner: true,
+        cohorts: {
+          with: {
+            members: {
+              with: {
+                user: true,
+              },
+            },
+          },
+          orderBy: (cohort, { desc }) => [desc(cohort.createdAt)],
+        },
+      },
+    });
+    return houseData;
+  }),
+
   create: protectedProcedure
     .input(
       z.object({
         name: z.string(),
+        slug: z.string(),
         description: z.string().min(1),
         locationName: z.string().optional(),
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         color: z.string(),
-        logoImage: z.string().optional(),
+        logoUrl: z.string(),
+        coverUrl: z.string(),
         images: z.array(z.string()).default([]),
       }),
     )
@@ -39,12 +64,14 @@ export const houseRouter = {
         .insert(house)
         .values({
           name: input.name,
+          slug: input.slug,
           description: input.description,
           locationName: input.locationName ?? null,
           latitude: input.latitude ?? null,
           longitude: input.longitude ?? null,
           color: input.color,
-          logoImage: input.logoImage ?? null,
+          logoUrl: input.logoUrl,
+          coverUrl: input.coverUrl,
           images: input.images,
           ownerId: ctx.session.user.id,
         })
@@ -63,7 +90,8 @@ export const houseRouter = {
         latitude: z.string().optional(),
         longitude: z.string().optional(),
         color: z.string().optional(),
-        logoImage: z.string().optional(),
+        logoUrl: z.string().optional(),
+        coverUrl: z.string().optional(),
         images: z.array(z.string()).optional(),
       }),
     )

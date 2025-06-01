@@ -1,28 +1,19 @@
 "use client";
 
 import type { GlobeMethods } from "react-globe.gl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useQuery } from "@tanstack/react-query";
+import { useAtom } from "jotai";
 import { useTheme } from "next-themes";
+
+import { selectedHouseAtom } from "~/lib/atoms";
+import { useTRPC } from "~/trpc/react";
 
 // Dynamically import Globe to prevent SSR issues
 const Globe = dynamic(() => import("react-globe.gl"), {
   ssr: false,
 });
-
-interface House {
-  id: string;
-  name: string | null;
-  description: string;
-  locationName: string | null;
-  latitude: string | null;
-  longitude: string | null;
-  color: string;
-  logoImage: string | null;
-  images: string[] | null;
-  ownerId: string;
-  createdAt: Date;
-}
 
 // Add proper typing for country data
 interface CountryProperties {
@@ -70,8 +61,6 @@ export interface GlobeConfig {
 interface WorldProps {
   globeConfig: GlobeConfig;
   data: any[];
-  houses?: House[];
-  onHouseClick?: (house: House) => void;
 }
 
 // Color scale function for population-based coloring (grey scale)
@@ -83,7 +72,7 @@ function getPopulationColor(
 ): string {
   // Handle edge cases
   if (maxPop <= 0 || minPop < 0 || population <= 0) {
-    return isLightMode ? "rgba(200, 200, 200, 0.3)" : "rgba(50, 50, 50, 0.3)";
+    return isLightMode ? "#C8C8C8" : "#323232";
   }
 
   // Normalize population to 0-1 range using logarithmic scale
@@ -108,12 +97,15 @@ function getPopulationColor(
   // Interpolate between min and max grey values
   const greyValue = Math.round(minGrey - (minGrey - maxGrey) * normalized);
 
-  // Return rgba with consistent opacity
-  return `rgba(${greyValue}, ${greyValue}, ${greyValue}, 0.6)`;
+  // Return solid rgb color
+  return `rgb(${greyValue}, ${greyValue}, ${greyValue})`;
 }
 
-export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
+export function World({ globeConfig }: WorldProps) {
+  const trpc = useTRPC();
+  const { data: houses = [] } = useQuery(trpc.house.getAll.queryOptions());
   const globeEl = useRef<GlobeMethods>(undefined);
+  const [selectedHouse, setSelectedHouse] = useAtom(selectedHouseAtom);
 
   const { theme } = useTheme();
   const [globeReady, setGlobeReady] = useState(false);
@@ -125,8 +117,8 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
     .filter((house) => house.latitude && house.longitude)
     .map((house) => ({
       id: house.id,
-      lat: parseFloat(house.latitude!),
-      lng: parseFloat(house.longitude!),
+      lat: parseFloat(house.latitude),
+      lng: parseFloat(house.longitude),
       color: house.color,
       size: 0.8,
       house: house,
@@ -172,21 +164,63 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
 
   // Handle point clicks directly
   const handlePointClick = (point: any) => {
-    if (onHouseClick && point.house) {
-      onHouseClick(point.house);
+    const house = point.house;
+    if (house) {
+      setSelectedHouse(house);
     }
   };
+
+  // Focus globe on selected house
+  useEffect(() => {
+    if (
+      globeEl.current &&
+      globeReady &&
+      selectedHouse &&
+      selectedHouse.latitude &&
+      selectedHouse.longitude
+    ) {
+      const lat = parseFloat(selectedHouse.latitude);
+      const lng = parseFloat(selectedHouse.longitude);
+
+      globeEl.current.pointOfView(
+        {
+          lat,
+          lng,
+          altitude: 1.5, // Zoom in closer to the selected house
+        },
+        1000,
+      ); // Smooth transition over 1 second
+    }
+  }, [selectedHouse, globeReady]);
+
+  // Reset selected house when globe is manually moved
+  useEffect(() => {
+    if (globeEl.current && globeReady) {
+      const controls = globeEl.current.controls();
+
+      const handleControlsChange = () => {
+        // Only reset if there's a selected house and user is manually interacting
+        if (selectedHouse && controls.autoRotate === false) {
+          setSelectedHouse(null);
+        }
+      };
+
+      controls.addEventListener("change", handleControlsChange);
+
+      // Cleanup
+      return () => {
+        controls.removeEventListener("change", handleControlsChange);
+      };
+    }
+  }, [globeReady, selectedHouse, setSelectedHouse]);
 
   // Custom polygon cap color function
   const getPolygonCapColor = (obj: any) => {
     const country = obj as CountryFeature;
 
-    console.log(country);
     const population = country.properties.POP_EST;
     if (!population || population <= 0) {
-      return theme === "light"
-        ? "rgba(180, 180, 180, 0.3)"
-        : "rgba(100, 100, 100, 0.3)"; // Default grey for countries with no population data
+      return theme === "light" ? "#B4B4B4" : "#646464"; // Default grey for countries with no population data
     }
     return getPopulationColor(
       population,
@@ -195,6 +229,14 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
       theme === "light",
     );
   };
+
+  const formattedHexPolygonsData = useMemo(() => {
+    return houses.map((house) => ({
+      ...house,
+      color: house.color,
+      type: "Feature",
+    }));
+  }, [houses]);
 
   const globeContainerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -207,8 +249,6 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
       setHeight(offsetHeight);
     }
   }, []);
-
-  console.log(width, height);
 
   return (
     <div ref={globeContainerRef} className="w-full">
@@ -231,31 +271,19 @@ export function World({ globeConfig, houses = [], onHouseClick }: WorldProps) {
             : globeConfig.atmosphereColor || "#FFFFFF"
         }
         atmosphereAltitude={globeConfig.atmosphereAltitude || 0.1}
-        hexPolygonsData={houses}
-        hexPolygonResolution={3}
-        hexPolygonMargin={0.3}
-        hexPolygonUseDots={true}
-        hexPolygonColor={() =>
-          `#${Math.round(Math.random() * Math.pow(2, 24))
-            .toString(16)
-            .padStart(6, "0")}`
-        }
+        polygonAltitude={0.01}
         polygonsData={countries.features.filter(
           (d) => d.properties.ISO_A2 !== "AQ",
         )}
         polygonCapColor={getPolygonCapColor}
-        polygonSideColor={() =>
-          theme === "light"
-            ? "rgba(140, 140, 140, 0.15)"
-            : "rgba(40, 40, 40, 0.15)"
-        }
+        polygonSideColor={() => (theme === "light" ? "#8C8C8C" : "#282828")}
         // Points (houses) configuration
         pointsData={pointsData}
         pointLat="lat"
         pointLng="lng"
         pointColor="color"
-        pointAltitude={0.01}
         pointRadius={(d: any) => d.size}
+        pointsTransitionDuration={0}
         onPointClick={handlePointClick}
         // Point labels on hover
 

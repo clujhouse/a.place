@@ -39,13 +39,7 @@ export function ProfileCohort() {
             )}
           </div>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {activeCohortsCount === 0
-            ? "Seeds waiting for spring"
-            : activeCohortsCount === 1
-              ? "One garden blooming"
-              : `${activeCohortsCount} gardens in bloom`}
-        </p>
+        <p className="mt-1 text-xs text-muted-foreground">baptized in blood</p>
       </div>
     </Link>
   );

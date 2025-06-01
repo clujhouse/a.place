@@ -18,7 +18,17 @@ const Homepage = () => {
   const { data: session } = authClient.useSession();
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="relative flex h-full flex-col">
+      <div
+        className="absolute inset-0 z-0 w-full"
+        style={{
+          backgroundImage: "url(/mask-test.png)", // Replace with your image path
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          opacity: 0.4,
+        }}
+      />
+
       <MainPresentation />
       <Suspense fallback={null}>
         <MainChat

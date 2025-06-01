@@ -219,13 +219,22 @@ export const house = mysqlTable("house", {
     .primaryKey()
     .notNull()
     .$defaultFn(() => nanoid()),
+
   name: varchar("name", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+
   description: text("description").notNull(),
+
   locationName: varchar("location_name", { length: 255 }),
+
   latitude: decimal("latitude", { precision: 10, scale: 8 }),
   longitude: decimal("longitude", { precision: 11, scale: 8 }),
+
   color: varchar("color", { length: 36 }).notNull(),
-  logoImage: json("logo_image").$type<string>(),
+
+  logoUrl: varchar("logo_url", { length: 255 }).notNull(),
+  coverUrl: varchar("cover_url", { length: 255 }).notNull(),
+
   images: json("images").$type<string[]>().default([]),
 
   socialLinks: json("social_links")
@@ -236,9 +245,11 @@ export const house = mysqlTable("house", {
       }[]
     >()
     .default([]),
+
   ownerId: varchar("owner_id", { length: 36 })
     .notNull()
     .references(() => user.id),
+
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -294,18 +305,14 @@ export const application = mysqlTable("application", {
     .notNull()
     .references(() => user.id),
 
-  // Application form fields
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  social: text("social").notNull(),
-  storyDescription: text("story_description").notNull(),
-  projectMetrics: text("project_metrics").notNull(),
-  isLocal: varchar("is_local", { length: 10, enum: ["yes", "no"] }).notNull(),
-  canAttendAllDays: varchar("can_attend_all_days", {
-    length: 10,
-    enum: ["yes", "no"],
-  }).notNull(),
-  image: text("image"), // Store image URL/path
+  fields: json("fields")
+    .$type<
+      {
+        key: string;
+        value: string;
+      }[]
+    >()
+    .default([]),
 
   status: varchar("status", {
     length: 20,
@@ -349,6 +356,14 @@ export const applicationRelations = relations(application, ({ one }) => ({
     fields: [application.userId],
     references: [user.id],
   }),
+}));
+
+export const houseRelations = relations(house, ({ one, many }) => ({
+  owner: one(user, {
+    fields: [house.ownerId],
+    references: [user.id],
+  }),
+  cohorts: many(cohort),
 }));
 
 export type DBMessage = InferSelectModel<typeof message>;

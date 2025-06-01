@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-import { HouseCard } from "~/components/house-card";
+import { HouseCard } from "~/components/house/house-card";
 import { NewHousePlaceholder } from "~/components/new-house-placeholder";
 import { useTRPC } from "~/trpc/react";
 
@@ -19,17 +19,7 @@ export function HousesGrid() {
       </div>
       <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">
         {houses.map((house) => (
-          <HouseCard
-            key={house.id}
-            house={{
-              id: house.id,
-              name: house.name,
-              description: house.description,
-              locationName: house.locationName,
-              color: house.color,
-              logoImage: house.logoImage,
-            }}
-          />
+          <HouseCard key={house.id} house={house} />
         ))}
         <NewHousePlaceholder />
       </div>
