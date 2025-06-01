@@ -253,117 +253,11 @@ export const house = mysqlTable("house", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-export const cohort = mysqlTable("cohort", {
-  id: varchar("id", { length: 36 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => nanoid()),
-  name: varchar("name", { length: 255 }).notNull(),
-  description: text("description").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-  houseId: varchar("house_id", { length: 36 })
-    .notNull()
-    .references(() => house.id),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
-  status: varchar("status", {
-    length: 255,
-    enum: ["active", "in progress", "archived"],
-  }).notNull(),
-});
-
-export const cohortMember = mysqlTable("cohort_member", {
-  id: varchar("id", { length: 36 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => nanoid()),
-  cohortId: varchar("cohort_id", { length: 36 })
-    .notNull()
-    .references(() => cohort.id),
-  userId: varchar("user_id", { length: 36 })
-    .notNull()
-    .references(() => user.id),
-  status: varchar("status", {
-    length: 20,
-    enum: ["accepted", "pending", "rejected"],
-  }).notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-});
-
-export const application = mysqlTable("application", {
-  id: varchar("id", { length: 36 })
-    .primaryKey()
-    .notNull()
-    .$defaultFn(() => nanoid()),
-  cohortId: varchar("cohort_id", { length: 36 })
-    .notNull()
-    .references(() => cohort.id),
-  userId: varchar("user_id", { length: 36 })
-    .notNull()
-    .references(() => user.id),
-
-  fields: json("fields")
-    .$type<
-      {
-        key: string;
-        value: string;
-      }[]
-    >()
-    .default([]),
-
-  status: varchar("status", {
-    length: 20,
-    enum: ["pending", "approved", "rejected"],
-  })
-    .notNull()
-    .default("pending"),
-
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
-
-export const cohortRelations = relations(cohort, ({ one, many }) => ({
-  house: one(house, {
-    fields: [cohort.houseId],
-    references: [house.id],
-  }),
-  members: many(cohortMember),
-  applications: many(application),
-}));
-
-export const cohortMemberRelations = relations(cohortMember, ({ one }) => ({
-  cohort: one(cohort, {
-    fields: [cohortMember.cohortId],
-    references: [cohort.id],
-  }),
-  user: one(user, {
-    fields: [cohortMember.userId],
-    references: [user.id],
-  }),
-}));
-
-export const applicationRelations = relations(application, ({ one }) => ({
-  cohort: one(cohort, {
-    fields: [application.cohortId],
-    references: [cohort.id],
-  }),
-  user: one(user, {
-    fields: [application.userId],
-    references: [user.id],
-  }),
-}));
-
-export const houseRelations = relations(house, ({ one, many }) => ({
+export const houseRelations = relations(house, ({ one }) => ({
   owner: one(user, {
     fields: [house.ownerId],
     references: [user.id],
   }),
-  cohorts: many(cohort),
 }));
 
 export type DBMessage = InferSelectModel<typeof message>;

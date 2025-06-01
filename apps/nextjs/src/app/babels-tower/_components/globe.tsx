@@ -113,12 +113,13 @@ export function World({ globeConfig }: WorldProps) {
   const [populationRange, setPopulationRange] = useState({ min: 0, max: 0 });
 
   // Convert houses to points data for the globe
+
   const pointsData = houses
     .filter((house) => house.latitude && house.longitude)
     .map((house) => ({
       id: house.id,
-      lat: parseFloat(house.latitude),
-      lng: parseFloat(house.longitude),
+      lat: parseFloat(house.latitude ?? "0"),
+      lng: parseFloat(house.longitude ?? "0"),
       color: house.color,
       size: 0.8,
       house: house,
@@ -148,8 +149,8 @@ export function World({ globeConfig }: WorldProps) {
     if (globeEl.current && globeReady) {
       // Set initial camera position
       globeEl.current.pointOfView({
-        lat: globeConfig.initialPosition?.lat || 46.7712,
-        lng: globeConfig.initialPosition?.lng || 23.6236,
+        lat: globeConfig.initialPosition?.lat ?? 46.7712,
+        lng: globeConfig.initialPosition?.lng ?? 23.6236,
         altitude: 2.5,
       });
 
@@ -268,9 +269,9 @@ export function World({ globeConfig }: WorldProps) {
         atmosphereColor={
           theme === "light"
             ? "#87CEEB"
-            : globeConfig.atmosphereColor || "#FFFFFF"
+            : (globeConfig.atmosphereColor ?? "#FFFFFF")
         }
-        atmosphereAltitude={globeConfig.atmosphereAltitude || 0.1}
+        atmosphereAltitude={globeConfig.atmosphereAltitude ?? 0.1}
         polygonAltitude={0.01}
         polygonsData={countries.features.filter(
           (d) => d.properties.ISO_A2 !== "AQ",
@@ -279,6 +280,7 @@ export function World({ globeConfig }: WorldProps) {
         polygonSideColor={() => (theme === "light" ? "#8C8C8C" : "#282828")}
         // Points (houses) configuration
         pointsData={pointsData}
+        pointAltitude={0.02}
         pointLat="lat"
         pointLng="lng"
         pointColor="color"

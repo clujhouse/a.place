@@ -10,9 +10,6 @@ export const houseRouter = {
   getAll: publicProcedure.query(async ({ ctx }) => {
     const houses = await ctx.db.query.house.findMany({
       orderBy: (house, { desc }) => [desc(house.createdAt)],
-      with: {
-        cohorts: true,
-      },
     });
     return houses;
   }),
@@ -29,16 +26,6 @@ export const houseRouter = {
       where: eq(house.slug, input),
       with: {
         owner: true,
-        cohorts: {
-          with: {
-            members: {
-              with: {
-                user: true,
-              },
-            },
-          },
-          orderBy: (cohort, { desc }) => [desc(cohort.createdAt)],
-        },
       },
     });
     return houseData;

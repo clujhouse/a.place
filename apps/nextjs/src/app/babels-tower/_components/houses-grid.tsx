@@ -14,7 +14,7 @@ export function HousesGrid() {
     <div className="flex flex-col border-r">
       <div className="flex items-center justify-between border-b p-4">
         <h1 className="flex items-center gap-2 text-xl font-semibold">
-          houses of the world
+          babel's tower
         </h1>
       </div>
       <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 lg:grid-cols-3">

@@ -10,6 +10,7 @@ import { Button } from "@acme/ui/button";
 import { Icon } from "@acme/ui/icon";
 import { Skeleton } from "@acme/ui/skeleton";
 
+import { SvgIcon } from "~/components/svg-icon";
 import { SvgIconSafe } from "~/components/svg-icon-safe";
 import { useTRPC } from "~/trpc/react";
 
@@ -78,18 +79,14 @@ export default function HouseDetailPage({
       <div className="flex items-center gap-2 border-b p-4">
         <Link href="/babels-tower">
           <h1 className="flex items-center gap-2 text-xl font-semibold">
-            houses of the world
+            babel's tower
           </h1>
         </Link>
         <p className="text-xl font-semibold"> / {house.name}</p>
       </div>
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col">
-          <SvgIconSafe
-            src={house.logoUrl}
-            alt={house.name}
-            className="h-16 w-16"
-          />
+          <SvgIcon src={house.logoUrl} alt={house.name} className="h-16 w-16" />
         </div>
         <div className="flex gap-2">
           {house.socialLinks?.map((link) => (
