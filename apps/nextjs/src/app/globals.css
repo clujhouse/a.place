@@ -138,3 +138,11 @@
 .tl-background {
   --color-background: rgba(0, 0, 0, 0.5); /* Light Theme Background */
 }
+
+@media (max-width: 640px) {
+  /* Hide mask properties on mobile */
+  .no-mask-mobile {
+    mask: none !important;
+    -webkit-mask: none !important;
+  }
+}

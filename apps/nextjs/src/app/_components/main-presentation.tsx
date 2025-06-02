@@ -122,14 +122,14 @@ const MainPresentation = () => {
 
   return (
     <div
-      className="h-full w-full"
+      className="no-mask-mobile h-full w-full"
       style={{
         mask: "radial-gradient(ellipse 30% 30% at center, black 80%, transparent 100%)",
         WebkitMask:
           "radial-gradient(ellipse 25% 50% at center, black 80%, transparent 100%)",
       }}
     >
-      <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 px-4 pb-12">
+      <div className="relative mx-auto flex h-full w-full max-w-3xl flex-col items-center justify-center gap-4 pb-12 md:px-4">
         <h1 className="mb-6 max-w-72 text-center text-6xl font-bold">
           find and be found.
         </h1>
