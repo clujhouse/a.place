@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import type { AMessage } from "@acme/validators/message";
 import {
+  createProfileEmbedding,
   generateTextResponse,
   onboardingWithContext,
   profilePrompt,
@@ -333,7 +334,19 @@ export const onboardingRouter = {
           shortBio = "New member excited to connect and share experiences.";
         }
 
-        // Upsert profile with AI-generated content
+        // Generate embedding for the profile
+        const embeddedProfileText = `
+name: ${ctx.session.user.name}
+
+one liner
+${shortBio}
+
+${profileText}
+        `;
+        const embeddingBuffer =
+          await createProfileEmbedding(embeddedProfileText);
+
+        // Upsert profile with AI-generated content and embedding
         await ctx.db
           .insert(profile)
           .values({
@@ -342,6 +355,7 @@ export const onboardingRouter = {
             isOnboarded: true,
             text: profileText,
             shortBio: shortBio,
+            embedding: embeddingBuffer,
           })
           .onDuplicateKeyUpdate({
             set: {
@@ -349,6 +363,7 @@ export const onboardingRouter = {
               text: profileText,
               shortBio: shortBio,
               completionPercentage: 100,
+              embedding: embeddingBuffer,
             },
           });
 
