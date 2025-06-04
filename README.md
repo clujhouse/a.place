@@ -9,7 +9,7 @@ Better Auth is a framework-agnostic authentication and authorization library for
 - Native Expo support without any extra setup (including OAuth)
 - Preview deployments without the need for a separate proxy server
 - A lot more features available out of the box and through plugins
-- Push text
+- Push text meow
 
 ## Installation
 
