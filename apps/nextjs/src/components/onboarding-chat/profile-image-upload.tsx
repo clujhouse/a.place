@@ -58,9 +58,20 @@ export const ProfileImageUpload = ({
   ) => {
     if (!e.target.files?.[0]) return;
 
+    const file = e.target.files[0];
+
+    // Check file size before upload (4MB limit)
+    const maxSizeInBytes = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxSizeInBytes) {
+      toast.error(
+        "Image is too large. Please choose an image smaller than 4MB.",
+      );
+      return;
+    }
+
     try {
       setIsUploading(true);
-      const uploadedFiles = await startUpload([e.target.files[0]]);
+      const uploadedFiles = await startUpload([file]);
       if (!uploadedFiles?.[0]) {
         toast.error("Failed to upload image");
         setIsUploading(false);
@@ -68,8 +79,24 @@ export const ProfileImageUpload = ({
       }
 
       updateProfileImage(uploadedFiles[0].ufsUrl);
-    } catch (err) {
-      toast.error("Failed to upload profile image");
+    } catch (err: any) {
+      // Check if it's a file size error
+      if (
+        err?.message?.includes("size") ||
+        err?.message?.includes("large") ||
+        err?.code === "TOO_LARGE"
+      ) {
+        toast.error(
+          "Image is too large. Please choose an image smaller than 4MB.",
+        );
+      } else if (
+        err?.message?.includes("type") ||
+        err?.message?.includes("format")
+      ) {
+        toast.error("Invalid file type. Please upload a valid image file.");
+      } else {
+        toast.error("Failed to upload profile image. Please try again.");
+      }
       setIsUploading(false);
     }
   };

@@ -153,6 +153,15 @@ export const ProfileBio = () => {
 
     const file = e.target.files[0];
 
+    // Check file size before upload (4MB limit)
+    const maxSizeInBytes = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxSizeInBytes) {
+      toast.error(
+        "Image is too large. Please choose an image smaller than 4MB.",
+      );
+      return;
+    }
+
     posthog.capture("profile_image_upload_attempted", {
       image_type: "profile_picture",
       file_size: file.size,
@@ -166,8 +175,24 @@ export const ProfileBio = () => {
       if (!uploadedFiles?.[0]) return;
 
       updateProfileImage(uploadedFiles[0].url);
-    } catch (err) {
-      toast.error("Failed to upload profile image");
+    } catch (err: any) {
+      // Check if it's a file size error
+      if (
+        err?.message?.includes("size") ||
+        err?.message?.includes("large") ||
+        err?.code === "TOO_LARGE"
+      ) {
+        toast.error(
+          "Image is too large. Please choose an image smaller than 4MB.",
+        );
+      } else if (
+        err?.message?.includes("type") ||
+        err?.message?.includes("format")
+      ) {
+        toast.error("Invalid file type. Please upload a valid image file.");
+      } else {
+        toast.error("Failed to upload profile image. Please try again.");
+      }
       setLoadingImageIndex(null);
 
       posthog.capture("profile_image_upload_failed", {
@@ -185,6 +210,15 @@ export const ProfileBio = () => {
     if (!e.target.files?.[0]) return;
 
     const file = e.target.files[0];
+
+    // Check file size before upload (4MB limit)
+    const maxSizeInBytes = 4 * 1024 * 1024; // 4MB
+    if (file.size > maxSizeInBytes) {
+      toast.error(
+        "Image is too large. Please choose an image smaller than 4MB.",
+      );
+      return;
+    }
 
     posthog.capture("profile_image_upload_attempted", {
       image_type: "additional_image",
@@ -209,8 +243,24 @@ export const ProfileBio = () => {
           index,
         });
       }
-    } catch (err) {
-      toast.error("Failed to update image");
+    } catch (err: any) {
+      // Check if it's a file size error
+      if (
+        err?.message?.includes("size") ||
+        err?.message?.includes("large") ||
+        err?.code === "TOO_LARGE"
+      ) {
+        toast.error(
+          "Image is too large. Please choose an image smaller than 4MB.",
+        );
+      } else if (
+        err?.message?.includes("type") ||
+        err?.message?.includes("format")
+      ) {
+        toast.error("Invalid file type. Please upload a valid image file.");
+      } else {
+        toast.error("Failed to upload image. Please try again.");
+      }
       setLoadingImageIndex(null);
 
       posthog.capture("profile_image_upload_failed", {
