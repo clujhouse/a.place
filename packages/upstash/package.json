@@ -26,6 +26,6 @@
   "prettier": "@acme/prettier-config",
   "dependencies": {
     "@upstash/redis": "^1.34.5",
-    "ai": "^4.2.8"
+    "ai": "^4.3.16"
   }
 }

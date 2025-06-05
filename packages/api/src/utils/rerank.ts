@@ -30,7 +30,9 @@ export async function rerankWithVoyage<T>(
 ): Promise<T[]> {
   const { model = "rerank-2", topK = 5, relevanceThreshold = 0.3 } = options;
 
-  const itemsWithText = items.filter((item) => item.text !== null && item.text.trim().length > 0);
+  const itemsWithText = items.filter(
+    (item) => item.text !== null && item.text.trim().length > 0,
+  );
 
   if (itemsWithText.length === 0) {
     return [];
@@ -54,7 +56,7 @@ export async function rerankWithVoyage<T>(
             item.relevanceScore !== undefined &&
             item.index !== undefined &&
             item.index < itemsWithText.length &&
-            (item.relevanceScore ?? 0) >= relevanceThreshold
+            (item.relevanceScore ?? 0) >= relevanceThreshold,
         )
         .sort((a, b) => (b.relevanceScore ?? 0) - (a.relevanceScore ?? 0))
         .map((item) => {
@@ -65,13 +67,15 @@ export async function rerankWithVoyage<T>(
         .slice(0, topK); // Take only the top K items
 
       console.log("Final reranked items count:", rerankedItems.length);
-      
+
       if (rerankedItems.length > 0) {
         return rerankedItems;
       }
     }
-
-    console.log("No suitable reranked items found, using top items from vector search");
+    console.log(rerankedResult);
+    console.log(
+      "No suitable reranked items found, using top items from vector search",
+    );
     // If no items meet our threshold, return top items from initial vector search
     return itemsWithText.slice(0, topK).map((item) => item.data);
   } catch (error) {

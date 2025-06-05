@@ -1,7 +1,7 @@
 import type { TRPCRouterRecord } from "@trpc/server";
 import { google } from "@ai-sdk/google";
 import { generateText, smoothStream, streamText } from "ai";
-import { eq, ne, sql } from "drizzle-orm";
+import { asc, eq, ne, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { VoyageAIClient } from "voyageai";
 import { z } from "zod";
@@ -119,7 +119,7 @@ export const mainRouter = {
         profileItems,
         {
           topK: 3,
-          relevanceThreshold: 0.4,
+          relevanceThreshold: 0.5,
           model: "rerank-2",
         },
       );
@@ -160,16 +160,21 @@ export const mainRouter = {
       // Get recent chat history
       const chatHistory = (await ctx.db.query.message.findMany({
         where: (message, { eq }) => eq(message.chatId, chatId),
-        orderBy: (message, { asc }) => asc(message.createdAt),
+        orderBy: (message, { desc }) => desc(message.createdAt),
         limit: 10,
       })) as AMessage[];
-
+      const sortedMesseges = chatHistory.sort(
+        (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+      );
       // Stream the response
       const result = streamText({
         model: google("gemini-2.5-flash-preview-04-17"),
-        messages: convertMessageToCoreMessage(chatHistory),
+        messages: convertMessageToCoreMessage(sortedMesseges),
         experimental_telemetry: { isEnabled: true },
         system: createSystemPromptWithProfiles(similarProfiles),
+        onError: (error) => {
+          console.error(error);
+        },
         experimental_transform: smoothStream({
           delayInMs: 20, // optional: defaults to 10ms
           chunking: "word", // optional: defaults to 'word'
@@ -182,7 +187,8 @@ export const mainRouter = {
         yield { id: textPartId, type: "text" as const, text: chunk };
 
       const textResponse = await result.text;
-
+      console.log(result.textStream);
+      console.log(textResponse);
       // Store the final response with profiles if any were found
       const responseParts = [] as AMessage["parts"];
 
