@@ -88,7 +88,7 @@ export function SearchUsageIndicator() {
         onClick={handleOpenUpgradeModal}
       >
         <div className="flex items-center justify-between text-sm">
-          <span>Daily searches</span>
+          <span>yooo donate to poor romanians (and cracked)</span>
           <span className={isNearLimit ? "font-medium" : ""}>
             {searchUsage.used}/{searchUsage.limit}
           </span>
